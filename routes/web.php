@@ -12,5 +12,10 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('pages.import');
 });
+
+// Route::get('/import', function () {
+//     return 'import';
+// });
+
