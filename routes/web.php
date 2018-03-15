@@ -11,9 +11,11 @@
 |
 */
 
-Route::get('/', function () {
-    return view('pages.import');
-});
+$router->get('/', 'ImportController@show')->name('import.show');
+
+// Route::get('/', function () {
+//     return view('pages.import');
+// });
 
 // Route::get('/import', function () {
 //     return 'import';
