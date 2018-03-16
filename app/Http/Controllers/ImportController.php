@@ -21,11 +21,10 @@ class ImportController extends Controller
      */
     public function store(Request $request)
     {
-        return "ImportController::store";
-        // $request->validate([
-        //     'upload-file' => 'required|mimes:csv,txt',
-        //     'importType' => 'required',
-        // ]);
+        $request->validate([
+            'upload-file' => 'required|mimes:csv,txt',
+            'importType' => 'required',
+        ]);
 
         // // Push file to S3.
         // $upload = $request->file('upload-file');
