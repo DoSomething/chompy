@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use League\Csv\Reader;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ImportController extends Controller
 {
@@ -33,20 +34,18 @@ class ImportController extends Controller
         $upload = $request->file('upload-file');
         $path = 'uploads/files/' . $request->input('importType') . '-import' . Carbon::now() . '.csv';
         $csv = Reader::createFromPath($upload->getRealPath());
+        $success = Storage::put($path, (string)$csv);
 
-        // $success = Storage::put($path, (string)$csv);
+        if (!$success) {
+            throw new HttpException(500, 'Unable read and store file to S3.');
+        }
 
-        // if (!$success) {
-            //     throw new HttpException(500, 'Unable read and store file to S3.');
-            // }
+        if ($request->input('importType') === 'turbovote') {
+            // We need to pass the file path and authenticated user role to
+            // the queue job because it does not have access to these things otherwise.
+            ImportTurboVotePosts::dispatch($path, auth()->user()->role);
+        }
 
-            // if ($request->input('importType') === 'turbovote') {
-                //     // We need to pass the file path and authenticated user role to
-                //     // the queue job because it does not have access to these things otherwise.
-                //     ImportTurboVotePosts::dispatch($path, auth()->user()->role);
-                // }
-
-                // return redirect()->route('import.show')->with('status', 'Importing CSV!');
         return "Import that CSV";
     }
 }
