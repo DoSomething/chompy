@@ -32,19 +32,21 @@ class ImportController extends Controller
 
         // Push file to S3.
         $upload = $request->file('upload-file');
-        $path = 'uploads/files/' . $request->input('importType') . '-import' . Carbon::now() . '.csv';
+        $path = 'test/files/' . $request->input('importType') . '-chompy-import' . Carbon::now() . '.csv';
         $csv = Reader::createFromPath($upload->getRealPath());
         $success = Storage::put($path, (string)$csv);
+        // $contents = Storage::get($path);
 
         if (!$success) {
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        if ($request->input('importType') === 'turbovote') {
-            // We need to pass the file path and authenticated user role to
-            // the queue job because it does not have access to these things otherwise.
-            ImportTurboVotePosts::dispatch($path, auth()->user()->role);
-        }
+        dd('success');
+        // if ($request->input('importType') === 'turbovote') {
+        //     // We need to pass the file path and authenticated user role to
+        //     // the queue job because it does not have access to these things otherwise.
+        //     ImportTurboVotePosts::dispatch($path, auth()->user()->role);
+        // }
 
         return "Import that CSV";
     }
