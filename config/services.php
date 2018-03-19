@@ -35,4 +35,10 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'rogue' => [
+        'url' => env('ROGUE_URL'),
+        'key' => env('ROGUE_TOKEN'),
+        'service_id' => env('FASTLY_SERVICE_ID'),
+    ],
+
 ];

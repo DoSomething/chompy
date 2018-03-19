@@ -8,8 +8,18 @@ use Illuminate\Http\Request;
 use App\Jobs\ImportTurboVotePosts;
 use Illuminate\Support\Facades\Storage;
 
+use App\Services\Rogue;
+
 class ImportController extends Controller
 {
+    /**
+     *
+     */
+    public function __construct(Rogue $rogue)
+    {
+        $this->rogue = $rogue;
+    }
+
     /*
      * Show the upload form.
      */
