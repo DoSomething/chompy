@@ -7,35 +7,15 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>Chompy</title>
-
+        <link rel="stylesheet" href="{{ mix('/css/app.css') }}">
         <link rel="icon" type="image/png" href="http://twooter.biz/Gifs/tonguecat.png">
+        <script src="{{ mix('/js/app.js') }}"></script>
     </head>
 
     <body>
-
-        @if (Session::has('status'))
-            <div class="messages">{{ Session::get('status') }}</div>
-        @endif
-
-        @if ($errors->any())
-            <div class="messages">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <div class="chrome">
-            <div class="wrapper">
-                <div class="container">
-                    @yield('main_content')
-                </div>
-            </div>
+        <div class="container">
+            @yield('main_content')
         </div>
-
     </body>
-
 
 </html>
