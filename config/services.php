@@ -36,9 +36,20 @@ return [
     ],
 
     'rogue' => [
-        'url' => env('ROGUE_URL'),
-        'key' => env('ROGUE_TOKEN'),
-        'service_id' => env('FASTLY_SERVICE_ID'),
+        'url' => env('ROGUE_URL', 'https://rogue-qa.dosomething.org'),
+    ],
+
+    'northstar' => [
+        'grant' => 'authorization_code', // Default OAuth grant to use: either 'authorization_code' or 'client_credentials'
+        'url' => env('NORTHSTAR_URL'),
+        'key' => storage_path('keys/public.key'),
+        'bridge' => \DoSomething\Gateway\Laravel\LaravelOAuthBridge::class,
+        'authorization_code' => [
+            'client_id' => env('NORTHSTAR_AUTHORIZATION_ID'),
+            'client_secret' => env('NORTHSTAR_AUTHORIZATION_SECRET'),
+            'scope' => ['user', 'openid', 'role:staff', 'role:admin'],
+            'redirect_uri' => 'next/login',
+        ],
     ],
 
 ];

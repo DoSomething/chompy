@@ -19,7 +19,9 @@ class Rogue extends RestApiClient
         $this->bridge = config('services.northstar.bridge');
         $this->grant = config('services.northstar.grant');
         $this->config = config('services.northstar');
+
         $base_url = config('services.rogue.url') . '/api/';
+
         parent::__construct($base_url);
     }
 
@@ -32,15 +34,13 @@ class Rogue extends RestApiClient
      */
     public function storePost($payload = [])
     {
-        unset($payload['media']);
-        // Guzzle expects specific file object for multipart form.
-        // @TODO: upadte Gateway to handle multipart form data.
-        $payload['file'] = fopen($payload['file']->getPathname(), 'r');
-        $multipartData = collect($payload)->map(function ($value, $key) {
-            return ['name' => $key, 'contents' => $value];
-        })->values()->toArray();
-        return $this->rogue->withToken(token())->send('POST', 'v3/posts', [
-            'multipart' => $multipartData,
-        ]);
+        // unset($payload['media']);
+        // // Guzzle expects specific file object for multipart form.
+        // // @TODO: upadte Gateway to handle multipart form data.
+        // $payload['file'] = fopen($payload['file']->getPathname(), 'r');
+        // $multipartData = collect($payload)->map(function ($value, $key) {
+        //     return ['name' => $key, 'contents' => $value];
+        // })->values()->toArray();
+        return $this->withToken(token())->send('POST', 'v3/posts', $payload);
     }
 }
