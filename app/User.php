@@ -4,10 +4,12 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use DoSomething\Gateway\Contracts\NorthstarUserContract;
+use DoSomething\Gateway\Laravel\HasNorthstarToken;
 
-class User extends Authenticatable
+class User extends Authenticatable implements NorthstarUserContract
 {
-    use Notifiable;
+    use Notifiable, HasNorthstarToken;
 
     /**
      * The attributes that are mass assignable.

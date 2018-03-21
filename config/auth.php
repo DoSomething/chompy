@@ -1,6 +1,12 @@
 <?php
 
 return [
+    /*
+     * This is a temporary hack until
+     * https://github.com/DoSomething/gateway/issues/65
+     * is resolved.
+     */
+    'model' => App\User::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -38,12 +44,11 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'local',
         ],
-
         'api' => [
-            'driver' => 'token',
-            'provider' => 'users',
+            'driver' => 'gateway',
+            'provider' => 'northstar',
         ],
     ],
 
@@ -65,15 +70,13 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'local' => [
             'driver' => 'eloquent',
             'model' => App\User::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'northstar' => [
+            'driver' => 'gateway',
+        ],
     ],
 
     /*

@@ -18,6 +18,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Authentication
+$router->get('login', 'Auth\loginController@getLogin');
+$router->get('logout', 'Auth\loginController@getLogout');
+
 // Route::get('/import', function () {
 //     return 'import';
 // });
