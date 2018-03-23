@@ -13,7 +13,11 @@
     </head>
 
     <body>
-        <div class="container">
+        <div class="container ch-navigation">
+            @yield('navigation')
+        </div>
+
+        <div class="container ch-main">
             @yield('main_content')
         </div>
     </body>

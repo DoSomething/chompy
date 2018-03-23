@@ -21,14 +21,3 @@
         </div><!--/.container-fluid -->
     </nav>
 @stop
-
-@section('main_content')
-
-<div class="jumbotron">
-    <h1>Welcome to Chompy</h1>
-    <p>The DoSomething.org Importer app</p>
-<a class="btn btn-lg btn-primary" href="../../components/#navbar" role="button">View navbar docs »</a>
-</p>
-</div>
-
-@stop

@@ -56,82 +56,53 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-        $postData = [
-            'campaign_id' => '8017',
-            'campaign_run_id' => '8022',
-            'northstar_id' => 'aaabbbb',
-            'type' => 'voter-reg',
-            'action' => 'chompy-turbovote',
-            'status' => 'chompy-status',
-            'source' => 'chompy',
-            'source_details' => '$sourceDetails',
-            'details' => '$postDetails',
-            'text' => 'This should not be required',
-        ];
+        $file = Storage::get($this->filepath);
+        $csv = Reader::createFromString($file);
+        $csv->setHeaderOffset(0);
+        $records = $csv->getRecords();
 
-        $rogue->asClient()->send('POST', 'v3/posts', $postData);
+        foreach ($records as $record) {
+            info('Importing record ' . $record['id']);
 
-        // $file = Storage::get($this->filepath);
-        // $csv = Reader::createFromString($file);
-        // $csv->setHeaderOffset(0);
-        // $records = $csv->getRecords();
+            $referralCode = $record['referral-code'];
 
-        // foreach ($records as $record) {
-        //     info('Importing record ' . $record['id']);
+            if ($referralCode) {
+                $referralCodeValues = $this->parseReferralCode(explode(',', $referralCode));
 
-        //     $referralCode = $record['referral-code'];
+                // Fall back to the Grab The Mic campaign (campaign_id: 8017, campaign_run_id: 8022)
+                // if these keys are not present.
+                $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? '8017' : $referralCodeValues['campaign_id'];
+                $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? '8022' : $referralCodeValues['campaign_run_id'];
 
-        //     if ($referralCode) {
-        //         $referralCodeValues = $this->parseReferralCode(explode(',', $referralCode));
+                if (isset($referralCodeValues['northstar_id'])) {
+                    $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
+                    $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
+                    $postDetails = $this->extractDetails($record);
 
-        //         // Fall back to the Grab The Mic campaign (campaign_id: 8017, campaign_run_id: 8022)
-        //         // if these keys are not present.
-        //         $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? '8017' : $referralCodeValues['campaign_id'];
-        //         $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? '8022' : $referralCodeValues['campaign_run_id'];
+                    $postData = [
+                        'campaign_id' => 8017,
+                        'campaign_run_id' => 8022,
+                        'northstar_id' => $referralCodeValues['northstar_id'],
+                        'type' => 'voter-reg',
+                        'action' => $tvCreatedAtMonth . '-turbovote',
+                        'status' => $record['voter-registration-status'],
+                        'source' => 'chompy',
+                        'source_details' => $sourceDetails,
+                        'details' => $postDetails,
+                        'text' => 'This should not be required',
+                        'quantity' => null,
+                    ];
 
-        //         if (isset($referralCodeValues['northstar_id'])) {
-        //             $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
-        //             $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
-        //             $postDetails = $this->extractDetails($record);
+                    $multipartData = collect($postData)->map(function ($value, $key) {
+                        return ['name' => $key, 'contents' => $value];
+                    })->values()->toArray();
 
-        //             $postData = [
-        //                 'campaign_id' => $referralCodeValues['campaign_id'],
-        //                 'campaign_run_id' => '8022',
-        //                 'northstar_id' => $referralCodeValues['northstar_id'],
-        //                 'type' => 'voter-reg',
-        //                 'action' => $tvCreatedAtMonth . '-turbovote',
-        //                 'status' => $record['voter-registration-status'],
-        //                 'source' => 'chompy', //$referralCodeValues['source'],
-        //                 'source_details' => $sourceDetails,
-        //                 'details' => $postDetails,
-        //                 'text' => 'This should not be required',
-        //             ];
+                    $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
 
-        //             $postData = [
-        //                 'campaign_id' => '8017',
-        //                 'campaign_run_id' => '8022',
-        //                 'northstar_id' => 'aaabbbb',
-        //                 'type' => 'voter-reg',
-        //                 'action' => 'chompy-turbovote',
-        //                 'status' => 'chompy-status',
-        //                 'source' => 'chompy',
-        //                 'source_details' => '$sourceDetails',
-        //                 'details' => '$postDetails',
-        //                 'text' => 'This should not be required',
-        //             ];
-        //             // $rogue->asClient()->storePost($postData);
-        //             // $rogue->asClient()->send('GET', 'v3/posts?limit=35', [])
-        //             // $multipartData = collect($postData)->map(function ($value, $key) {
-        //             //     return ['name' => $key, 'contents' => $value];
-        //             // })->values()->toArray();
-        //             // dd($multipartData);
-        //             dd('is this happening');
-        //             $rogue->asClient()->send('POST', 'v3/posts', $postData);
-
-        //              @TODO - somehow confirm the post was created. maybe more accurate errors returned so we can catch things easilt to retrigger the job.
-        //         }
-        //     }
-        // }
+                    //  @TODO - somehow confirm the post was created. maybe more accurate errors returned so we can catch things easilt to retrigger the job.
+                }
+            }
+        }
     }
 
     /**
