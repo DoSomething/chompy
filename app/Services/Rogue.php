@@ -22,7 +22,7 @@ class Rogue extends RestApiClient
 
         $base_url = config('services.rogue.url') . '/api/';
 
-        parent::__construct($base_url);
+        parent::__construct($base_url, ['verify' => env('VERIFY_ROGUE_SSL_CERTIFICATE', true)]);
     }
 
 
