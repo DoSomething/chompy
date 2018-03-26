@@ -71,8 +71,8 @@ class ImportTurboVotePosts implements ShouldQueue
 
                 // Fall back to the Grab The Mic campaign (campaign_id: 8017, campaign_run_id: 8022)
                 // if these keys are not present.
-                $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? '8017' : $referralCodeValues['campaign_id'];
-                $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? '8022' : $referralCodeValues['campaign_run_id'];
+                $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? 8017 : $referralCodeValues['campaign_id'];
+                $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? 8022 : $referralCodeValues['campaign_run_id'];
 
                 if (isset($referralCodeValues['northstar_id'])) {
                     $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
@@ -80,12 +80,12 @@ class ImportTurboVotePosts implements ShouldQueue
                     $postDetails = $this->extractDetails($record);
 
                     $postData = [
-                        'campaign_id' => 8017,
-                        'campaign_run_id' => 8022,
+                        'campaign_id' =>(int) $referralCodeValues['campaign_id'],
+                        'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
                         'northstar_id' => $referralCodeValues['northstar_id'],
                         'type' => 'voter-reg',
                         'action' => $tvCreatedAtMonth . '-turbovote',
-                        'status' => $record['voter-registration-status'],
+                        'status' => 'pending',//$record['voter-registration-status'],
                         'source' => 'chompy',
                         'source_details' => $sourceDetails,
                         'details' => $postDetails,
