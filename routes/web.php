@@ -15,7 +15,7 @@ $router->get('/import', 'ImportController@show')->name('import.show');
 $router->post('import', 'ImportController@store')->name('import.store');
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('pages.home');
 });
 
 // Authentication
