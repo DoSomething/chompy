@@ -19,8 +19,8 @@ Route::get('/', function () {
 });
 
 // Authentication
-$router->get('login', 'Auth\loginController@getLogin')->name('login');
-$router->get('logout', 'Auth\loginController@getLogout')->name('logout');
+$router->get('login', 'Auth\LoginController@getLogin')->name('login');
+$router->get('logout', 'Auth\LoginController@getLogout')->name('logout');
 
 // Route::get('/import', function () {
 //     return 'import';
