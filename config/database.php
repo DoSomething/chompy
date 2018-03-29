@@ -1,14 +1,20 @@
 <?php
 
 // Convert Heroku's `CLEARDB_DATABASE_URL` to standard DB environment variables
-if (env('CLEARDB_DATABASE_URL')) {
-    $url = parse_url(env('CLEARDB_DATABASE_URL'));
-    putenv('DB_HOST=' . $url['host']);
-    putenv('DB_PORT=' . $url['port']);
-    putenv('DB_DATABASE=' . substr($url["path"], 1));
-    putenv('DB_USERNAME=' . $url["user"]);
-    putenv('DB_PASSWORD=' . $url['pass']);
-}
+// if (env('CLEARDB_DATABASE_URL')) {
+//     $url = parse_url(env('CLEARDB_DATABASE_URL'));
+//     putenv('DB_HOST=' . $url['host']);
+//     putenv('DB_PORT=' . $url['port']);
+//     putenv('DB_DATABASE=' . substr($url["path"], 1));
+//     putenv('DB_USERNAME=' . $url["user"]);
+//     putenv('DB_PASSWORD=' . $url['pass']);
+// }
+$url = parse_url(env('CLEARDB_DATABASE_URL'));
+putenv('DB_HOST=' . $url['host']);
+putenv('DB_PORT=' . $url['port']);
+putenv('DB_DATABASE=' . substr($url["path"], 1));
+putenv('DB_USERNAME=' . $url["user"]);
+putenv('DB_PASSWORD=' . $url['pass']);
 
 return [
 
