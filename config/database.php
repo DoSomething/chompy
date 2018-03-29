@@ -1,23 +1,23 @@
 <?php
 
 // Convert Heroku's `CLEARDB_DATABASE_URL` to standard DB environment variables
-if (env('CLEARDB_DATABASE_URL')) {
+// if (env('CLEARDB_DATABASE_URL')) {
     $url = parse_url(env('CLEARDB_DATABASE_URL'));
     putenv('DB_HOST=' . $url['host']);
     putenv('DB_PORT=' . $url['port']);
     putenv('DB_DATABASE=' . substr($url["path"], 1));
     putenv('DB_USERNAME=' . $url["user"]);
     putenv('DB_PASSWORD=' . $url['pass']);
-}
+// }
 
 // Convert Heroku's `REDIS_URL` to standard `REDIS_HOST`, `REDIS_PORT`,
 // and `REDIS_PASSWORD` environment variables:
-if (env('REDIS_URL')) {
+// if (env('REDIS_URL')) {
     $url = parse_url(env('REDIS_URL'));
     putenv('REDIS_HOST=' . $url['host']);
     putenv('REDIS_PORT=' . $url['port']);
     putenv('REDIS_PASSWORD=' . $url['pass']);
-}
+// }
 
 return [
 
