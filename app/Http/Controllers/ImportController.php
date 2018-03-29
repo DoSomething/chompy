@@ -39,9 +39,8 @@ class ImportController extends Controller
     {
         $request->validate([
             'upload-file' => 'required|mimes:csv,txt',
-            'importType' => 'required',
+            'import-type' => 'required',
         ]);
-
 
         // Push file to S3.
         $upload = $request->file('upload-file');
@@ -57,6 +56,6 @@ class ImportController extends Controller
             ImportTurboVotePosts::dispatch($path)->onQueue('importer');
         }
 
-        return "Importing that CSV";
+        return redirect()->route('import.show')->with('status', 'Importing CSV!');
     }
 }

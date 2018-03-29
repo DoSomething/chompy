@@ -763,8 +763,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
+// @TODO - this was stolen from https://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3 figure out better file input styling.
 Object(__WEBPACK_IMPORTED_MODULE_0__helpers__["a" /* ready */])(function () {
-    Object(__WEBPACK_IMPORTED_MODULE_2__forms_fileUpload__["a" /* default */])();
+    $(document).on('change', ':file', function () {
+        var input = $(this),
+            numFiles = input.get(0).files ? input.get(0).files.length : 1,
+            label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+        input.trigger('fileselect', [numFiles, label]);
+    });
+
+    $(document).ready(function () {
+        $(':file').on('fileselect', function (event, numFiles, label) {
+
+            var input = $(this).parents('.input-group').find(':text'),
+                log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+            if (input.length) {
+                input.val(log);
+            } else {
+                if (log) alert(log);
+            }
+        });
+    });
 });
 
 /***/ }),
@@ -31828,6 +31848,7 @@ module.exports = function spread(callback) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+// @TODO - this is pulled from codepen. need to rewrite this to ES6 - no more jquery.
 function bs_input_file() {
     $(".input-file").before(function () {
         if (!$(this).prev().hasClass('input-ghost')) {
@@ -31853,7 +31874,7 @@ function bs_input_file() {
     });
 }
 
-/* harmony default export */ __webpack_exports__["a"] = (bs_input_file);
+/* unused harmony default export */ var _unused_webpack_default_export = (bs_input_file);
 
 /***/ }),
 /* 37 */
