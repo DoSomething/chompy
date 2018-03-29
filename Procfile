@@ -1,5 +1,1 @@
-web: composer warmup && vendor/bin/heroku-php-nginx -C nginx.conf public/
-
-release: php artisan migrate --force
-
-queue: php artisan queue:work --sleep=5
+web: vendor/bin/heroku-php-apache2 public
