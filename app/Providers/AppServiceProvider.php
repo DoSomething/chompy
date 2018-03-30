@@ -15,6 +15,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+
+        // Horizon Dashboard Authentication.
+        \Horizon::auth(function ($request) {
+            return auth()->user()->role === 'admin';
+        });
     }
 
     /**

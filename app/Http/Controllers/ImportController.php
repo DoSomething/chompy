@@ -53,7 +53,7 @@ class ImportController extends Controller
         }
 
         if ($request->input('import-type') === 'turbovote') {
-            ImportTurboVotePosts::dispatch($path)->onQueue('importer');
+            ImportTurboVotePosts::dispatch($path);
         }
 
         return redirect()->route('import.show')->with('status', 'Importing CSV!');
