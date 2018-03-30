@@ -65,7 +65,7 @@ return [
         'client_credentials' => [
             'client_id' => env('NORTHSTAR_CLIENT_ID'),
             'client_secret' => env('NORTHSTAR_CLIENT_SECRET'),
-            'scope' => ['user', 'admin'],
+            'scope' => ['admin', 'user', 'client', 'activity', 'write'],
         ],
     ]
 

@@ -33,6 +33,17 @@ class ImportTurboVotePosts implements ShouldQueue
         $this->filepath = $filepath;
     }
 
+
+    /**
+     * Get the tags that should be assigned to the job.
+     *
+     * @return array
+     */
+    public function tags()
+    {
+        return ['turbovote'];
+    }
+
     /**
      * Execute the job.
      *

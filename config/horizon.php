@@ -84,7 +84,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['default'],
+                'queue' => ['importer'],
                 'balance' => 'simple',
                 'processes' => 3,
                 'tries' => 3,
