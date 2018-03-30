@@ -81,6 +81,16 @@ return [
             ],
         ],
 
+        'qa' => [
+            'supervisor-1' => [
+                'connection' => 'redis',
+                'queue' => ['importer'],
+                'balance' => 'simple',
+                'processes' => 3,
+                'tries' => 3,
+            ],
+        ],
+
         'local' => [
             'supervisor-1' => [
                 'connection' => 'redis',
