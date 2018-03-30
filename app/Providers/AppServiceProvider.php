@@ -18,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Horizon Dashboard Authentication.
         \Horizon::auth(function ($request) {
-            return true;
+            return auth()->user()->role === 'admin';
         });
     }
 
