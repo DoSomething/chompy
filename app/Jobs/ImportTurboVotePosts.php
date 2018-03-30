@@ -23,20 +23,6 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     protected $filepath;
 
-    // /**
-    //  * The Rogue Client intances
-    //  *
-    //  * @var App\Services\Rogue;
-    //  */
-    // protected $rogue;
-
-    // /**
-    //  * The role of the authenticated user that kicked off the request.
-    //  *
-    //  * @var object
-    //  */
-    // protected $authenticatedUserRole;
-
     /**
      * Create a new job instance.
      *
@@ -45,8 +31,6 @@ class ImportTurboVotePosts implements ShouldQueue
     public function __construct($filepath)
     {
         $this->filepath = $filepath;
-
-        // $this->authenticatedUserRole = $authenticatedUserRole;
     }
 
     /**
@@ -56,6 +40,7 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
+        // @TODO - remove CSV from s3 when done.
         $file = Storage::get($this->filepath);
         $csv = Reader::createFromString($file);
         $csv->setHeaderOffset(0);

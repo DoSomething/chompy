@@ -44,7 +44,7 @@ class ImportController extends Controller
 
         // Push file to S3.
         $upload = $request->file('upload-file');
-        $path = 'test/files/' . $request->input('importType') . '-chompy-import' . Carbon::now() . '.csv';
+        $path = 'test/files/' . $request->input('import-type') . '-importer' . Carbon::now() . '.csv';
         $csv = Reader::createFromPath($upload->getRealPath());
         $success = Storage::put($path, (string)$csv);
 
@@ -52,7 +52,7 @@ class ImportController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        if ($request->input('importType') === 'turbovote') {
+        if ($request->input('import-type') === 'turbovote') {
             ImportTurboVotePosts::dispatch($path)->onQueue('importer');
         }
 
