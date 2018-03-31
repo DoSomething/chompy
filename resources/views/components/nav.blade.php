@@ -12,7 +12,11 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a class="nav-item nav-link" href="/login">Login</a></li>
+                @if (Auth::user())
+                    <li><a class="nav-item nav-link" href="/logout">Logout</a></li>
+                @else
+                    <li><a class="nav-item nav-link" href="/login">Login</a></li>
+                @endif
             </ul>
         </div><!--/.nav-collapse -->
     </div><!--/.container-fluid -->
