@@ -44,7 +44,7 @@ class ImportController extends Controller
 
         // Push file to S3.
         $upload = $request->file('upload-file');
-        $path = 'test/files/' . $request->input('import-type') . '-importer' . Carbon::now() . '.csv';
+        $path = 'uploads/' . $request->input('import-type') . '-importer' . Carbon::now() . '.csv';
         $csv = Reader::createFromPath($upload->getRealPath());
         $success = Storage::put($path, (string)$csv);
 
