@@ -6,7 +6,7 @@ namespace App\Jobs;
 use Carbon\Carbon;
 use League\Csv\Reader;
 use App\Services\Rogue;
-use App\Events\NewLogMessage;
+use App\Events\LogProgress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
@@ -32,9 +32,6 @@ class ImportTurboVotePosts implements ShouldQueue
     public function __construct($filepath)
     {
         $this->filepath = $filepath;
-
-        // Pusher instance
-        $this->pusher = new \Pusher(config('broadcasting.connections.pusher.key'), config('broadcasting.connections.pusher.secret'), config('broadcasting.connections.pusher.app_id'), config('broadcasting.connections.pusher.options'));
     }
 
 
@@ -55,28 +52,15 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-        event(new NewLogMessage('a message to log'));
-
         // @TODO - remove CSV when done.
+
         $file = Storage::get($this->filepath);
         $csv = Reader::createFromString($file);
         $csv->setHeaderOffset(0);
         $records = $csv->getRecords();
 
         foreach ($records as $record) {
-            // TODO - make this into a method.
-            // Enable pusher logging
-            $this->pusher->set_logger(new class
-            {
-                public function log($msg)
-                {
-                    \Log::info($msg);
-                }
-            });
-            // TODO - could also pull the channel and event from some sort of config.
-            $this->pusher->trigger('importer', 'log',[
-                'message' => 'Importing record: '. $record['id']
-            ]);
+            event(new LogProgress('Importing record: '.$record['id']));
 
             $referralCode = $record['referral-code'];
 

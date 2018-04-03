@@ -56,6 +56,6 @@ window.Echo = new Echo({
 
 // Listen to the 'log' event on the importer channel.
 window.Echo.channel('importer')
-    .listen('NewLogMessage', (e) => {
+    .listen('LogProgress', (e) => {
         $('#logs').find('pre').append('<code>' + e.message + '</code>\n');
     });
