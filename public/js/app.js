@@ -870,8 +870,7 @@ window.Echo = new __WEBPACK_IMPORTED_MODULE_0_laravel_echo___default.a({
 });
 
 // Listen to the 'log' event on the importer channel.
-window.Echo.channel('importer').listen('.log', function (e) {
-    console.log('can you hear me \n');
+window.Echo.channel('importer').listen('NewLogMessage', function (e) {
     $('#logs').find('pre').append('<code>' + e.message + '</code>\n');
 });
 
