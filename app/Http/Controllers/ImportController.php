@@ -8,8 +8,6 @@ use Illuminate\Http\Request;
 use App\Jobs\ImportTurboVotePosts;
 use Illuminate\Support\Facades\Storage;
 
-use App\Services\Rogue;
-
 class ImportController extends Controller
 {
     /**
@@ -17,11 +15,9 @@ class ImportController extends Controller
      *
      * @return void
      */
-    public function __construct(Rogue $rogue)
+    public function __construct()
     {
         $this->middleware('auth');
-
-        $this->rogue = $rogue;
     }
 
     /*
