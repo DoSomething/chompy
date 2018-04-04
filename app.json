@@ -1,0 +1,105 @@
+{
+  "name": "chompy",
+  "scripts": {
+  },
+  "env": {
+    "APP_DEBUG": {
+      "required": true
+    },
+    "APP_ENV": {
+      "required": true
+    },
+    "APP_KEY": {
+      "required": true
+    },
+    "APP_LOG": {
+      "required": true
+    },
+    "APP_URL": {
+      "required": true
+    },
+    "AWS_ACCESS_KEY_ID": {
+      "required": true
+    },
+    "AWS_REGION": {
+      "required": true
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "required": true
+    },
+    "AWS_SECRET_KEY": {
+      "required": true
+    },
+    "CACHE_DRIVER": {
+      "required": true
+    },
+    "CLEARDB_DATABASE_URL": {
+      "required": true
+    },
+    "FILESYSTEM_DRIVER": {
+      "required": true
+    },
+    "NORTHSTAR_AUTHORIZATION_ID": {
+      "required": true
+    },
+    "NORTHSTAR_AUTHORIZATION_SECRET": {
+      "required": true
+    },
+    "NORTHSTAR_CLIENT_ID": {
+      "required": true
+    },
+    "NORTHSTAR_CLIENT_SECRET": {
+      "required": true
+    },
+    "NORTHSTAR_URL": {
+      "required": true
+    },
+    "QUEUE_DRIVER": {
+      "required": true
+    },
+    "REDIS_URL": {
+      "required": true
+    },
+    "ROGUE_URL": {
+      "required": true
+    },
+    "S3_BUCKET": {
+      "required": true
+    },
+    "S3_KEY": {
+      "required": true
+    },
+    "S3_REGION": {
+      "required": true
+    },
+    "S3_SECRET": {
+      "required": true
+    },
+    "S3_URL": {
+      "required": true
+    },
+    "SESSION_DRIVER": {
+      "required": true
+    }
+  },
+  "formation": {
+    "queue": {
+      "quantity": 1
+    },
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+    "cleardb",
+    "heroku-redis"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "heroku/php"
+    }
+  ]
+}
