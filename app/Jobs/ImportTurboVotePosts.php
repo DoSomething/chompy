@@ -6,6 +6,7 @@ namespace App\Jobs;
 use Carbon\Carbon;
 use League\Csv\Reader;
 use App\Services\Rogue;
+use App\Events\LogProgress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
@@ -51,14 +52,15 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-        // @TODO - remove CSV from s3 when done.
+        // @TODO - remove CSV when done.
+
         $file = Storage::get($this->filepath);
         $csv = Reader::createFromString($file);
         $csv->setHeaderOffset(0);
         $records = $csv->getRecords();
 
         foreach ($records as $record) {
-            info('Importing record ' . $record['id']);
+            event(new LogProgress('Importing record: '.$record['id']));
 
             $referralCode = $record['referral-code'];
 

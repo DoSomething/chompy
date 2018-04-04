@@ -8,8 +8,6 @@ use Illuminate\Http\Request;
 use App\Jobs\ImportTurboVotePosts;
 use Illuminate\Support\Facades\Storage;
 
-use App\Services\Rogue;
-
 class ImportController extends Controller
 {
     /**
@@ -56,6 +54,6 @@ class ImportController extends Controller
             ImportTurboVotePosts::dispatch($path);
         }
 
-        return redirect()->route('import.show')->with('status', 'Your CSV was added to the queue to be processed. Check out the progress on <a href="/horizon">Horizon</a>');
+        return redirect()->route('import.show')->with('status', 'Your CSV was added to the queue to be processed. Check out the progress on <a target="_blank" href="/horizon">Horizon</a>');
     }
 }

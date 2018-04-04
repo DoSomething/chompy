@@ -43,11 +43,19 @@ if (token) {
  * allows your team to easily build robust real-time web applications.
  */
 
-// import Echo from 'laravel-echo'
+import Echo from 'laravel-echo'
 
-// window.Pusher = require('pusher-js');
+window.Pusher = require('pusher-js');
 
-// window.Echo = new Echo({
-//     broadcaster: 'pusher',
-//     key: 'your-pusher-key'
-// });
+window.Echo = new Echo({
+    broadcaster: 'pusher',
+    key: 'b0f937b1f525e790847e',
+    cluster: 'us2',
+    encrypted: true
+});
+
+// Listen to the 'log' event on the importer channel.
+window.Echo.channel('importer')
+    .listen('LogProgress', (e) => {
+        $('#logs').find('pre').append('<code>' + e.message + '</code>\n');
+    });
