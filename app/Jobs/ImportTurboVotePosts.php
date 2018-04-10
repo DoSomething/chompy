@@ -45,11 +45,6 @@ class ImportTurboVotePosts implements ShouldQueue
         return ['turbovote'];
     }
 
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
     public function handle(Rogue $rogue)
     {
         $file = Storage::get($this->filepath);
@@ -57,49 +52,65 @@ class ImportTurboVotePosts implements ShouldQueue
         $csv->setHeaderOffset(0);
         $records = $csv->getRecords();
 
-        foreach ($records as $record) {
-            event(new LogProgress('Importing record: '.$record['id']));
-
-            $referralCode = $record['referral-code'];
-
-            if ($referralCode) {
-                $referralCodeValues = $this->parseReferralCode(explode(',', $referralCode));
-
-                // Fall back to the Grab The Mic campaign (campaign_id: 8017, campaign_run_id: 8022)
-                // if these keys are not present.
-                $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? 8017 : $referralCodeValues['campaign_id'];
-                $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? 8022 : $referralCodeValues['campaign_run_id'];
-
-                if (isset($referralCodeValues['northstar_id'])) {
-                    $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
-                    $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
-                    $postDetails = $this->extractDetails($record);
-
-                    $postData = [
-                        'campaign_id' =>(int) $referralCodeValues['campaign_id'],
-                        'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
-                        'northstar_id' => $referralCodeValues['northstar_id'],
-                        'type' => 'voter-reg',
-                        'action' => $tvCreatedAtMonth . '-turbovote',
-                        'status' => 'pending',//$record['voter-registration-status'],
-                        'source' => 'chompy',
-                        'source_details' => $sourceDetails,
-                        'details' => $postDetails,
-                        'text' => 'This should not be required',
-                        'quantity' => null,
-                    ];
-
-                    $multipartData = collect($postData)->map(function ($value, $key) {
-                        return ['name' => $key, 'contents' => $value];
-                    })->values()->toArray();
-
-                    $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
-
-                    //  @TODO - somehow confirm the post was created. maybe more accurate errors returned so we can catch things easilt to retrigger the job.
-                }
-            }
-        }
+        event(new LogProgress(count($csv)));
     }
+    // /**
+    //  * Execute the job.
+    //  *
+    //  * @return void
+    //  */
+    // public function handle(Rogue $rogue)
+    // {
+    //     // @TODO - remove CSV when done.
+
+    //     $file = Storage::get($this->filepath);
+    //     $csv = Reader::createFromString($file);
+    //     $csv->setHeaderOffset(0);
+    //     $records = $csv->getRecords();
+
+    //     foreach ($records as $record) {
+    //         event(new LogProgress('Importing record: '.$record['id']));
+
+    //         $referralCode = $record['referral-code'];
+
+    //         if ($referralCode) {
+    //             $referralCodeValues = $this->parseReferralCode(explode(',', $referralCode));
+
+    //             // Fall back to the Grab The Mic campaign (campaign_id: 8017, campaign_run_id: 8022)
+    //             // if these keys are not present.
+    //             $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? 8017 : $referralCodeValues['campaign_id'];
+    //             $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? 8022 : $referralCodeValues['campaign_run_id'];
+
+    //             if (isset($referralCodeValues['northstar_id'])) {
+    //                 $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
+    //                 $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
+    //                 $postDetails = $this->extractDetails($record);
+
+    //                 $postData = [
+    //                     'campaign_id' =>(int) $referralCodeValues['campaign_id'],
+    //                     'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
+    //                     'northstar_id' => $referralCodeValues['northstar_id'],
+    //                     'type' => 'voter-reg',
+    //                     'action' => $tvCreatedAtMonth . '-turbovote',
+    //                     'status' => 'pending',//$record['voter-registration-status'],
+    //                     'source' => 'chompy',
+    //                     'source_details' => $sourceDetails,
+    //                     'details' => $postDetails,
+    //                     'text' => 'This should not be required',
+    //                     'quantity' => null,
+    //                 ];
+
+    //                 $multipartData = collect($postData)->map(function ($value, $key) {
+    //                     return ['name' => $key, 'contents' => $value];
+    //                 })->values()->toArray();
+
+    //                 $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
+
+    //                 //  @TODO - somehow confirm the post was created. maybe more accurate errors returned so we can catch things easilt to retrigger the job.
+    //             }
+    //         }
+    //     }
+    // }
 
     /**
      * Parse the referral code field to grab individual values.
