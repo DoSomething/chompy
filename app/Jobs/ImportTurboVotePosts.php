@@ -52,8 +52,6 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-        // @TODO - remove CSV when done.
-
         $file = Storage::get($this->filepath);
         $csv = Reader::createFromString($file);
         $csv->setHeaderOffset(0);
