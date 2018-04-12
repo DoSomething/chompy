@@ -51,7 +51,7 @@ class ImportController extends Controller
         }
 
         if ($request->input('import-type') === 'turbovote') {
-            ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(5));
+            ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
         return redirect()->route('import.show')->with('status', 'Your CSV was added to the queue to be processed. Check out the progress on <a target="_blank" href="/horizon">Horizon</a>');
