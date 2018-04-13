@@ -87,7 +87,7 @@ class ImportTurboVotePosts implements ShouldQueue
 
                     if (isset($referralCodeValues['northstar_id'])) {
                         $countHasNorthstarID++;
-                        // Check if the post exists in rogue already
+
                         $post = $rogue->asClient()->get('v3/posts', [
                             'filter' => [
                                 'campaign_id' => (int) $referralCodeValues['campaign_id'],
@@ -96,7 +96,6 @@ class ImportTurboVotePosts implements ShouldQueue
                             ]
                         ]);
 
-                        // If it doesn't, create the post with the provided status.
                         if (! $post['data']) {
                             $countPostNeedsToBeCreated++;
 
@@ -122,7 +121,6 @@ class ImportTurboVotePosts implements ShouldQueue
                             // @TODO - figure out what todo if this fails. move into try/catch
                             $roguePost = $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
                         } else {
-                            // If it does get that status and apply the hierarchy logic to know if the status should be updated.
                             $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
 
                             $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
@@ -138,6 +136,8 @@ class ImportTurboVotePosts implements ShouldQueue
                         // Northstar ID does not exist
                         // @TODO - create NS account and process
                     }
+                } else {
+                    // No referral code...
                 }
             } else {
                 // record was cleaned and skipped
@@ -284,6 +284,29 @@ class ImportTurboVotePosts implements ShouldQueue
         }
 
         return $changeStatus;
+    }
+
+    /*
+        If an email includes thing.org in the address, ignore it.
+        If a hostname includes `testing, ignore it.
+        If an email includes @dosome in the address, ignore it.
+        If a last name includes Baloney, ignore it.
+        If an email includes turbovote, ignore it.
+    */
+    private function scrubRecord($record)
+    {
+        $scrub = false;
+
+        $isValidEmail = strrpos($record['email'], 'thing.org') === false || strrpos($record['email'] === false, '@dosome') || strrpos($record['email'], 'turbovote') === false;
+        $isValidHostname = strrpos($record['hostname'], 'testing') === false;
+        $isValidLastName = strrpos($record['last-name'], 'Baloney') === false;
+
+        if (!$isValidEmail || !$isValidHostname || !$isValidLastName)
+        {
+            $scrub = true;
+        }
+
+        return $scrub;
     }
 }
 
