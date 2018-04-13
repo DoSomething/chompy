@@ -25,25 +25,6 @@ class Rogue extends RestApiClient
         parent::__construct($base_url, ['verify' => env('VERIFY_ROGUE_SSL_CERTIFICATE', true)]);
     }
 
-
-    /**
-     * Store post in Rogue.
-     *
-     * @param  array  $payload
-     * @return array - JSON response
-     */
-    // public function storePost($payload = [])
-    // {
-    //     // unset($payload['media']);
-    //     // // Guzzle expects specific file object for multipart form.
-    //     // // @TODO: upadte Gateway to handle multipart form data.
-    //     // $payload['file'] = fopen($payload['file']->getPathname(), 'r');
-    //     // $multipartData = collect($payload)->map(function ($value, $key) {
-    //     //     return ['name' => $key, 'contents' => $value];
-    //     // })->values()->toArray();
-    //     return $this->withToken(token())->send('POST', 'v3/posts', $payload);
-    // }
-
     /**
      * Handle validation exceptions.
      *
@@ -58,7 +39,7 @@ class Rogue extends RestApiClient
     public function handleValidationException($endpoint, $response, $method, $path, $options)
     {
         $errors = $response['errors'];
-        dd($endpoint, $response, $method, $path, $options);
+
         throw new ValidationException($errors, $endpoint);
     }
 

@@ -96,7 +96,7 @@ return [
                 'connection' => 'redis',
                 'queue' => ['importer'],
                 'balance' => 'simple',
-                'processes' => 3,
+                'processes' => 10,
                 'tries' => 3,
             ],
         ],

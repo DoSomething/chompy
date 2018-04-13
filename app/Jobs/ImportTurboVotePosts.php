@@ -56,6 +56,12 @@ class ImportTurboVotePosts implements ShouldQueue
 
         event(new LogProgress('Total rows to chomp: '.count($csv)));
 
+        // Metrics
+        $countProcessed = 0;
+        $countHasReferralCode = 0;
+        $countHasNorthstarID = 0;
+        $countPostNeedsToBeCreated = 0;
+
         foreach($records as $record)
         {
             // make sure record should be processed.
@@ -65,30 +71,26 @@ class ImportTurboVotePosts implements ShouldQueue
 
             if ($shouldProcess)
             {
-                /*
-                 * MIGHT NOT NEED TO DO THIS SINCE ROGUE WILL CREATE THE SIGNUP AUTOMATICALLY IF IT DOESN'T EXIST.
-                 * see if the signup already exists.
-                 * if it doesn't, create the signup.
-                 * Send the signup to rogue.
-                 */
+                $countProcessed++;
                 $referralCode = $record['referral-code'];
-
                 event(new LogProgress('Processing record: ' . $record['id']));
 
                 if (! empty($referralCode)) {
-
+                    $countHasReferralCode++;
                     $referralCodeValues = $this->parseReferralCode(explode(',', $referralCode));
 
                     // Fall back to the Grab The Mic campaign (campaign_id: 8017, campaign_run_id: 8022)
                     // if these keys are not present.
+                    // @TODO - make sure these go together
                     $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? 8017 : $referralCodeValues['campaign_id'];
                     $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? 8022 : $referralCodeValues['campaign_run_id'];
 
                     if (isset($referralCodeValues['northstar_id'])) {
+                        $countHasNorthstarID++;
                         // Check if the post exists in rogue already
-                        $post = $rogue->asClient()->send('GET', 'v3/posts', [
+                        $post = $rogue->asClient()->get('v3/posts', [
                             'filter' => [
-                                'campaign_id' =>(int) $referralCodeValues['campaign_id'],
+                                'campaign_id' => (int) $referralCodeValues['campaign_id'],
                                 'northstar_id' => $referralCodeValues['northstar_id'],
                                 'type' => 'voter-reg',
                             ]
@@ -96,8 +98,8 @@ class ImportTurboVotePosts implements ShouldQueue
 
                         // If it doesn't, create the post with the provided status.
                         if (! $post['data']) {
-                            event(new LogProgress('No post found, something needs to happen'));
-                            // TODO - count new posts created.
+                            $countPostNeedsToBeCreated++;
+
                             $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
                             $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
                             $postDetails = $this->extractDetails($record);
@@ -116,35 +118,37 @@ class ImportTurboVotePosts implements ShouldQueue
                             $multipartData = collect($postData)->map(function ($value, $key) {
                                 return ['name' => $key, 'contents' => $value];
                             })->values()->toArray();
-                            dd('send this to rogue');
+
+                            // @TODO - figure out what todo if this fails. move into try/catch
                             $roguePost = $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
-                            dd($roguePost);
-                            event(new LogProgress('New Post Created: '. $record['id']));
-
                         } else {
-                            event(new LogProgress('suggests the post exists already'));
-                        }
+                            // If it does get that status and apply the hierarchy logic to know if the status should be updated.
+                            $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
 
+                            $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
+
+                            if ($statusShouldChange) {
+                                event(new LogProgress('Change status of post to: ' . $statusShouldChange));
+                                // $roguePost = $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
+                            } else {
+                                event(new LogProgress('Status stays the same'));
+                            }
+                        }
                     } else {
                         // Northstar ID does not exist
-                        event(new LogProgress('Northstar ID does not exist'));
+                        // @TODO - create NS account and process
                     }
-                } else {
-                    // count these
-                    event(new LogProgress('referall code empty: '.$record['id']));
                 }
-
-
-                // dd($post);
-                // If it does get that status and apply the hierarchy logic to know if it's status should be updated.
-                // If it doesn't, create the post with the provided status.
-                // send the post to rogue
             } else {
                 // record was cleaned and skipped
             }
         }
 
         event(new LogProgress('Done!'));
+        event(new LogProgress('$countProcessed: '. $countProcessed));
+        event(new LogProgress('$countHasReferralCode: ' . $countHasReferralCode));
+        event(new LogProgress('$countHasNorthstarID: ' . $countHasNorthstarID));
+        event(new LogProgress('$countPostNeedsToBeCreated: ' . $countPostNeedsToBeCreated));
     }
 
     /**
@@ -165,7 +169,7 @@ class ImportTurboVotePosts implements ShouldQueue
             }
 
             // Grab the Campaign Id.
-            if (strtolower($value[0]) === 'campaignid') {
+            if (strtolower($value[0]) === 'campaignid' || strtolower($value[0]) === 'campaign') {
                 $values['campaign_id'] = $value[1];
             }
 
@@ -240,7 +244,7 @@ class ImportTurboVotePosts implements ShouldQueue
 
         switch($tvStatus)
         {
-            case 'intiated':
+            case 'initiated':
                 $translatedStatus = 'register-form';
                 break;
             case 'registered':
@@ -257,6 +261,29 @@ class ImportTurboVotePosts implements ShouldQueue
         }
 
         return $translatedStatus;
+    }
+
+    private function updateStatus($currentStatus, $newStatus)
+    {
+        $statusHierarchy = [
+            'uncertain',
+            'ineligible',
+            'confirmed',
+            'register-OVR',
+            'register-form',
+        ];
+
+        $changeStatus = null;
+
+        $indexOfCurrentStatus = array_search($currentStatus, $statusHierarchy);
+        $indexOfNewStatus = array_search($newStatus, $statusHierarchy);
+
+        if ($indexOfCurrentStatus < $indexOfNewStatus)
+        {
+            $changeStatus = $newStatus;
+        }
+
+        return $changeStatus;
     }
 }
 
