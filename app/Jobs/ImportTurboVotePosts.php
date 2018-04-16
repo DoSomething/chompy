@@ -58,6 +58,7 @@ class ImportTurboVotePosts implements ShouldQueue
 
         // Metrics
         $countProcessed = 0;
+        $countScrubbed = 0;
         $countHasReferralCode = 0;
         $countHasNorthstarID = 0;
         $countPostNeedsToBeCreated = 0;
@@ -65,9 +66,7 @@ class ImportTurboVotePosts implements ShouldQueue
         foreach($records as $record)
         {
             // make sure record should be processed.
-            // $shouldProcess = $this->scrubRecord($record);
-
-            $shouldProcess= true;
+            $shouldProcess = $this->scrubRecord($record);
 
             if ($shouldProcess)
             {
@@ -140,12 +139,14 @@ class ImportTurboVotePosts implements ShouldQueue
                     // No referral code...
                 }
             } else {
-                // record was cleaned and skipped
+                $countScrubbed++;
+                event(new LogProgress('Record scrubbed.'));
             }
         }
 
         event(new LogProgress('Done!'));
-        event(new LogProgress('$countProcessed: '. $countProcessed));
+        event(new LogProgress('$countProcessed: ' . $countProcessed));
+        event(new LogProgress('$countScrubbed: ' . $countScrubbed));
         event(new LogProgress('$countHasReferralCode: ' . $countHasReferralCode));
         event(new LogProgress('$countHasNorthstarID: ' . $countHasNorthstarID));
         event(new LogProgress('$countPostNeedsToBeCreated: ' . $countPostNeedsToBeCreated));
@@ -295,18 +296,11 @@ class ImportTurboVotePosts implements ShouldQueue
     */
     private function scrubRecord($record)
     {
-        $scrub = false;
+        $isNotValidEmail = strrpos($record['email'], 'thing.org') !== false || strrpos($record['email'] !== false, '@dosome') || strrpos($record['email'], 'turbovote') !== false;
+        $isNotValidHostname = strrpos($record['hostname'], 'testing') !== false;
+        $isNotValidLastName = strrpos($record['last-name'], 'Baloney') !== false;
 
-        $isValidEmail = strrpos($record['email'], 'thing.org') === false || strrpos($record['email'] === false, '@dosome') || strrpos($record['email'], 'turbovote') === false;
-        $isValidHostname = strrpos($record['hostname'], 'testing') === false;
-        $isValidLastName = strrpos($record['last-name'], 'Baloney') === false;
-
-        if (!$isValidEmail || !$isValidHostname || !$isValidLastName)
-        {
-            $scrub = true;
-        }
-
-        return $scrub;
+        return $isNotValidEmail || $isNotValidHostname || $isNotValidLastName ? false : true;
     }
 }
 
