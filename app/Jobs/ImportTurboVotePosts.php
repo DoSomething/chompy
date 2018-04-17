@@ -6,7 +6,6 @@ namespace App\Jobs;
 use Carbon\Carbon;
 use League\Csv\Reader;
 use App\Services\Rogue;
-use League\Csv\Statement;
 use App\Events\LogProgress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Storage;
@@ -48,7 +47,6 @@ class ImportTurboVotePosts implements ShouldQueue
 
     public function handle(Rogue $rogue)
     {
-        // Will createFromPath work here
         $file = Storage::get($this->filepath);
         $csv = Reader::createFromString($file);
         $csv->setHeaderOffset(0);
