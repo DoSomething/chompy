@@ -61,11 +61,10 @@ class ImportTurboVotePosts implements ShouldQueue
         $countScrubbed = 0;
         $countHasReferralCode = 0;
         $countHasNorthstarID = 0;
-        $countPostNeedsToBeCreated = 0;
+        $countPostCreated = 0;
 
         foreach($records as $record)
         {
-            // make sure record should be processed.
             $shouldProcess = $this->scrubRecord($record);
 
             if ($shouldProcess)
@@ -96,8 +95,6 @@ class ImportTurboVotePosts implements ShouldQueue
                         ]);
 
                         if (! $post['data']) {
-                            $countPostNeedsToBeCreated++;
-
                             $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
                             $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
                             $postDetails = $this->extractDetails($record);
@@ -117,39 +114,43 @@ class ImportTurboVotePosts implements ShouldQueue
                                 return ['name' => $key, 'contents' => $value];
                             })->values()->toArray();
 
-                            // @TODO - figure out what todo if this fails. move into try/catch
-                            $roguePost = $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
+                            try {
+                                $roguePost = $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
+                                $countPostCreated = $roguePost ? $countPostCreated++ : $countPostCreated;
+                            } catch (\Exception $e) {
+                                event(new LogProgress('There was an error storing that post: '.$e->getMessage()));
+                            }
                         } else {
                             $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
-
                             $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
 
                             if ($statusShouldChange) {
-                                event(new LogProgress('Change status of post to: ' . $statusShouldChange));
-                                // $roguePost = $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
-                            } else {
-                                event(new LogProgress('Status stays the same'));
+                                try {
+                                    $roguePost = $rogue->asClient()->patch('v3/posts/'.$post['data'][0]['id'], [
+                                        'status' => $statusShouldChange,
+                                    ]);
+
+                                } catch (\Exception $e) {
+                                    event(new LogProgress('There was an error updating that post: ' . $e->getMessage()));
+                                }
                             }
                         }
                     } else {
                         // Northstar ID does not exist
                         // @TODO - create NS account and process
                     }
-                } else {
-                    // No referral code...
                 }
             } else {
                 $countScrubbed++;
-                event(new LogProgress('Record scrubbed.'));
             }
         }
 
         event(new LogProgress('Done!'));
-        event(new LogProgress('$countProcessed: ' . $countProcessed));
-        event(new LogProgress('$countScrubbed: ' . $countScrubbed));
-        event(new LogProgress('$countHasReferralCode: ' . $countHasReferralCode));
-        event(new LogProgress('$countHasNorthstarID: ' . $countHasNorthstarID));
-        event(new LogProgress('$countPostNeedsToBeCreated: ' . $countPostNeedsToBeCreated));
+        event(new LogProgress('# of processed records: ' . $countProcessed));
+        event(new LogProgress('# of scrubbed records: ' . $countScrubbed));
+        event(new LogProgress('# of records with referral code: ' . $countHasReferralCode));
+        event(new LogProgress('# of records with NS ID: ' . $countHasNorthstarID));
+        event(new LogProgress('# of Posts Created in Rogue: ' . $countPostCreated));
     }
 
     /**
@@ -274,17 +275,10 @@ class ImportTurboVotePosts implements ShouldQueue
             'register-form',
         ];
 
-        $changeStatus = null;
-
         $indexOfCurrentStatus = array_search($currentStatus, $statusHierarchy);
         $indexOfNewStatus = array_search($newStatus, $statusHierarchy);
 
-        if ($indexOfCurrentStatus < $indexOfNewStatus)
-        {
-            $changeStatus = $newStatus;
-        }
-
-        return $changeStatus;
+        return $indexOfCurrentStatus < $indexOfNewStatus ? $newStatus : null;
     }
 
     /*
