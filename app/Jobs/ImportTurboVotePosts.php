@@ -232,6 +232,7 @@ class ImportTurboVotePosts implements ShouldQueue
      *
      * @param  string $tvStatus
      * @param  string $tvMethod
+     * @return string
      */
     private function translateStatus($tvStatus, $tvMethod)
     {
@@ -263,6 +264,13 @@ class ImportTurboVotePosts implements ShouldQueue
         return $translatedStatus;
     }
 
+    /*
+     * Determines if a status should be changed and what it should be changed to.
+     *
+     * @param string $currentStatus
+     * @param string $newStatus
+     * @return string|null
+     */
     private function updateStatus($currentStatus, $newStatus)
     {
         $statusHierarchy = [
@@ -280,11 +288,10 @@ class ImportTurboVotePosts implements ShouldQueue
     }
 
     /*
-        If an email includes thing.org in the address, ignore it.
-        If a hostname includes `testing, ignore it.
-        If an email includes @dosome in the address, ignore it.
-        If a last name includes Baloney, ignore it.
-        If an email includes turbovote, ignore it.
+     * Determines if a record should be process to be stored or if it is not valid.
+     *
+     * @param array $record
+     * @return bool
     */
     private function scrubRecord($record)
     {
