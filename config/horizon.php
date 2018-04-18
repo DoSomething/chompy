@@ -74,10 +74,11 @@ return [
         'production' => [
             'supervisor-1' => [
                 'connection' => 'redis',
-                'queue' => ['default'],
+                'queue' => ['importer'],
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
+                'timeout' => 43200,
             ],
         ],
 
@@ -86,8 +87,9 @@ return [
                 'connection' => 'redis',
                 'queue' => ['importer'],
                 'balance' => 'simple',
-                'processes' => 3,
+                'processes' => 10,
                 'tries' => 3,
+                'timeout' => 43200,
             ],
         ],
 
@@ -98,6 +100,7 @@ return [
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
+                'timeout' => 43200,
             ],
         ],
     ],
