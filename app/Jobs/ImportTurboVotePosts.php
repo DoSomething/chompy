@@ -114,7 +114,10 @@ class ImportTurboVotePosts implements ShouldQueue
 
                             try {
                                 $roguePost = $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
-                                $countPostCreated = $roguePost ? $countPostCreated++ : $countPostCreated;
+
+                                if ($roguePost['data']) {
+                                    $countPostCreated++;
+                                }
                             } catch (\Exception $e) {
                                 event(new LogProgress('There was an error storing that post: '.$e->getMessage()));
                             }
