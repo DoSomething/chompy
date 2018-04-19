@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 
+use App\Stat;
 use Carbon\Carbon;
 use League\Csv\Reader;
 use App\Services\Rogue;
@@ -55,11 +56,14 @@ class ImportTurboVotePosts implements ShouldQueue
         event(new LogProgress('Total rows to chomp: '.count($csv)));
 
         // Metrics
-        $countProcessed = 0;
+        $totalRecords = count($csv);
         $countScrubbed = 0;
-        $countHasReferralCode = 0;
-        $countHasNorthstarID = 0;
+        $countProcessed = 0;
+        $countMissingNSId = 0;
         $countPostCreated = 0;
+        $countHasNorthstarID = 0;
+        $countHasReferralCode = 0;
+        $countMissingReferralCode = 0;
 
         foreach($records as $record)
         {
@@ -119,7 +123,8 @@ class ImportTurboVotePosts implements ShouldQueue
                                     $countPostCreated++;
                                 }
                             } catch (\Exception $e) {
-                                event(new LogProgress('There was an error storing that post: '.$e->getMessage()));
+                                event(new LogProgress('There was an error storing the post for: '.$record['id']));
+                                event(new LogProgress('Error: '.$e->getMessage()));
                             }
                         } else {
                             $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
@@ -130,16 +135,19 @@ class ImportTurboVotePosts implements ShouldQueue
                                     $roguePost = $rogue->asClient()->patch('v3/posts/'.$post['data'][0]['id'], [
                                         'status' => $statusShouldChange,
                                     ]);
-
                                 } catch (\Exception $e) {
-                                    event(new LogProgress('There was an error updating that post: ' . $e->getMessage()));
+                                    event(new LogProgress('There was an error updating the post for: ' . $record['id']));
+                                    event(new LogProgress('Error: ' . $e->getMessage()));
                                 }
                             }
                         }
                     } else {
+                        $countMissingNSId++;
                         // Northstar ID does not exist
                         // @TODO - create NS account and process
                     }
+                } else {
+                    $countMissingReferralCode++;
                 }
             } else {
                 $countScrubbed++;
@@ -150,8 +158,23 @@ class ImportTurboVotePosts implements ShouldQueue
         event(new LogProgress('# of processed records: ' . $countProcessed));
         event(new LogProgress('# of scrubbed records: ' . $countScrubbed));
         event(new LogProgress('# of records with referral code: ' . $countHasReferralCode));
+        event(new LogProgress('# of records missing referral code: ' . $countMissingReferralCode));
         event(new LogProgress('# of records with NS ID: ' . $countHasNorthstarID));
         event(new LogProgress('# of Posts Created in Rogue: ' . $countPostCreated));
+        event(new LogProgress('# of records with missing NS ids: '. $countMissingNSId));
+
+        $stat = Stat::create([
+            'total_records' => $totalRecords,
+            'stats' => json_encode([
+                'processed' => $countProcessed,
+                'scrubbed' => $countScrubbed,
+                'has_referral_codes' => $countHasReferralCode,
+                'missing_referral_code' => $countMissingReferralCode,
+                'has_northstar_id' => $countHasNorthstarID,
+                'missing_northstar_id' => $countMissingNSId,
+                'posts_created' => $countPostCreated,
+            ]),
+        ]);
     }
 
     /**
