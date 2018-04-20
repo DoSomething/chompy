@@ -285,6 +285,8 @@ class ImportTurboVotePosts implements ShouldQueue
             case 'not-required':
                 $translatedStatus = 'ineligible';
                 break;
+            default:
+                $translatedStatus = 'pending';
         }
 
         return $translatedStatus;
