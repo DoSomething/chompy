@@ -73,7 +73,8 @@ class ImportTurboVotePosts implements ShouldQueue
             {
                 $countProcessed++;
                 $referralCode = $record['referral-code'];
-                event(new LogProgress('Processing record: ' . $record['id']));
+                // event(new LogProgress('Processing record: ' . $record['id']));
+                info('progress_log: Processing: '. $record['id']);
 
                 if (! empty($referralCode)) {
                     $countHasReferralCode++;
