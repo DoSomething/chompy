@@ -16,7 +16,7 @@ class AddStatsTable extends Migration
         Schema::create('stats', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('total_records');
-            $table->json('stats');
+            $table->json('stats')->nullable();
             $table->timestamps();
         });
     }
