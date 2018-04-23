@@ -124,8 +124,9 @@ class ImportTurboVotePosts implements ShouldQueue
                                     $countPostCreated++;
                                 }
                             } catch (\Exception $e) {
-                                event(new LogProgress('There was an error storing the post for: '.$record['id']));
-                                event(new LogProgress('Error: '.$e->getMessage()));
+                                info('There was an error storing the post for: ' . $record['id'], [
+                                    'Error' => $e->getMessage(),
+                                ]);
                             }
                         } else {
                             $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
@@ -137,8 +138,9 @@ class ImportTurboVotePosts implements ShouldQueue
                                         'status' => $statusShouldChange,
                                     ]);
                                 } catch (\Exception $e) {
-                                    event(new LogProgress('There was an error updating the post for: ' . $record['id']));
-                                    event(new LogProgress('Error: ' . $e->getMessage()));
+                                    info('There was an error updating the post for: ' . $record['id'], [
+                                        'Error' => $e->getMessage(),
+                                    ]);
                                 }
                             }
                         }
@@ -156,13 +158,13 @@ class ImportTurboVotePosts implements ShouldQueue
         }
 
         event(new LogProgress('Done!'));
-        event(new LogProgress('# of processed records: ' . $countProcessed));
-        event(new LogProgress('# of scrubbed records: ' . $countScrubbed));
-        event(new LogProgress('# of records with referral code: ' . $countHasReferralCode));
-        event(new LogProgress('# of records missing referral code: ' . $countMissingReferralCode));
-        event(new LogProgress('# of records with NS ID: ' . $countHasNorthstarID));
-        event(new LogProgress('# of Posts Created in Rogue: ' . $countPostCreated));
-        event(new LogProgress('# of records with missing NS ids: '. $countMissingNSId));
+        // event(new LogProgress('# of processed records: ' . $countProcessed));
+        // event(new LogProgress('# of scrubbed records: ' . $countScrubbed));
+        // event(new LogProgress('# of records with referral code: ' . $countHasReferralCode));
+        // event(new LogProgress('# of records missing referral code: ' . $countMissingReferralCode));
+        // event(new LogProgress('# of records with NS ID: ' . $countHasNorthstarID));
+        // event(new LogProgress('# of Posts Created in Rogue: ' . $countPostCreated));
+        // event(new LogProgress('# of records with missing NS ids: '. $countMissingNSId));
 
         $stat = Stat::create([
             'total_records' => $totalRecords,
