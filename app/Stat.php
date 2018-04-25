@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stat extends Model
 {
-    protected $fillable = ['total_records', 'stats'];
+    protected $fillable = ['filename', 'total_records', 'stats'];
 }

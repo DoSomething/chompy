@@ -158,15 +158,9 @@ class ImportTurboVotePosts implements ShouldQueue
         }
 
         event(new LogProgress('Done!'));
-        // event(new LogProgress('# of processed records: ' . $countProcessed));
-        // event(new LogProgress('# of scrubbed records: ' . $countScrubbed));
-        // event(new LogProgress('# of records with referral code: ' . $countHasReferralCode));
-        // event(new LogProgress('# of records missing referral code: ' . $countMissingReferralCode));
-        // event(new LogProgress('# of records with NS ID: ' . $countHasNorthstarID));
-        // event(new LogProgress('# of Posts Created in Rogue: ' . $countPostCreated));
-        // event(new LogProgress('# of records with missing NS ids: '. $countMissingNSId));
 
         $stat = Stat::create([
+            'filename' => $this->filepath,
             'total_records' => $totalRecords,
             'stats' => json_encode([
                 'processed' => $countProcessed,
