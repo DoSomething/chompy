@@ -169,6 +169,11 @@ return [
         Laravel\Tinker\TinkerServiceProvider::class,
 
         /*
+         * DoSomething Service Providers...
+         */
+        DoSomething\Gateway\Laravel\GatewayServiceProvider::class,
+
+        /*
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,

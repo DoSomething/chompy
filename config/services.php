@@ -51,6 +51,7 @@ return [
     //         'redirect_uri' => 'next/login',
     //     ],
     // ],
+
     'northstar' => [
         'grant' => 'authorization_code', // Default OAuth grant to use: either 'authorization_code' or 'client_credentials'
         'url' => env('NORTHSTAR_URL'), // the environment you want to connect to

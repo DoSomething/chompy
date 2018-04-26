@@ -9,6 +9,7 @@ use League\Csv\Reader;
 use App\Services\Rogue;
 use App\Events\LogProgress;
 use Illuminate\Bus\Queueable;
+// use DoSomething\Gateway\Northstar;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -145,6 +146,19 @@ class ImportTurboVotePosts implements ShouldQueue
                             }
                         }
                     } else {
+                        $newNorthstarUser = gateway('northstar')->createUser([
+                            'first_name' => $record['first-name'],
+                            'last_name' => $record['last-name'],
+                            'email' => $record['email'],
+                            'addr_stree1' => $record['registered-address-street'],
+                            'addr_stree2' => $record['registered-address-street-2'],
+                            'addr_city' => $record['registered-address-city'],
+                            'addr_state' => $record['registered-address-state'],
+                            'addr_zip' => $record['registered-address-zip'],
+                        ]);
+
+                        dd($newNorthstarUser);
+
                         $countMissingNSId++;
                         // Northstar ID does not exist
                         // @TODO - create NS account and process
