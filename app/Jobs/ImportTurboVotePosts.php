@@ -75,11 +75,13 @@ class ImportTurboVotePosts implements ShouldQueue
                 $referralCode = $record['referral-code'];
 
                 if (! empty($referralCode)) {
+                    info("referral code not empty");
                     $this->stats['countHasReferralCode']++;
                     $referralCodeValues = $this->parseReferralCode(explode(',', $referralCode));
 
                     try {
                         $user = $this->getOrCreateUser($record, $referralCodeValues);
+                        info("something should happen with the user", ['user' => $user->id]);
                     } catch (\Exception $e) {
                         info('There was an error with that user: ' . $record['id'], [
                             'Error' => $e->getMessage(),
@@ -332,23 +334,23 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     private function getOrCreateUser($record, $values)
     {
-        $user = null;
-
         if (isset($values['northstar_id']) && !empty($values['northstar_id'])) {
             $this->stats['countHasNorthstarID']++;
-
+            info('getting with id', ['id' => $values['northstar_id']]);
             $user = gateway('northstar')->asClient()->getUser('id', $values['northstar_id']);
-
-            return $user;
-        }
-
-        $this->stats['countMissingNSId']++;
-
-        if (isset($record['email']) &&  !empty($record['email'])) {
+        } elseif (isset($record['email']) &&  !empty($record['email'])) {
+            $this->stats['countMissingNSId']++;
+            info('getting with email', ['email' => $record['email']]);
             $user = gateway('northstar')->asClient()->getUser('email', $record['email']);
         } elseif (isset($record['phone']) && !empty($record['phone']) ) {
+            info('getting with phone', ['mobil' => $record['phone']]);
+            $this->stats['countMissingNSId']++;
             $user = gateway('northstar')->asClient()->getUser('mobile', $record['phone']);
-        } else {
+        }
+
+        info('this is the user before we decide to make one', ['user' => $user, 'evaluates' => is_null($user)]);
+        if (is_null($user)) {
+            info('creating user');
             $user = gateway('northstar')->asClient()->createUser([
                 'email' => $record['email'],
                 'mobile' => $record['phone'],
@@ -361,6 +363,8 @@ class ImportTurboVotePosts implements ShouldQueue
                 'addr_zip' => $record['registered-address-zip'],
                 'source' => env('NORTHSTAR_CLIENT_ID'),
             ]);
+
+            info('created user', ['user' => $user->id]);
         }
 
         return $user ? $user : null;
