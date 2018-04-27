@@ -9,7 +9,6 @@ use League\Csv\Reader;
 use App\Services\Rogue;
 use App\Events\LogProgress;
 use Illuminate\Bus\Queueable;
-// use DoSomething\Gateway\Northstar;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -27,6 +26,13 @@ class ImportTurboVotePosts implements ShouldQueue
     protected $filepath;
 
     /**
+     * The path to the stored csv.
+     *
+     * @var array
+     */
+    protected $stats;
+
+    /**
      * Create a new job instance.
      *
      * @return void
@@ -34,6 +40,8 @@ class ImportTurboVotePosts implements ShouldQueue
     public function __construct($filepath)
     {
         $this->filepath = $filepath;
+
+        $this->stats = $this->statsInit();
     }
 
 
@@ -49,54 +57,36 @@ class ImportTurboVotePosts implements ShouldQueue
 
     public function handle(Rogue $rogue)
     {
-        $file = Storage::get($this->filepath);
-        $csv = Reader::createFromString($file);
-        $csv->setHeaderOffset(0);
-        $records = $csv->getRecords();
+        $records = $this->getCSVRecords($this->filepath);
 
-        event(new LogProgress('Total rows to chomp: '.count($csv)));
-
-        // Metrics
-        $totalRecords = count($csv);
-        $countScrubbed = 0;
-        $countProcessed = 0;
-        $countMissingNSId = 0;
-        $countPostCreated = 0;
-        $countHasNorthstarID = 0;
-        $countHasReferralCode = 0;
-        $countNSAccountCreated = 0;
-        $countMissingReferralCode = 0;
-
-        foreach($records as $record)
+        foreach ($records as $record)
         {
             $shouldProcess = $this->scrubRecord($record);
 
-            if ($shouldProcess)
-            {
-                $countProcessed++;
+            if ($shouldProcess) {
+                info('progress_log: Processing: ' . $record['id']);
+
                 $referralCode = $record['referral-code'];
-                // event(new LogProgress('Processing record: ' . $record['id']));
-                info('progress_log: Processing: '. $record['id']);
 
                 if (! empty($referralCode)) {
-                    $countHasReferralCode++;
+                    $this->stats['countHasReferralCode']++;
                     $referralCodeValues = $this->parseReferralCode(explode(',', $referralCode));
 
-                    // Fall back to the Grab The Mic campaign (campaign_id: 8017, campaign_run_id: 8022)
-                    // if these keys are not present.
-                    // @TODO - make sure these go together
-                    $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? 8017 : $referralCodeValues['campaign_id'];
-                    $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? 8022 : $referralCodeValues['campaign_run_id'];
+                    try {
+                        $user = $this->getOrCreateUser($record, $referralCodeValues);
+                    } catch (\Exception $e) {
+                        info('There was an error with that user: ' . $record['id'], [
+                            'Error' => $e->getMessage(),
+                        ]);
+                    }
 
-                    if (isset($referralCodeValues['northstar_id'])) {
-                        $countHasNorthstarID++;
-
-                        $post = $rogue->asClient()->get('v3/posts', [
-                            'filter' => [
+                    if ($user) {
+                        // @TODO - We probably don't need to do this for new users and can skip this.
+                        // How do we know if this is a new user or not.
+                        $post = $rogue->getPost([
                                 'campaign_id' => (int) $referralCodeValues['campaign_id'],
-                                'northstar_id' => $referralCodeValues['northstar_id'],
+                                'northstar_id' => $user->id,
                                 'type' => 'voter-reg',
-                            ]
                         ]);
 
                         if (! $post['data']) {
@@ -107,7 +97,7 @@ class ImportTurboVotePosts implements ShouldQueue
                             $postData = [
                                 'campaign_id' => (int) $referralCodeValues['campaign_id'],
                                 'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
-                                'northstar_id' => $referralCodeValues['northstar_id'],
+                                'northstar_id' => $user->id,
                                 'type' => 'voter-reg',
                                 'action' => $tvCreatedAtMonth . '-turbovote',
                                 'status' => $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']),
@@ -115,15 +105,11 @@ class ImportTurboVotePosts implements ShouldQueue
                                 'details' => $postDetails,
                             ];
 
-                            $multipartData = collect($postData)->map(function ($value, $key) {
-                                return ['name' => $key, 'contents' => $value];
-                            })->values()->toArray();
-
                             try {
-                                $roguePost = $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
+                                $post = $rogue->createPost($postData);
 
-                                if ($roguePost['data']) {
-                                    $countPostCreated++;
+                                if ($post['data']) {
+                                    $this->stats['countPostCreated']++;
                                 }
                             } catch (\Exception $e) {
                                 info('There was an error storing the post for: ' . $record['id'], [
@@ -136,9 +122,7 @@ class ImportTurboVotePosts implements ShouldQueue
 
                             if ($statusShouldChange) {
                                 try {
-                                    $roguePost = $rogue->asClient()->patch('v3/posts/'.$post['data'][0]['id'], [
-                                        'status' => $statusShouldChange,
-                                    ]);
+                                    $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
                                 } catch (\Exception $e) {
                                     info('There was an error updating the post for: ' . $record['id'], [
                                         'Error' => $e->getMessage(),
@@ -146,133 +130,37 @@ class ImportTurboVotePosts implements ShouldQueue
                                 }
                             }
                         }
-                    } else {
-                        $countMissingNSId++;
-
-                        try {
-                            // Check if user exists already using ns id or mobile number.
-                            // @TODO - make into funtion.
-                            if (isset($record['email'])) {
-                                $existingUser = gateway('northstar')->asClient()->getUser('email', $record['email']);
-                            } elseif (isset($record['phone'])) {
-                                $existingUser = gateway('northstar')->asClient()->getUser('mobile', $record['phone']);
-                            } else {
-                                $existingUser = null;
-                            }
-
-                            // If they don't exist, create a ns account for them
-                            if (! $existingUser) {
-                                $newNorthstarUser = gateway('northstar')->asClient()->createUser([
-                                    'email' => $record['email'],
-                                    'mobile' => $record['phone'],
-                                    'first_name' => $record['first-name'],
-                                    'last_name' => $record['last-name'],
-                                    'addr_stree1' => $record['registered-address-street'],
-                                    'addr_stree2' => $record['registered-address-street-2'],
-                                    'addr_city' => $record['registered-address-city'],
-                                    'addr_state' => $record['registered-address-state'],
-                                    'addr_zip' => $record['registered-address-zip'],
-                                ]);
-                            }
-
-
-                            // if they do, grab the account, check if they have a voter-reg post already
-                            $user = $existingUser->id ? $existingUser : $newNorthstarUser;
-
-                            $post = $rogue->asClient()->get('v3/posts', [
-                                'filter' => [
-                                    'campaign_id' => (int) $referralCodeValues['campaign_id'],
-                                    'northstar_id' => $user->id,
-                                    'type' => 'voter-reg',
-                                ]
-                            ]);
-
-                            if (!$post['data']) {
-                                $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
-                                $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
-                                $postDetails = $this->extractDetails($record);
-
-                                $postData = [
-                                    'campaign_id' => (int)$referralCodeValues['campaign_id'],
-                                    'campaign_run_id' => (int)$referralCodeValues['campaign_run_id'],
-                                    'northstar_id' => $user->id,
-                                    'type' => 'voter-reg',
-                                    'action' => $tvCreatedAtMonth . '-turbovote',
-                                    'status' => $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']),
-                                    'source_details' => $sourceDetails,
-                                    'details' => $postDetails,
-                                ];
-
-                                $multipartData = collect($postData)->map(function ($value, $key) {
-                                    return ['name' => $key, 'contents' => $value];
-                                })->values()->toArray();
-
-                                try {
-                                    $roguePost = $rogue->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
-
-                                    if ($roguePost['data']) {
-                                        $countPostCreated++;
-                                    }
-                                } catch (\Exception $e) {
-                                    info('There was an error storing the post for: ' . $record['id'], [
-                                        'Error' => $e->getMessage(),
-                                    ]);
-                                }
-                            } else {
-                                $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
-                                $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
-
-                                if ($statusShouldChange) {
-                                    try {
-                                        $roguePost = $rogue->asClient()->patch('v3/posts/' . $post['data'][0]['id'], [
-                                            'status' => $statusShouldChange,
-                                        ]);
-                                    } catch (\Exception $e) {
-                                        info('There was an error updating the post for: ' . $record['id'], [
-                                            'Error' => $e->getMessage(),
-                                        ]);
-                                    }
-                                }
-                            }
-                        } catch (\Exception $e) {
-                            info('There was an error creating a NS account for: ' . $record['id'], [
-                                'Error' => $e->getMessage(),
-                            ]);
-                        }
-
-                        if ($newNorthstarUser) {
-                            $countNSAccountCreated++;
-
-                            info('New NS user created or updated: ', [
-                                'record' => $record['id'],
-                                'ns_id' => $newNorthstarUser->id,
-                            ]);
-                        }
                     }
                 } else {
-                    $countMissingReferralCode++;
+                    $this->stats['countMissingReferralCode']++;
                 }
+                $this->stats['countProcessed']++;
             } else {
-                $countScrubbed++;
+                $this->stats['countScrubbed']++;
             }
         }
 
         event(new LogProgress('Done!'));
 
-        $stat = Stat::create([
+        Stat::create([
             'filename' => $this->filepath,
-            'total_records' => $totalRecords,
-            'stats' => json_encode([
-                'processed' => $countProcessed,
-                'scrubbed' => $countScrubbed,
-                'has_referral_codes' => $countHasReferralCode,
-                'missing_referral_code' => $countMissingReferralCode,
-                'has_northstar_id' => $countHasNorthstarID,
-                'missing_northstar_id' => $countMissingNSId,
-                'posts_created' => $countPostCreated,
-                'northstar_account_created' => $countNSAccountCreated,
-            ]),
+            'total_records' => $this->stats['totalRecords'],
+            'stats' => json_encode($this->stats),
         ]);
+    }
+
+    private function statsInit()
+    {
+        return [
+            'totalRecords' => 0,
+            'countScrubbed' => 0,
+            'countProcessed' => 0,
+            'countMissingNSId' => 0,
+            'countPostCreated' => 0,
+            'countHasNorthstarID' => 0,
+            'countHasReferralCode' => 0,
+            'countMissingReferralCode' => 0,
+        ];
     }
 
     /**
@@ -426,6 +314,63 @@ class ImportTurboVotePosts implements ShouldQueue
         $isNotValidLastName = strrpos($record['last-name'], 'Baloney') !== false;
 
         return $isNotValidEmail || $isNotValidHostname || $isNotValidLastName ? false : true;
+    }
+
+    private function getOrCreateUser($record, $values)
+    {
+        info('values', [
+            'values' => $values,
+        ]);
+
+        info('northstar id check', [
+            'evaluates' => isset($values['northstar_id']) && !empty($values['northstar_id']),
+        ]);
+
+        $user = null;
+
+        if (isset($values['northstar_id']) && !empty($values['northstar_id'])) {
+            $this->stats['countHasNorthstarID']++;
+
+            $user = gateway('northstar')->asClient()->getUser('id', $values['northstar_id']);
+
+            return $user;
+        }
+
+        $this->stats['countMissingNSId']++;
+
+        if (isset($record['email']) &&  !empty($record['email'])) {
+            $user = gateway('northstar')->asClient()->getUser('email', $record['email']);
+        } elseif (isset($record['phone']) && !empty($record['phone']) ) {
+            $user = gateway('northstar')->asClient()->getUser('mobile', $record['phone']);
+        } else {
+            $user = gateway('northstar')->asClient()->createUser([
+                'email' => $record['email'],
+                'mobile' => $record['phone'],
+                'first_name' => $record['first-name'],
+                'last_name' => $record['last-name'],
+                'addr_street1' => $record['registered-address-street'],
+                'addr_street2' => $record['registered-address-street-2'],
+                'addr_city' => $record['registered-address-city'],
+                'addr_state' => $record['registered-address-state'],
+                'addr_zip' => $record['registered-address-zip'],
+                'source' => env('NORTHSTAR_CLIENT_ID'),
+            ]);
+        }
+
+        return $user ? $user : null;
+    }
+
+    private function getCSVRecords($filepath)
+    {
+        $file = Storage::get($filepath);
+        $csv = Reader::createFromString($file);
+        $csv->setHeaderOffset(0);
+        $records = $csv->getRecords();
+
+        event(new LogProgress('Total rows to chomp: ' . count($csv)));
+        $this->stats['totalRecords'] = count($csv);
+
+        return $records;
     }
 }
 
