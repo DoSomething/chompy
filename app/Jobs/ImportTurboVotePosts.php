@@ -64,6 +64,7 @@ class ImportTurboVotePosts implements ShouldQueue
         $countPostCreated = 0;
         $countHasNorthstarID = 0;
         $countHasReferralCode = 0;
+        $countNSAccountCreated = 0;
         $countMissingReferralCode = 0;
 
         foreach($records as $record)
@@ -146,22 +147,33 @@ class ImportTurboVotePosts implements ShouldQueue
                             }
                         }
                     } else {
-                        $newNorthstarUser = gateway('northstar')->createUser([
-                            'first_name' => $record['first-name'],
-                            'last_name' => $record['last-name'],
-                            'email' => $record['email'],
-                            'addr_stree1' => $record['registered-address-street'],
-                            'addr_stree2' => $record['registered-address-street-2'],
-                            'addr_city' => $record['registered-address-city'],
-                            'addr_state' => $record['registered-address-state'],
-                            'addr_zip' => $record['registered-address-zip'],
-                        ]);
-
-                        dd($newNorthstarUser);
-
                         $countMissingNSId++;
-                        // Northstar ID does not exist
-                        // @TODO - create NS account and process
+
+                        try {
+                            $newNorthstarUser = gateway('northstar')->asClient()->createUser([
+                                'first_name' => $record['first-name'],
+                                'last_name' => $record['last-name'],
+                                'email' => $record['email'],
+                                'addr_stree1' => $record['registered-address-street'],
+                                'addr_stree2' => $record['registered-address-street-2'],
+                                'addr_city' => $record['registered-address-city'],
+                                'addr_state' => $record['registered-address-state'],
+                                'addr_zip' => $record['registered-address-zip'],
+                            ]);
+                        } catch (\Exception $e) {
+                            info('There was an error creating a NS account for: ' . $record['id'], [
+                                'Error' => $e->getMessage(),
+                            ]);
+                        }
+
+                        if ($newNorthstarUser) {
+                            $countNSAccountCreated++;
+
+                            info('New NS user created or updated: ', [
+                                'record' => $record['id'],
+                                'ns_id' => $newNorthstarUser->id,
+                            ]);
+                        }
                     }
                 } else {
                     $countMissingReferralCode++;
@@ -184,6 +196,7 @@ class ImportTurboVotePosts implements ShouldQueue
                 'has_northstar_id' => $countHasNorthstarID,
                 'missing_northstar_id' => $countMissingNSId,
                 'posts_created' => $countPostCreated,
+                'northstar_account_created' => $countNSAccountCreated,
             ]),
         ]);
     }
