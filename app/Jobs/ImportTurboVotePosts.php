@@ -55,6 +55,12 @@ class ImportTurboVotePosts implements ShouldQueue
         return ['turbovote'];
     }
 
+    /**
+     * Execute the job.
+     *
+     * @param  Rogue $rogue
+     * @return void
+     */
     public function handle(Rogue $rogue)
     {
         $records = $this->getCSVRecords($this->filepath);
@@ -82,7 +88,6 @@ class ImportTurboVotePosts implements ShouldQueue
 
                     if ($user) {
                         // @TODO - We probably don't need to do this for new users and can skip this.
-                        // How do we know if this is a new user or not.
                         $post = $rogue->getPost([
                                 'campaign_id' => (int) $referralCodeValues['campaign_id'],
                                 'northstar_id' => $user->id,
@@ -149,6 +154,11 @@ class ImportTurboVotePosts implements ShouldQueue
         ]);
     }
 
+    /**
+     * Initiate the stat counters.
+     *
+     * @return array
+     */
     private function statsInit()
     {
         return [
@@ -248,11 +258,6 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     private function translateStatus($tvStatus, $tvMethod)
     {
-        if (!$tvStatus || !$tvMethod)
-        {
-            // @TODO - Throw error.
-        }
-
         $translatedStatus = '';
 
         switch($tvStatus)
@@ -316,16 +321,17 @@ class ImportTurboVotePosts implements ShouldQueue
         return $isNotValidEmail || $isNotValidHostname || $isNotValidLastName ? false : true;
     }
 
+    /**
+     * For a given record and referral code values, first check if we have a northstar ID, then grab the user using that.
+     * Otherwise, see if we can find the user with the given email (if it exists), if not check if we can find them with the given phone number (if it exists).
+     * If all else fails, create the user .
+     *
+     * @TODO - If we have a northstar id in the referral code, then we probably don't need to make a call to northstar for the full user object.
+     *
+     * @return array
+     */
     private function getOrCreateUser($record, $values)
     {
-        info('values', [
-            'values' => $values,
-        ]);
-
-        info('northstar id check', [
-            'evaluates' => isset($values['northstar_id']) && !empty($values['northstar_id']),
-        ]);
-
         $user = null;
 
         if (isset($values['northstar_id']) && !empty($values['northstar_id'])) {
