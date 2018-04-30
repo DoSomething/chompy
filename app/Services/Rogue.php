@@ -43,4 +43,48 @@ class Rogue extends RestApiClient
         throw new ValidationException($errors, $endpoint);
     }
 
+    /**
+     * Get a post from Rogue give a set of filters.
+     *
+     * @param array $inputs - The filters to use to grab the post.
+     * @return array $post - The found post.
+     */
+    public function getPost($inputs)
+    {
+        $post = $this->asClient()->get('v3/posts', [
+            'filter' => $inputs,
+        ]);
+
+        return $post;
+    }
+
+    /**
+     * Create a post in rogue.
+     *
+     * @param array $data - The data to create the post with.
+     * @return array $post - The created post.
+     */
+    public function createPost($data)
+    {
+        $multipartData = collect($data)->map(function ($value, $key) {
+            return ['name' => $key, 'contents' => $value];
+        })->values()->toArray();
+
+        $post = $this->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
+
+        return $post;
+    }
+
+    /**
+     * Update a post in rogue
+     *
+     * @param string $postId - The ID of the post to update.
+     * @return array $post - The updated post.
+     */
+    public function updatePost($postId, $input)
+    {
+        $post = $this->asClient()->patch('v3/posts/'.$postId, $input);
+
+        return $post;
+    }
 }
