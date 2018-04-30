@@ -91,9 +91,9 @@ class ImportTurboVotePosts implements ShouldQueue
                     if ($user) {
                         // @TODO - We probably don't need to do this for new users and can skip this.
                         $post = $rogue->getPost([
-                                'campaign_id' => (int) $referralCodeValues['campaign_id'],
-                                'northstar_id' => $user->id,
-                                'type' => 'voter-reg',
+                            'campaign_id' => (int) $referralCodeValues['campaign_id'],
+                            'northstar_id' => $user->id,
+                            'type' => 'voter-reg',
                         ]);
 
                         if (! $post['data']) {
@@ -334,23 +334,27 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     private function getOrCreateUser($record, $values)
     {
-        if (isset($values['northstar_id']) && !empty($values['northstar_id'])) {
-            $this->stats['countHasNorthstarID']++;
-            info('getting with id', ['id' => $values['northstar_id']]);
-            $user = gateway('northstar')->asClient()->getUser('id', $values['northstar_id']);
-        } elseif (isset($record['email']) &&  !empty($record['email'])) {
-            $this->stats['countMissingNSId']++;
-            info('getting with email', ['email' => $record['email']]);
-            $user = gateway('northstar')->asClient()->getUser('email', $record['email']);
-        } elseif (isset($record['phone']) && !empty($record['phone']) ) {
-            info('getting with phone', ['mobil' => $record['phone']]);
-            $this->stats['countMissingNSId']++;
-            $user = gateway('northstar')->asClient()->getUser('mobile', $record['phone']);
+        $user = null;
+
+        $userFieldsToLookFor = [
+            'id' => isset($values['northstar_id']) && !empty($values['northstar_id']) ? $values['northstar_id'] : null,
+            'email' => isset($record['email']) && !empty($record['email']) ? $record['email'] : null,
+            'mobile' => isset($record['phone']) && !empty($record['phone']) ? $record['phone'] : null,
+        ];
+
+        foreach ($userFieldsToLookFor as $field => $value)
+        {
+            if ($value) {
+                info('getting user with the '.$field.' field', [$field => $value]);
+                $user = gateway('northstar')->asClient()->getUser($field, $value);
+            }
+
+            if ($user) {
+                break;
+            }
         }
 
-        info('this is the user before we decide to make one', ['user' => $user, 'evaluates' => is_null($user)]);
         if (is_null($user)) {
-            info('creating user');
             $user = gateway('northstar')->asClient()->createUser([
                 'email' => $record['email'],
                 'mobile' => $record['phone'],
@@ -367,7 +371,7 @@ class ImportTurboVotePosts implements ShouldQueue
             info('created user', ['user' => $user->id]);
         }
 
-        return $user ? $user : null;
+        return $user;
     }
 
     private function getCSVRecords($filepath)
