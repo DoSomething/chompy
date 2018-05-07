@@ -75,7 +75,6 @@ class ImportTurboVotePosts implements ShouldQueue
                 $referralCode = $record['referral-code'];
 
                 if (! empty($referralCode)) {
-                    $this->stats['countHasReferralCode']++;
                     $referralCodeValues = $this->parseReferralCode(explode(',', $referralCode));
 
                     try {
@@ -136,9 +135,8 @@ class ImportTurboVotePosts implements ShouldQueue
                             }
                         }
                     }
-                } else {
-                    $this->stats['countMissingReferralCode']++;
                 }
+
                 $this->stats['countProcessed']++;
             } else {
                 $this->stats['countScrubbed']++;
@@ -165,11 +163,8 @@ class ImportTurboVotePosts implements ShouldQueue
             'totalRecords' => 0,
             'countScrubbed' => 0,
             'countProcessed' => 0,
-            'countMissingNSId' => 0,
             'countPostCreated' => 0,
-            'countHasNorthstarID' => 0,
-            'countHasReferralCode' => 0,
-            'countMissingReferralCode' => 0,
+            'countUserAccountsCreated' => 0,
         ];
     }
 
@@ -363,10 +358,11 @@ class ImportTurboVotePosts implements ShouldQueue
                 'addr_city' => $record['registered-address-city'],
                 'addr_state' => $record['registered-address-state'],
                 'addr_zip' => $record['registered-address-zip'],
-                'source' => env('NORTHSTAR_CLIENT_ID'),
+                'source' => 'turbovote',
             ]);
 
             info('created user', ['user' => $user->id]);
+            $this->stats['countUserAccountsCreated']++;
         }
 
         return $user;
