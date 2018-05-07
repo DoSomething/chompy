@@ -111,6 +111,7 @@ class ImportTurboVotePosts implements ShouldQueue
                                 'type' => 'voter-reg',
                                 'action' => $tvCreatedAtMonth . '-turbovote',
                                 'status' => $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']),
+                                'source' => 'turbovote',
                                 'source_details' => $sourceDetails,
                                 'details' => $postDetails,
                             ];
@@ -364,7 +365,7 @@ class ImportTurboVotePosts implements ShouldQueue
                 'addr_city' => $record['registered-address-city'],
                 'addr_state' => $record['registered-address-state'],
                 'addr_zip' => $record['registered-address-zip'],
-                'source' => 'turbovote',
+                'source' => env('NORTHSTAR_CLIENT_ID'),
             ]);
 
             info('created user', ['user' => $user->id]);
