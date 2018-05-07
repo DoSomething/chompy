@@ -86,6 +86,12 @@ class ImportTurboVotePosts implements ShouldQueue
                     }
 
                     if ($user) {
+                        // Fall back to the Grab The Mic campaign (campaign_id: 8017, campaign_run_id: 8022)
+                        // if these keys are not present.
+                        // @TODO - make sure these go together
+                        $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? 8017 : $referralCodeValues['campaign_id'];
+                        $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? 8022 : $referralCodeValues['campaign_run_id'];
+
                         // @TODO - We probably don't need to do this for new users and can skip this.
                         $post = $rogue->getPost([
                             'campaign_id' => (int) $referralCodeValues['campaign_id'],
@@ -97,12 +103,6 @@ class ImportTurboVotePosts implements ShouldQueue
                             $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
                             $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
                             $postDetails = $this->extractDetails($record);
-
-                            // Fall back to the Grab The Mic campaign (campaign_id: 8017, campaign_run_id: 8022)
-                            // if these keys are not present.
-                            // @TODO - make sure these go together
-                            $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? 8017 : $referralCodeValues['campaign_id'];
-                            $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? 8022 : $referralCodeValues['campaign_run_id'];
 
                             $postData = [
                                 'campaign_id' => (int) $referralCodeValues['campaign_id'],
