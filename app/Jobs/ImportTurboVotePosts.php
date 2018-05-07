@@ -75,13 +75,11 @@ class ImportTurboVotePosts implements ShouldQueue
                 $referralCode = $record['referral-code'];
 
                 if (! empty($referralCode)) {
-                    info("referral code not empty");
                     $this->stats['countHasReferralCode']++;
                     $referralCodeValues = $this->parseReferralCode(explode(',', $referralCode));
 
                     try {
                         $user = $this->getOrCreateUser($record, $referralCodeValues);
-                        info("something should happen with the user", ['user' => $user->id]);
                     } catch (\Exception $e) {
                         info('There was an error with that user: ' . $record['id'], [
                             'Error' => $e->getMessage(),
