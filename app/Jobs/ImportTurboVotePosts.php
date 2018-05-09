@@ -216,7 +216,6 @@ class ImportTurboVotePosts implements ShouldQueue
             ];
         }
 
-
         return $values;
     }
 
