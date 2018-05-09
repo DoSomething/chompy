@@ -73,72 +73,62 @@ class ImportTurboVotePosts implements ShouldQueue
                 info('progress_log: Processing: ' . $record['id']);
 
                 $referralCode = $record['referral-code'];
+                $referralCodeValues = $this->parseReferralCode($referralCode);
 
-                if (! empty($referralCode)) {
-                    $referralCodeValues = $this->parseReferralCode(explode(',', $referralCode));
+                try {
+                    $user = $this->getOrCreateUser($record, $referralCodeValues);
+                } catch (\Exception $e) {
+                    info('There was an error with that user: ' . $record['id'], [
+                        'Error' => $e->getMessage(),
+                    ]);
+                }
 
-                    try {
-                        $user = $this->getOrCreateUser($record, $referralCodeValues);
-                    } catch (\Exception $e) {
-                        info('There was an error with that user: ' . $record['id'], [
-                            'Error' => $e->getMessage(),
-                        ]);
-                    }
+                if ($user) {
+                    $post = $rogue->getPost([
+                        'campaign_id' => (int) $referralCodeValues['campaign_id'],
+                        'northstar_id' => $user->id,
+                        'type' => 'voter-reg',
+                    ]);
 
-                    if ($user) {
-                        // Fall back to the Grab The Mic campaign (campaign_id: 8017, campaign_run_id: 8022)
-                        // if these keys are not present.
-                        // @TODO - make sure these go together
-                        $referralCodeValues['campaign_id'] = !isset($referralCodeValues['campaign_id']) ? 8017 : $referralCodeValues['campaign_id'];
-                        $referralCodeValues['campaign_run_id'] = !isset($referralCodeValues['campaign_run_id']) ? 8022 : $referralCodeValues['campaign_run_id'];
+                    if (! $post['data']) {
+                        $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
+                        $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
+                        $postDetails = $this->extractDetails($record);
 
-                        // @TODO - We probably don't need to do this for new users and can skip this.
-                        $post = $rogue->getPost([
+                        $postData = [
                             'campaign_id' => (int) $referralCodeValues['campaign_id'],
+                            'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
                             'northstar_id' => $user->id,
                             'type' => 'voter-reg',
-                        ]);
+                            'action' => $tvCreatedAtMonth . '-turbovote',
+                            'status' => $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']),
+                            'source' => 'turbovote',
+                            'source_details' => $sourceDetails,
+                            'details' => $postDetails,
+                        ];
 
-                        if (! $post['data']) {
-                            $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
-                            $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
-                            $postDetails = $this->extractDetails($record);
+                        try {
+                            $post = $rogue->createPost($postData);
 
-                            $postData = [
-                                'campaign_id' => (int) $referralCodeValues['campaign_id'],
-                                'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
-                                'northstar_id' => $user->id,
-                                'type' => 'voter-reg',
-                                'action' => $tvCreatedAtMonth . '-turbovote',
-                                'status' => $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']),
-                                'source' => 'turbovote',
-                                'source_details' => $sourceDetails,
-                                'details' => $postDetails,
-                            ];
+                            if ($post['data']) {
+                                $this->stats['countPostCreated']++;
+                            }
+                        } catch (\Exception $e) {
+                            info('There was an error storing the post for: ' . $record['id'], [
+                                'Error' => $e->getMessage(),
+                            ]);
+                        }
+                    } else {
+                        $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
+                        $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
 
+                        if ($statusShouldChange) {
                             try {
-                                $post = $rogue->createPost($postData);
-
-                                if ($post['data']) {
-                                    $this->stats['countPostCreated']++;
-                                }
+                                $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
                             } catch (\Exception $e) {
-                                info('There was an error storing the post for: ' . $record['id'], [
+                                info('There was an error updating the post for: ' . $record['id'], [
                                     'Error' => $e->getMessage(),
                                 ]);
-                            }
-                        } else {
-                            $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
-                            $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
-
-                            if ($statusShouldChange) {
-                                try {
-                                    $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
-                                } catch (\Exception $e) {
-                                    info('There was an error updating the post for: ' . $record['id'], [
-                                        'Error' => $e->getMessage(),
-                                    ]);
-                                }
                             }
                         }
                     }
@@ -184,33 +174,46 @@ class ImportTurboVotePosts implements ShouldQueue
     {
         $values = [];
 
-        foreach ($referralCode as $value) {
-            $value = explode(':', $value);
+        if (! empty($referralCode)) {
+            $referralCode = explode(',', $referralCode);
 
-            // Grab northstar id
-            if (strtolower($value[0]) === 'user') {
-                $values['northstar_id'] = $value[1];
-            }
+            foreach ($referralCode as $value) {
+                $value = explode(':', $value);
 
-            // Grab the Campaign Id.
-            if (strtolower($value[0]) === 'campaignid' || strtolower($value[0]) === 'campaign') {
-                $values['campaign_id'] = $value[1];
-            }
+                // Grab northstar id
+                if (strtolower($value[0]) === 'user') {
+                    $values['northstar_id'] = $value[1];
+                }
 
-            // Grab the Campaign Run Id.
-            if (strtolower($value[0]) === 'campaignrunid') {
-                $values['campaign_run_id'] = $value[1];
-            }
+                // Grab the Campaign Id.
+                if (strtolower($value[0]) === 'campaignid' || strtolower($value[0]) === 'campaign') {
+                    $values['campaign_id'] = $value[1];
+                }
 
-            // Grab the source
-            if (strtolower($value[0]) === 'source') {
-                $values['source'] = $value[1];
-            }
+                // Grab the Campaign Run Id.
+                if (strtolower($value[0]) === 'campaignrunid') {
+                    $values['campaign_run_id'] = $value[1];
+                }
 
-            // Grab any source details
-            if (strtolower($value[0]) === 'source_details') {
-                $values['source_details'] = $value[1];
+                // Grab the source
+                if (strtolower($value[0]) === 'source') {
+                    $values['source'] = $value[1];
+                }
+
+                // Grab any source details
+                if (strtolower($value[0]) === 'source_details') {
+                    $values['source_details'] = $value[1];
+                }
             }
+        } else {
+            // If the referral code is not present, use these default values.
+            $values = [
+                'northstar_id' => null, // set the user to null so we force account creation when the code is not present.
+                'campaign_id' => 8017,
+                'campaign_run_id' => 8022,
+                'source' => 'turbovote',
+                'source_details' => null,
+            ];
         }
 
         return $values;
@@ -345,7 +348,7 @@ class ImportTurboVotePosts implements ShouldQueue
         foreach ($userFieldsToLookFor as $field => $value)
         {
             if ($value) {
-                info('getting user with the '.$field.' field', [$field => $value]);
+                // info('getting user with the '.$field.' field', [$field => $value]);
                 $user = gateway('northstar')->asClient()->getUser($field, $value);
             }
 
