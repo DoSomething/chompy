@@ -205,8 +205,10 @@ class ImportTurboVotePosts implements ShouldQueue
                     $values['source_details'] = $value[1];
                 }
             }
-        } else {
-            // If the referral code is not present, use these default values.
+        }
+
+        // If the referral code is not present or we didn't get the right fields, use these default values.
+        if (empty($values) || !array_has($values, ['northstar_id', 'campaign_id', 'campaign_run_id'])) {
             $values = [
                 'northstar_id' => null, // set the user to null so we force account creation when the code is not present.
                 'campaign_id' => 8017,
