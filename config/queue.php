@@ -61,7 +61,7 @@ return [
             'driver' => 'redis',
             'connection' => 'default',
             'queue' => 'importer',
-            'retry_after' => 3600,
+            'retry_after' => 400,
         ],
 
     ],
