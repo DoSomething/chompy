@@ -78,7 +78,7 @@ return [
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
-                'timeout' => 360,
+                'timeout' => 1200,
             ],
         ],
 
@@ -89,7 +89,7 @@ return [
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
-                'timeout' => 360,
+                'timeout' => 1200,
             ],
         ],
 
@@ -100,7 +100,7 @@ return [
                 'balance' => 'simple',
                 'processes' => 10,
                 'tries' => 3,
-                'timeout' => 360,
+                'timeout' => 1200,
             ],
         ],
     ],
