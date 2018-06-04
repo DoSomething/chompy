@@ -52,6 +52,7 @@ class ImportController extends Controller
         }
 
         if ($request->input('import-type') === 'turbovote') {
+            info("turbo vote import happening");
             ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 

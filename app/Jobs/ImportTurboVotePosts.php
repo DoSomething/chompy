@@ -64,7 +64,7 @@ class ImportTurboVotePosts implements ShouldQueue
     public function handle(Rogue $rogue)
     {
         $records = $this->getCSVRecords($this->filepath);
-
+        info("start loop through records");
         foreach ($records as $record)
         {
             $shouldProcess = $this->scrubRecord($record);
