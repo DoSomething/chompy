@@ -17,15 +17,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
-        // Horizon Dashboard Authentication.
-        \Horizon::auth(function ($request) {
-            if (auth()->user()) {
-                return auth()->user()->role === 'user' || auth()->user()->role === 'admin' || auth()->user()->role === 'staff';
-            }
-
-            return false;
-        });
-
         View::share('pusherKey', env('PUSHER_APP_KEY'));
     }
 
