@@ -55,6 +55,6 @@ class ImportController extends Controller
             ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        return redirect()->route('import.show')->with('status', 'Your CSV was added to the queue to be processed. Check out the progress on <a target="_blank" href="/horizon">Horizon</a>');
+        return redirect()->route('import.show')->with('status', 'Your CSV was added to the queue to be processed.');
     }
 }

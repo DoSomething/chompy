@@ -14,7 +14,6 @@
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
                     <li><a class="nav-item nav-link" href="/import">Import</a></li>
-                    <li><a class="nav-item nav-link" href="/horizon">Horizon</a></li>
                     <li><a class="nav-item nav-link" href="/logout">Logout</a></li>
                 @else
                     <li><a class="nav-item nav-link" href="/login">Login</a></li>
