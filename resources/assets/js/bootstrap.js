@@ -59,6 +59,7 @@ window.Echo.channel('importer')
     .listen('LogProgress', (e) => {
         const messageType = e.type;
         const messageContent = e.message;
+        const value = e.progressValue;
 
         // @TODO - don't use jquery
         if (messageType == 'general') {
@@ -66,7 +67,7 @@ window.Echo.channel('importer')
         }
 
         if (messageType == 'progress') {
-            $('.progress-bar').attr("aria-valuenow", "50");
-            $('.progress-bar').attr('style', 'width: 50%');
+            $('.progress-bar').attr("aria-valuenow", value);
+            $('.progress-bar').attr('style', 'width: ' + value + '%');
         }
     });

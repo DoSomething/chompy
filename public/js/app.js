@@ -873,6 +873,7 @@ window.Echo = new __WEBPACK_IMPORTED_MODULE_0_laravel_echo___default.a({
 window.Echo.channel('importer').listen('LogProgress', function (e) {
     var messageType = e.type;
     var messageContent = e.message;
+    var value = e.progressValue;
 
     // @TODO - don't use jquery
     if (messageType == 'general') {
@@ -880,8 +881,8 @@ window.Echo.channel('importer').listen('LogProgress', function (e) {
     }
 
     if (messageType == 'progress') {
-        $('.progress-bar').attr("aria-valuenow", "50");
-        $('.progress-bar').attr('style', 'width: 50%');
+        $('.progress-bar').attr("aria-valuenow", value);
+        $('.progress-bar').attr('style', 'width: ' + value + '%');
     }
 });
 
