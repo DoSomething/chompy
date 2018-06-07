@@ -1,3 +1,4 @@
+// Set up JS
 import './bootstrap';
 
 // Handles the upload form interaction

@@ -67,83 +67,81 @@ class ImportTurboVotePosts implements ShouldQueue
     {
         $records = $this->getCSVRecords($this->filepath);
 
-        $i = 1;
-        foreach ($records as $record)
+        foreach ($records as $offset => $record)
         {
-            // $shouldProcess = $this->scrubRecord($record);
+            $shouldProcess = $this->scrubRecord($record);
 
-            // if ($shouldProcess) {
-            //     info('progress_log: Processing: ' . $record['id']);
+            if ($shouldProcess) {
+                info('progress_log: Processing: ' . $record['id']);
 
-            //     $referralCode = $record['referral-code'];
-            //     $referralCodeValues = $this->parseReferralCode($referralCode);
+                $referralCode = $record['referral-code'];
+                $referralCodeValues = $this->parseReferralCode($referralCode);
 
-            //     try {
-            //         $user = $this->getOrCreateUser($record, $referralCodeValues);
-            //     } catch (\Exception $e) {
-            //         info('There was an error with that user: ' . $record['id'], [
-            //             'Error' => $e->getMessage(),
-            //         ]);
-            //     }
+                try {
+                    $user = $this->getOrCreateUser($record, $referralCodeValues);
+                } catch (\Exception $e) {
+                    info('There was an error with that user: ' . $record['id'], [
+                        'Error' => $e->getMessage(),
+                    ]);
+                }
 
-            //     if ($user) {
-            //         $post = $rogue->getPost([
-            //             'campaign_id' => (int) $referralCodeValues['campaign_id'],
-            //             'northstar_id' => $user->id,
-            //             'type' => 'voter-reg',
-            //         ]);
+                if ($user) {
+                    $post = $rogue->getPost([
+                        'campaign_id' => (int) $referralCodeValues['campaign_id'],
+                        'northstar_id' => $user->id,
+                        'type' => 'voter-reg',
+                    ]);
 
-            //         if (! $post['data']) {
-            //             $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
-            //             $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
-            //             $postDetails = $this->extractDetails($record);
+                    if (! $post['data']) {
+                        $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
+                        $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
+                        $postDetails = $this->extractDetails($record);
 
-            //             $postData = [
-            //                 'campaign_id' => (int) $referralCodeValues['campaign_id'],
-            //                 'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
-            //                 'northstar_id' => $user->id,
-            //                 'type' => 'voter-reg',
-            //                 'action' => $tvCreatedAtMonth . '-turbovote',
-            //                 'status' => $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']),
-            //                 'source' => 'turbovote',
-            //                 'source_details' => $sourceDetails,
-            //                 'details' => $postDetails,
-            //             ];
+                        $postData = [
+                            'campaign_id' => (int) $referralCodeValues['campaign_id'],
+                            'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
+                            'northstar_id' => $user->id,
+                            'type' => 'voter-reg',
+                            'action' => $tvCreatedAtMonth . '-turbovote',
+                            'status' => $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']),
+                            'source' => 'turbovote',
+                            'source_details' => $sourceDetails,
+                            'details' => $postDetails,
+                        ];
 
-            //             try {
-            //                 $post = $rogue->createPost($postData);
+                        try {
+                            $post = $rogue->createPost($postData);
 
-            //                 if ($post['data']) {
-            //                     $this->stats['countPostCreated']++;
-            //                 }
-            //             } catch (\Exception $e) {
-            //                 info('There was an error storing the post for: ' . $record['id'], [
-            //                     'Error' => $e->getMessage(),
-            //                 ]);
-            //             }
-            //         } else {
-            //             $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
-            //             $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
+                            if ($post['data']) {
+                                $this->stats['countPostCreated']++;
+                            }
+                        } catch (\Exception $e) {
+                            info('There was an error storing the post for: ' . $record['id'], [
+                                'Error' => $e->getMessage(),
+                            ]);
+                        }
+                    } else {
+                        $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
+                        $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
 
-            //             if ($statusShouldChange) {
-            //                 try {
-            //                     $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
-            //                 } catch (\Exception $e) {
-            //                     info('There was an error updating the post for: ' . $record['id'], [
-            //                         'Error' => $e->getMessage(),
-            //                     ]);
-            //                 }
-            //             }
-            //         }
-            //     }
+                        if ($statusShouldChange) {
+                            try {
+                                $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
+                            } catch (\Exception $e) {
+                                info('There was an error updating the post for: ' . $record['id'], [
+                                    'Error' => $e->getMessage(),
+                                ]);
+                            }
+                        }
+                    }
+                }
 
-            //     $this->stats['countProcessed']++;
-            // } else {
-            //     $this->stats['countScrubbed']++;
-            // }
+                $this->stats['countProcessed']++;
+            } else {
+                $this->stats['countScrubbed']++;
+            }
 
-            event(new LogProgress('', 'progress', ($i / $this->totalRecords) * 100));
-            $i++;
+            event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
         }
 
         event(new LogProgress('Done!', 'general'));
