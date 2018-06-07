@@ -54,8 +54,13 @@ window.Echo = new Echo({
     encrypted: true
 });
 
-// Listen to the 'log' event on the importer channel.
+// Listen to the 'LogProgress Event' event on the importer channel.
 window.Echo.channel('importer')
     .listen('LogProgress', (e) => {
-        $('#logs').find('pre').append('<code>' + e.message + '</code>\n');
+        const messageType = e.type;
+        const messageContent = e.message;
+
+        if ( messageType === 'general') {
+            $('#messages').append('<code>' + e.message + '</code>\n');
+        }
     });

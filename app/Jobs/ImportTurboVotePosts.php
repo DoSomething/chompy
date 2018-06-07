@@ -387,10 +387,10 @@ class ImportTurboVotePosts implements ShouldQueue
         $csv->setHeaderOffset(0);
         $records = $csv->getRecords();
 
-        event(new LogProgress('Total rows to chomp: ' . count($csv)));
+        event(new LogProgress('Total rows to chomp: ' . count($csv), 'general'));
+
         $this->stats['totalRecords'] = count($csv);
 
         return $records;
     }
 }
-

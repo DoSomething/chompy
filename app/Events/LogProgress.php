@@ -11,16 +11,20 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
 class LogProgress implements ShouldBroadcastNow
 {
+    // TODO - Add comments.
     public $message;
+
+    public $type;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($message)
+    public function __construct($message, $type)
     {
         $this->message = $message;
+        $this->type = $type;
     }
 
     /**

@@ -871,7 +871,15 @@ window.Echo = new __WEBPACK_IMPORTED_MODULE_0_laravel_echo___default.a({
 
 // Listen to the 'log' event on the importer channel.
 window.Echo.channel('importer').listen('LogProgress', function (e) {
-    $('#logs').find('pre').append('<code>' + e.message + '</code>\n');
+    // console.log(e);
+    // console.log(e.type);
+
+    var messageType = e.type;
+    var messageContent = e.message;
+
+    if (messageType === 'general') {
+        $('#messages').append('<code>' + e.message + '</code>\n');
+    }
 });
 
 /***/ }),
