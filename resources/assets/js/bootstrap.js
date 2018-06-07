@@ -60,7 +60,13 @@ window.Echo.channel('importer')
         const messageType = e.type;
         const messageContent = e.message;
 
-        if ( messageType === 'general') {
+        // @TODO - don't use jquery
+        if (messageType == 'general') {
             $('#messages').append('<code>' + e.message + '</code>\n');
+        }
+
+        if (messageType == 'progress') {
+            $('.progress-bar').attr("aria-valuenow", "50");
+            $('.progress-bar').attr('style', 'width: 50%');
         }
     });

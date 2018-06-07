@@ -16,15 +16,18 @@ class LogProgress implements ShouldBroadcastNow
 
     public $type;
 
+    public $progressValue;
+
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($message, $type)
+    public function __construct($message, $type, $progressValue = null)
     {
         $this->message = $message;
         $this->type = $type;
+        $this->progressValue = $progressValue;
     }
 
     /**

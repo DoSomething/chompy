@@ -869,16 +869,19 @@ window.Echo = new __WEBPACK_IMPORTED_MODULE_0_laravel_echo___default.a({
     encrypted: true
 });
 
-// Listen to the 'log' event on the importer channel.
+// Listen to the 'LogProgress Event' event on the importer channel.
 window.Echo.channel('importer').listen('LogProgress', function (e) {
-    // console.log(e);
-    // console.log(e.type);
-
     var messageType = e.type;
     var messageContent = e.message;
 
-    if (messageType === 'general') {
+    // @TODO - don't use jquery
+    if (messageType == 'general') {
         $('#messages').append('<code>' + e.message + '</code>\n');
+    }
+
+    if (messageType == 'progress') {
+        $('.progress-bar').attr("aria-valuenow", "50");
+        $('.progress-bar').attr('style', 'width: 50%');
     }
 });
 
