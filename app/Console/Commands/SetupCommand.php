@@ -48,6 +48,22 @@ class SetupCommand extends Command
             $this->setEnvironmentVariable('NORTHSTAR_AUTHORIZATION_SECRET', 'Enter the OAuth Client Secret');
         });
 
+        $this->section('Set Rogue environment variables', function () {
+            $environments = [
+                'http://northstar.dev' => 'http://aurora.dev',
+                'https://identity-dev.dosomething.org' => 'https://aurora-qa.dosomething.org',
+                'https://identity-qa.dosomething.org' => 'https://aurora-thor.dosomething.org',
+            ];
+
+            $this->chooseEnvironmentVariable('ROGUE_URL', 'Choose a Rogue environment', array_keys($environments));
+
+            $this->instruction('You can get these environment variables from Aurora\'s "Clients" page:');
+            $this->instruction($environments[env('NORTHSTAR_URL')] . '/clients');
+
+            $this->setEnvironmentVariable('NORTHSTAR_AUTHORIZATION_ID', 'Enter the OAuth Client ID');
+            $this->setEnvironmentVariable('NORTHSTAR_AUTHORIZATION_SECRET', 'Enter the OAuth Client Secret');
+        });
+
         $this->runCommand('key:generate', 'Creating application key');
 
         $this->runCommand('gateway:key', 'Fetching public key from Northstar');

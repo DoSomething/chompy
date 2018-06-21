@@ -10,5 +10,5 @@ $ composer install && npm install
 $ php artisan chompy:setup
 
 # And finally, build the frontend assets:
-$ npm run build
+$ npm run dev
 ```
