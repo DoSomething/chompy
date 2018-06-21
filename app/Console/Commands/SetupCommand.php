@@ -58,6 +58,13 @@ class SetupCommand extends Command
 
         });
 
+        $this->section('Set Pusher environment variables', function () {
+            $this->setEnvironmentVariable('PUSHER_APP_ID', 'Enter the Pusher App ID');
+            $this->setEnvironmentVariable('PUSHER_APP_KEY', 'Enter the Pusher App Key');
+            $this->setEnvironmentVariable('PUSHER_APP_SECRET', 'Enter the Pusher App Secret');
+
+        });
+
 
 
         $this->runCommand('key:generate', 'Creating application key');
