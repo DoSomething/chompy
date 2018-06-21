@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers;
+namespace Chompy\Providers;
 
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Schema;

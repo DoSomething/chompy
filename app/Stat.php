@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace Chompy;
 
 use Illuminate\Database\Eloquent\Model;
 

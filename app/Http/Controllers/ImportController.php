@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Chompy\Http\Controllers;
 
 use Carbon\Carbon;
 use League\Csv\Reader;
 use Illuminate\Http\Request;
-use App\Jobs\ImportTurboVotePosts;
+use Chompy\Jobs\ImportTurboVotePosts;
 use Illuminate\Support\Facades\Storage;
 
 class ImportController extends Controller

@@ -6,7 +6,7 @@ return [
      * https://github.com/DoSomething/gateway/issues/65
      * is resolved.
      */
-    'model' => App\User::class,
+    'model' => Chompy\User::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -72,7 +72,7 @@ return [
     'providers' => [
         'local' => [
             'driver' => 'eloquent',
-            'model' => App\User::class,
+            'model' => Chompy\User::class,
         ],
         'northstar' => [
             'driver' => 'gateway',

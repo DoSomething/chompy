@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace Chompy\Services;
 
 use DoSomething\Gateway\AuthorizesWithOAuth2;
 use DoSomething\Gateway\Common\RestApiClient;
