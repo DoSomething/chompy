@@ -50,18 +50,15 @@ class SetupCommand extends Command
 
         $this->section('Set Rogue environment variables', function () {
             $environments = [
-                'http://northstar.dev' => 'http://aurora.dev',
-                'https://identity-dev.dosomething.org' => 'https://aurora-qa.dosomething.org',
-                'https://identity-qa.dosomething.org' => 'https://aurora-thor.dosomething.org',
+                'https://rogue-qa.dosomething.org' => 'https://aurora-qa.dosomething.org',
+                'https://rogue-thor.dosomething.org' => 'https://aurora-thor.dosomething.org',
             ];
 
-            $this->chooseEnvironmentVariable('ROGUE_URL', 'Choose a Rogue environment', array_keys($environments));
+            $this->chooseEnvironmentVariable('Rogue_URL', 'Choose a Rogue environment', array_keys($environments));
 
-            $this->instruction('You can get these environment variables from Aurora\'s "Clients" page:');
-            $this->instruction($environments[env('ROGUE_URL')] . '/clients');
         });
 
-        
+
 
         $this->runCommand('key:generate', 'Creating application key');
 
