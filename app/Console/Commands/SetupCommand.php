@@ -74,10 +74,16 @@ class SetupCommand extends Command
             $this->setEnvironmentVariable('S3_REGION', 'Enter the S3 Region');
             $this->setEnvironmentVariable('S3_SECRET', 'Enter the S3 Secret');
             $this->setEnvironmentVariable('S3_URL', 'Enter the S3 Url');
+
         });
 
+        
+        $this->section('Set Filesystem environment variables', function () {
+            $this->instruction('Be sure to set this to local if you are testing locally!');
+            $this->setEnvironmentVariable('FILESYSTEM_DRIVER', 'Enter the filesystem driver');
+           
 
-
+        });
         $this->runCommand('key:generate', 'Creating application key');
 
         $this->runCommand('gateway:key', 'Fetching public key from Northstar');
