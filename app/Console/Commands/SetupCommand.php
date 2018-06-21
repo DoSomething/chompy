@@ -65,6 +65,14 @@ class SetupCommand extends Command
 
         });
 
+        $this->section('Set S3 environment variables', function () {
+            $this->setEnvironmentVariable('S3_BUCKET', 'Enter the S3 Bucket');
+            $this->setEnvironmentVariable('S3_KEY', 'Enter the S3 Key');
+            $this->setEnvironmentVariable('S3_REGION', 'Enter the S3 Region');
+            $this->setEnvironmentVariable('S3_SECRET', 'Enter the S3 Secret');
+            $this->setEnvironmentVariable('S3_URL', 'Enter the S3 Url');
+        });
+
 
 
         $this->runCommand('key:generate', 'Creating application key');
