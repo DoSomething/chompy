@@ -46,7 +46,10 @@ class SetupCommand extends Command
 
             $this->setEnvironmentVariable('NORTHSTAR_AUTHORIZATION_ID', 'Enter the OAuth Client ID');
             $this->setEnvironmentVariable('NORTHSTAR_AUTHORIZATION_SECRET', 'Enter the OAuth Client Secret');
+            $this->setEnvironmentVariable('NORTHSTAR_CLIENT_ID', 'Enter the Northstar Client ID');
+            $this->setEnvironmentVariable('NORTHSTAR_CLIENT_SECRET', 'Enter the Northstar  Client Secret');
         });
+
 
         $this->section('Set Rogue environment variables', function () {
             $environments = [
