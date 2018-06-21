@@ -61,6 +61,14 @@ class SetupCommand extends Command
 
         });
 
+        $this->section('Set Driver environment variables', function () {
+            $this->setEnvironmentVariable('BROADCAST_DRIVER', 'Enter the broadcast driver');
+            $this->setEnvironmentVariable('CACHE_DRIVER', 'Enter the cache driver');
+            $this->setEnvironmentVariable('SESSION_DRIVER', 'Enter the session driver');
+            $this->setEnvironmentVariable('QUEUE_DRIVER', 'Enter the queue driver');
+
+        });
+
         $this->section('Set Pusher environment variables', function () {
             $this->setEnvironmentVariable('PUSHER_APP_ID', 'Enter the Pusher App ID');
             $this->setEnvironmentVariable('PUSHER_APP_KEY', 'Enter the Pusher App Key');
