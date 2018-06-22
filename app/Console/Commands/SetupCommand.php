@@ -85,6 +85,12 @@ class SetupCommand extends Command
 
         });
 
+        $this->section('Set AWS environment variables', function () {
+            $this->setEnvironmentVariable('AWS_ACCESS_KEY_ID', 'Enter the AWS Access Key ID');
+            $this->setEnvironmentVariable('AWS_SECRET_ACCESS_KEY', 'Enter the AWS Secret Access Key');
+            $this->setEnvironmentVariable('AWS_REGION', 'Enter the AWS Region');
+
+        });
         
         $this->section('Set Filesystem environment variables', function () {
             $this->instruction('Be sure to set this to local if you are testing locally!');
