@@ -17,7 +17,7 @@ To gain access to an ID and SECRET, you will need to have the proper permissions
 For the most part, you can use the QA Rogue URL for your development environment: `https://rogue-qa.dosomething.org`
 
 To gain access to an ID and SECRET, you will need to have the proper permissions set on your DoSomething account. Let a developer on the team know if you are unable to access [Aurora (QA)](https://aurora-qa.dosomething.org/clients).
-s
+
 ### .ENV (noun: /Dot EE EN VEE/)
 
 The `.env` file provides environment specific configurations that can be set differently depending on the environment (local, qa, production, etc). Here is what an [example.env](https://github.com/DoSomething/rogue/blob/master/.env.example) looks like from the Rogue repository.
