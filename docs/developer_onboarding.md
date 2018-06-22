@@ -14,7 +14,7 @@ To gain access to an ID and SECRET, you will need to have the proper permissions
 
 ### Rogue
 
-For the most part, you can use the QA Rogue URL for your development environment: `https://rogue-qa.dosomething.org`
+For the most part, you should use the Development Rogue URL for your development environment: `http://rogue.test`
 
 To gain access to an ID and SECRET, you will need to have the proper permissions set on your DoSomething account. Let a developer on the team know if you are unable to access [Aurora (QA)](https://aurora-qa.dosomething.org/clients).
 
