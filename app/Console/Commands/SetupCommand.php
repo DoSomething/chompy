@@ -34,7 +34,7 @@ class SetupCommand extends Command
 
         $this->section('Set Northstar environment variables', function () {
             $environments = [
-                'http://northstar.dev' => 'http://aurora.dev',
+                'http://northstar.test' => 'http://aurora.test',
                 'https://identity-dev.dosomething.org' => 'https://aurora-qa.dosomething.org',
                 'https://identity-qa.dosomething.org' => 'https://aurora-thor.dosomething.org',
             ];
@@ -53,19 +53,11 @@ class SetupCommand extends Command
 
         $this->section('Set Rogue environment variables', function () {
             $environments = [
-                'https://rogue-qa.dosomething.org' => 'https://aurora-qa.dosomething.org',
-                'https://rogue-thor.dosomething.org' => 'https://aurora-thor.dosomething.org',
+                'https://rogue-qa.dosomething.org',
+                'https://rogue-thor.dosomething.org'
             ];
 
-            $this->chooseEnvironmentVariable('Rogue_URL', 'Choose a Rogue environment', array_keys($environments));
-
-        });
-
-        $this->section('Set Driver environment variables', function () {
-            $this->setEnvironmentVariable('BROADCAST_DRIVER', 'Enter the broadcast driver');
-            $this->setEnvironmentVariable('CACHE_DRIVER', 'Enter the cache driver');
-            $this->setEnvironmentVariable('SESSION_DRIVER', 'Enter the session driver');
-            $this->setEnvironmentVariable('QUEUE_DRIVER', 'Enter the queue driver');
+            $this->chooseEnvironmentVariable('Rogue_URL', 'Choose a Rogue environment', $environments);
 
         });
 
@@ -73,22 +65,6 @@ class SetupCommand extends Command
             $this->setEnvironmentVariable('PUSHER_APP_ID', 'Enter the Pusher App ID');
             $this->setEnvironmentVariable('PUSHER_APP_KEY', 'Enter the Pusher App Key');
             $this->setEnvironmentVariable('PUSHER_APP_SECRET', 'Enter the Pusher App Secret');
-
-        });
-
-        $this->section('Set S3 environment variables', function () {
-            $this->setEnvironmentVariable('S3_BUCKET', 'Enter the S3 Bucket');
-            $this->setEnvironmentVariable('S3_KEY', 'Enter the S3 Key');
-            $this->setEnvironmentVariable('S3_REGION', 'Enter the S3 Region');
-            $this->setEnvironmentVariable('S3_SECRET', 'Enter the S3 Secret');
-            $this->setEnvironmentVariable('S3_URL', 'Enter the S3 Url');
-
-        });
-
-        $this->section('Set AWS environment variables', function () {
-            $this->setEnvironmentVariable('AWS_ACCESS_KEY_ID', 'Enter the AWS Access Key ID');
-            $this->setEnvironmentVariable('AWS_SECRET_ACCESS_KEY', 'Enter the AWS Secret Access Key');
-            $this->setEnvironmentVariable('AWS_REGION', 'Enter the AWS Region');
 
         });
         
