@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events;
+namespace Chompy\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PrivateChannel;

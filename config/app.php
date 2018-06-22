@@ -176,11 +176,11 @@ return [
         /*
          * Application Service Providers...
          */
-        App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
-        App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
+        Chompy\Providers\AppServiceProvider::class,
+        Chompy\Providers\AuthServiceProvider::class,
+        Chompy\Providers\BroadcastServiceProvider::class,
+        Chompy\Providers\EventServiceProvider::class,
+        Chompy\Providers\RouteServiceProvider::class,
 
     ],
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Chompy\Http\Controllers;
 
 use Carbon\Carbon;
 use League\Csv\Reader;
 use Illuminate\Http\Request;
-use App\Jobs\ImportTurboVotePosts;
+use Chompy\Jobs\ImportTurboVotePosts;
 use Illuminate\Support\Facades\Storage;
 
 class ImportController extends Controller
@@ -43,9 +43,11 @@ class ImportController extends Controller
 
         // Push file to S3.
         $upload = $request->file('upload-file');
+       
         $path = 'uploads/' . $request->input('import-type') . '-importer' . Carbon::now() . '.csv';
         $csv = Reader::createFromPath($upload->getRealPath());
         $success = Storage::put($path, (string)$csv);
+
 
         if (!$success) {
             throw new HttpException(500, 'Unable read and store file to S3.');

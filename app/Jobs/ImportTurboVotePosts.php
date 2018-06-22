@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Jobs;
+namespace Chompy\Jobs;
 
 
-use App\Stat;
+use Chompy\Stat;
 use Carbon\Carbon;
 use League\Csv\Reader;
-use App\Services\Rogue;
-use App\Events\LogProgress;
+use Chompy\Services\Rogue;
+use Chompy\Events\LogProgress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
@@ -82,7 +82,7 @@ class ImportTurboVotePosts implements ShouldQueue
                         'Error' => $e->getMessage(),
                     ]);
                 }
-
+                
                 if ($user) {
                     $post = $rogue->getPost([
                         'campaign_id' => (int) $referralCodeValues['campaign_id'],
