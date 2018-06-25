@@ -32,6 +32,8 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     protected $stats;
 
+    protected $totalRecords;
+
     /**
      * Create a new job instance.
      *
@@ -64,8 +66,8 @@ class ImportTurboVotePosts implements ShouldQueue
     public function handle(Rogue $rogue)
     {
         $records = $this->getCSVRecords($this->filepath);
-        info("start loop through records");
-        foreach ($records as $record)
+
+        foreach ($records as $offset => $record)
         {
             $shouldProcess = $this->scrubRecord($record);
 
@@ -138,9 +140,11 @@ class ImportTurboVotePosts implements ShouldQueue
             } else {
                 $this->stats['countScrubbed']++;
             }
+
+            event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
         }
 
-        event(new LogProgress('Done!'));
+        event(new LogProgress('Done!', 'general'));
 
         Stat::create([
             'filename' => $this->filepath,
@@ -386,11 +390,13 @@ class ImportTurboVotePosts implements ShouldQueue
         $csv = Reader::createFromString($file);
         $csv->setHeaderOffset(0);
         $records = $csv->getRecords();
+        $this->totalRecords = count($csv);
 
-        event(new LogProgress('Total rows to chomp: ' . count($csv)));
-        $this->stats['totalRecords'] = count($csv);
+        event(new LogProgress('Total rows to chomp: ' . $this->totalRecords, 'general'));
+        event(new LogProgress('', 'progress', 0));
+
+        $this->stats['totalRecords'] = $this->totalRecords;
 
         return $records;
     }
 }
-
