@@ -11,11 +11,19 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
 class LogProgress implements ShouldBroadcastNow
 {
-    // TODO - Add comments.
+    /*
+     * The message being sent out.
+     */
     public $message;
 
+    /*
+     * The "type" of message i.e `general` message or an updated `progress` value.
+     */
     public $type;
 
+    /*
+     * An integer value that defines the progress so far (out of 100)
+     */
     public $progressValue;
 
     /**
