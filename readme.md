@@ -4,7 +4,7 @@ This is **Chompy**, the DoSomething.org importer app. Chompy is built using [Lar
 
 ### Getting Started
 
-To get started with development, follow the [installation](https://github.com/DoSomething/chompy/blob/master/docs/installation.md) and [contributing](https://github.com/DoSomething/rogue/blob/master/docs/development/contributing.md) documentation.
+To get started with development, follow the [installation](https://github.com/DoSomething/chompy/blob/master/docs/installation.md) and [contributing](https://github.com/DoSomething/chompy/blob/master/docs/development/contributing.md) documentation.
 
 ### Security Vulnerabilities
 
