@@ -18,6 +18,29 @@ To import a new type of CSV, add a new option to the frontend form that correspo
 
 Use the implementation of the `ImportTurboVotePosts` as an example. 
 
+## Stats
+
+Chompy has a very simple DB with a `Stat` model that is to record general metrics about a Job after it is finished.
+
+An example Stat looks like:
+
+```json 
+{
+  "id": 2,
+  "filename": "uploads/turbovote-importer2018-05-14 18:39:46.csv",
+  "total_records": 1000,
+  "stats": {
+    "totalRecords":992,
+     "countScrubbed":0,
+     "countProcessed":992, 
+     "countPostCreated":933,
+     "countUserAccountsCreated":118
+  },
+  "created_at": "2018-05-15 06:41:56",
+  "updated_at": "2018-05-15 06:41:56"
+}
+```
+
 ## More about Pusher
 
 [Pusher](https://pusher.com/) is a third-party service that lets you create real-time apps. In the case of this app, it is used to just show job progress. 
