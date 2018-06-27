@@ -10,7 +10,6 @@
         <title>Chompy</title>
         <link rel="stylesheet" href="{{ mix('/css/app.css') }}">
         <link rel="icon" type="image/png" href="http://twooter.biz/Gifs/tonguecat.png">
-        <script src="{{ mix('/js/app.js') }}"></script>
     </head>
 
     <body>
@@ -36,6 +35,12 @@
         <div class="container">
             @yield('main_content')
         </div>
+
+        <script>
+            window.PusherAppKey = '{{ env('PUSHER_APP_KEY') }}';
+        </script>
+
+        <script src="{{ mix('/js/app.js') }}"></script>
     </body>
 
 </html>

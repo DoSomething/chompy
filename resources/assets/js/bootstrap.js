@@ -38,7 +38,7 @@ window.Pusher = require('pusher-js');
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
-    key: '7fd470282efd1c1eb153',
+    key: window.PusherAppKey,
     cluster: 'us2',
     encrypted: true,
     namespace: 'Chompy.Events'

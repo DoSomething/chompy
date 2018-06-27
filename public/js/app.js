@@ -812,10 +812,10 @@ if (token) {
 
 
 window.Pusher = __webpack_require__(32);
-console.log('anything');
+console.log(window.PusherAppKey);
 window.Echo = new __WEBPACK_IMPORTED_MODULE_0_laravel_echo___default.a({
     broadcaster: 'pusher',
-    key: '7fd470282efd1c1eb153',
+    key: window.PusherAppKey,
     cluster: 'us2',
     encrypted: true,
     namespace: 'Chompy.Events'
@@ -17445,7 +17445,6 @@ function ready(fn) {
  */
 
 // Listen to the 'LogProgress Event' event on the importer channel.
-console.log(window.Echo.channel('importer'));
 window.Echo.channel('importer').listen('LogProgress', function (e) {
     var messageType = e.type;
     var messageContent = e.message;
