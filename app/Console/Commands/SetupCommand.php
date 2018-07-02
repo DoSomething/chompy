@@ -57,7 +57,7 @@ class SetupCommand extends Command
                 'https://rogue-thor.dosomething.org'
             ];
 
-            $this->chooseEnvironmentVariable('Rogue_URL', 'Choose a Rogue environment', $environments);
+            $this->chooseEnvironmentVariable('ROGUE_URL', 'Choose a Rogue environment', $environments);
 
         });
 
