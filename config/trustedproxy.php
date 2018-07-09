@@ -24,17 +24,4 @@ return [
      * no matter how many proxies that client's request has subsequently passed through.
      */
     'proxies' => $trustedProxies,
-
-    /*
-     * Default Header Names
-     *
-     * Change these if the proxy does not send the default header names.
-     */
-    'headers' => [
-        \Illuminate\Http\Request::HEADER_FORWARDED    => 'FORWARDED',
-        \Illuminate\Http\Request::HEADER_CLIENT_IP    => 'X_FORWARDED_FOR',
-        \Illuminate\Http\Request::HEADER_CLIENT_HOST  => 'X_FORWARDED_HOST',
-        \Illuminate\Http\Request::HEADER_CLIENT_PROTO => 'X_FORWARDED_PROTO',
-        \Illuminate\Http\Request::HEADER_CLIENT_PORT  => 'X_FORWARDED_PORT',
-    ],
 ];
