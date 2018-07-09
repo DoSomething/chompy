@@ -18,6 +18,8 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \Chompy\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \Chompy\Http\Middleware\TrustProxies::class,
+        \Chompy\Http\Middleware\ForceHttps::class,
     ];
 
     /**
