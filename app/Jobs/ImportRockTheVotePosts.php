@@ -60,7 +60,7 @@ class ImportRockTheVotePosts implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(Rogue $rogue)
     {
         info('STARTING');
 
@@ -71,7 +71,7 @@ class ImportRockTheVotePosts implements ShouldQueue
             $shouldProcess = $this->scrubRecord($record);
 
             if ($shouldProcess) {
-                info('progress_log: Processing: ' . $record['id']);
+                // info('progress_log: Processing: ' . $record['id']); @TODO: do we need this? no nsid column
 
                 $referralCode = $record['Tracking Source'];
                 $referralCodeValues = $this->parseReferralCode($referralCode);
@@ -93,7 +93,6 @@ class ImportRockTheVotePosts implements ShouldQueue
 
                     if (! $post['data']) {
                         $rtvCreatedAtMonth = strtolower(Carbon::parse($record['Started registration'])->format('F-Y'));
-                        // @TODO - is source_details a thing for RTV?
                         $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
                         $postDetails = $this->extractDetails($record);
 
@@ -331,11 +330,10 @@ class ImportRockTheVotePosts implements ShouldQueue
     */
     private function scrubRecord($record)
     {
-        $isNotValidEmail = strrpos($record['email'], 'thing.org') !== false || strrpos($record['email'] !== false, '@dosome') || strrpos($record['email'], 'rockthevote.com') !== false || strrpos($record['email'], 'test') !== false || strrpos($record['email'], '+') !== false;
-        $isNotValidHostname = strrpos($record['hostname'], 'testing') !== false;
-        $isNotValidLastName = strrpos($record['last-name'], 'Baloney') !== false;
+        $isNotValidEmail = strrpos($record['Email address'], 'thing.org') !== false || strrpos($record['Email address'] !== false, '@dosome') || strrpos($record['Email address'], 'rockthevote.com') !== false || strrpos($record['Email address'], 'test') !== false || strrpos($record['Email address'], '+') !== false;
+        $isNotValidLastName = strrpos($record['Last name'], 'Baloney') !== false;
 
-        return $isNotValidEmail || $isNotValidHostname || $isNotValidLastName ? false : true;
+        return $isNotValidEmail || $isNotValidLastName ? false : true;
     }
 
     /**
@@ -353,7 +351,7 @@ class ImportRockTheVotePosts implements ShouldQueue
 
         $userFieldsToLookFor = [
             'id' => isset($values['northstar_id']) && !empty($values['northstar_id']) ? $values['northstar_id'] : null,
-            'email' => isset($record['email']) && !empty($record['email']) ? $record['email'] : null,
+            'email' => isset($record['Email address']) && !empty($record['Email address']) ? $record['Email address'] : null,
             'mobile' => isset($record['phone']) && !empty($record['phone']) ? $record['phone'] : null,
         ];
 
