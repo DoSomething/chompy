@@ -62,7 +62,7 @@ class ImportRockTheVotePosts implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-        info('STARTING');
+        info('STARTING RTV IMPORT');
 
         $records = $this->getCSVRecords($this->filepath);
 
@@ -71,7 +71,7 @@ class ImportRockTheVotePosts implements ShouldQueue
             $shouldProcess = $this->scrubRecord($record);
 
             if ($shouldProcess) {
-                // info('progress_log: Processing: ' . $record['id']); @TODO: do we need this? no nsid column
+                info('progress_log: Processing: ' . $record['Email address']);
 
                 $referralCode = $record['Tracking Source'];
                 $referralCodeValues = $this->parseReferralCode($referralCode);
@@ -79,7 +79,7 @@ class ImportRockTheVotePosts implements ShouldQueue
                 try {
                     $user = $this->getOrCreateUser($record, $referralCodeValues);
                 } catch (\Exception $e) {
-                    info('There was an error with that user: ' . $record['id'], [
+                    info('There was an error with that user: ' . $record['Email address'], [
                         'Error' => $e->getMessage(),
                     ]);
                 }
@@ -115,7 +115,7 @@ class ImportRockTheVotePosts implements ShouldQueue
                                 $this->stats['countPostCreated']++;
                             }
                         } catch (\Exception $e) {
-                            info('There was an error storing the post for: ' . $record['id'], [
+                            info('There was an error storing the post', [
                                 'Error' => $e->getMessage(),
                             ]);
                         }
@@ -127,14 +127,13 @@ class ImportRockTheVotePosts implements ShouldQueue
                             try {
                                 $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
                             } catch (\Exception $e) {
-                                info('There was an error updating the post for: ' . $record['id'], [
+                                info('There was an error updating the post for: ' . $record['Email address'], [
                                     'Error' => $e->getMessage(),
                                 ]);
                             }
                         }
                     }
                 }
-
                 $this->stats['countProcessed']++;
             } else {
                 $this->stats['countScrubbed']++;
@@ -189,9 +188,18 @@ class ImportRockTheVotePosts implements ShouldQueue
         if (! empty($referralCode)) {
             $referralCode = explode(',', $referralCode);
 
+            $referral = false;
+
             foreach ($referralCode as $value) {
 
-                $value = explode(':', $value);
+                // See if we are dealing with ":" or "="
+                if (strpos($value, ':')) {
+                    $value = explode(':', $value);
+                }
+                elseif (strpos($value, '=')) {
+                    $value = explode('=', $value);
+                }
+
                 // Grab northstar id
                 if (strtolower($value[0]) === 'user') {
                     $values['northstar_id'] = $value[1];
@@ -216,13 +224,42 @@ class ImportRockTheVotePosts implements ShouldQueue
                 if (strtolower($value[0]) === 'source_details') {
                     $values['source_details'] = $value[1];
                 }
+
+                // Is this a referral?
+                if (strtolower($value[0]) === 'referral' && strtolower($value[1]) === 'true') {
+                    $referral = true;
+                }
             }
         }
 
-        // Make sure we have all the values we need, otherwise, use the defaults.
-        // @TODO: QUESTION - Why don't we only set unset values as the defaults? The way we have it now we could be overwriting campaign_id if there is no northstar_id or vice versa
-        if (empty($values) || !array_has($values, ['northstar_id', 'campaign_id', 'campaign_run_id'])) {
-            $values = [
+        // See if we have all the required information we need
+        if (!array_has($values, ['northstar_id', 'campaign_id', 'campaign_run_id'])) {
+            // If we have the campaign values, use em! This also means that we do not have NS id
+            if (array_has($values, ['campaign_id', 'campaign_run_id'])) {
+                $finalValues = [
+                    'northstar_id' => null, // set the user to null so we force account creation when the code is not present.
+                    'campaign_id' => $values['campaign_id'],
+                    'campaign_run_id' => $values['campaign_run_id'],
+                    'source' => 'rock-the-vote',
+                    'source_details' => null,
+                ];
+            }
+
+            // If we have NS id, use it! This also means that we do not have both campaign_id and campaign_run_id, so use the defaults
+            if (array_has($values, ['northstar_id'])) {
+                $finalValues = [
+                    'northstar_id' => $values['northstar_id'], // set the user to null so we force account creation when the code is not present.
+                    'campaign_id' => 8017,
+                    'campaign_run_id' => 8022,
+                    'source' => 'rock-the-vote',
+                    'source_details' => null,
+                ];
+            }
+        }
+
+        // If we were missing all the necessary values or if this is a referral, use all the defaults
+        if (empty($finalValues) || $referral) {
+            $finalValues = [
                 'northstar_id' => null, // set the user to null so we force account creation when the code is not present.
                 'campaign_id' => 8017,
                 'campaign_run_id' => 8022,
@@ -231,7 +268,7 @@ class ImportRockTheVotePosts implements ShouldQueue
             ];
         }
 
-        return $values;
+        return $finalValues;
     }
 
     // @TODO: is this a thing for RTV??
@@ -279,6 +316,9 @@ class ImportRockTheVotePosts implements ShouldQueue
      */
     private function translateStatus($rtvStatus, $rtvFinishWithState)
     {
+        $rtvStatus = strtolower($rtvStatus);
+        $rtvFinishWithState = strtolower($rtvFinishWithState);
+
         if($rtvStatus === 'complete') {
             if ($rtvFinishWithState === "no") {
                 return 'register-form';
@@ -288,7 +328,7 @@ class ImportRockTheVotePosts implements ShouldQueue
             }   
         }
 
-        if (strpos($rtvStatus, 'step')) {
+        if (strpos($rtvStatus, 'step') !== false) {
             return 'uncertain';
         }
 
@@ -336,6 +376,22 @@ class ImportRockTheVotePosts implements ShouldQueue
         return $isNotValidEmail || $isNotValidLastName ? false : true;
     }
 
+    /*
+     * Translate "Opt-in to Partner SMS/robocall" from Rock the Vote CSV to a Northstar sms_status
+     *
+     * @param array $sms_status
+     * @return string
+    */
+    private function transformSmsStatus($sms_status)
+    {
+        if ($sms_status === 'Yes') {
+            return 'active';
+        }
+
+        // @TODO: do we want this to be 'pending' or some other status? we talked about this recently referring to something else
+        return 'stop';
+    }
+
     /**
      * For a given record and referral code values, first check if we have a northstar ID, then grab the user using that.
      * Otherwise, see if we can find the user with the given email (if it exists), if not check if we can find them with the given phone number (if it exists).
@@ -358,7 +414,7 @@ class ImportRockTheVotePosts implements ShouldQueue
         foreach ($userFieldsToLookFor as $field => $value)
         {
             if ($value) {
-                // info('getting user with the '.$field.' field', [$field => $value]);
+                info('getting user with the '.$field.' field', [$field => $value]);
                 $user = gateway('northstar')->asClient()->getUser($field, $value);
             }
 
@@ -382,7 +438,7 @@ class ImportRockTheVotePosts implements ShouldQueue
             ];
 
             if ($record['Phone']) {
-                $userData['sms_status'] = $record['Opt-in to Partner SMS/robocall'];
+                $userData['sms_status'] = $this->transformSmsStatus($record['Opt-in to Partner SMS/robocall']);
             }
 
             $user = gateway('northstar')->asClient()->createUser($userData);
