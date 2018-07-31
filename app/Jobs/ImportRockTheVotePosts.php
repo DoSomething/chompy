@@ -6,8 +6,8 @@ use Chompy\Stat;
 use Carbon\Carbon;
 use League\Csv\Reader;
 use Chompy\Services\Rogue;
-use Chompy\Events\LogProgress;
 use Illuminate\Bus\Queueable;
+use Chompy\Events\LogProgress;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -271,7 +271,6 @@ class ImportRockTheVotePosts implements ShouldQueue
         return $finalValues;
     }
 
-    // @TODO: is this a thing for RTV??
     /**
      * Parse the record for extra details and return them as a JSON object.
      *
@@ -283,17 +282,9 @@ class ImportRockTheVotePosts implements ShouldQueue
         $details = [];
 
         $importantKeys = [
-            'hostname',
-            'referral-code',
-            'partner-comms-opt-in',
-            'created-at',
-            'updated-at',
-            'voter-registration-status',
-            'voter-registration-source',
-            'voter-registration-method',
-            'voting-method-preference',
-            'email subscribed',
-            'sms subscribed',
+            'Tracking Source',
+            'Started registration',
+            'Finish with State',
         ];
 
         foreach ($importantKeys as $key) {
