@@ -84,7 +84,7 @@ class ImportTurboVotePosts implements ShouldQueue
                         'Error' => $e->getMessage(),
                     ]);
                 }
-                
+
                 if ($user) {
                     $post = $rogue->getPost([
                         'campaign_id' => (int) $referralCodeValues['campaign_id'],

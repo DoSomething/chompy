@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use League\Csv\Reader;
 use Illuminate\Http\Request;
 use Chompy\Jobs\ImportTurboVotePosts;
+use Chompy\Jobs\ImportFacebookSharePosts;
 use Illuminate\Support\Facades\Storage;
 use Chompy\Jobs\ImportRockTheVotePosts;
 
