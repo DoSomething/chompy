@@ -27,6 +27,12 @@
                     <input name="import-type" class="form-check-input" type="checkbox" value="rock-the-vote">
                     Rock the Vote Import
                 </label>
+                <br>
+
+                <label class="form-check-label">
+                    <input name="import-type" class="form-check-input" type="checkbox" value="facebook">
+                    Facebook Share Import
+                </label>
             </div>
         </div>
         <div>
