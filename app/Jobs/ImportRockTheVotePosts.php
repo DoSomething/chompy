@@ -8,6 +8,7 @@ use League\Csv\Reader;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Chompy\Events\LogProgress;
+use Chompy\Traits\ImportToRogue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,7 +16,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 
 class ImportRockTheVotePosts implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable;
+    use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
 
     /**
      * The path to the stored csv.
@@ -150,22 +151,6 @@ class ImportRockTheVotePosts implements ShouldQueue
             'stats' => json_encode($this->stats),
         ]);
 
-    }
-
-    /**
-     * Initiate the stat counters.
-     *
-     * @return array
-     */
-    private function statsInit()
-    {
-        return [
-            'totalRecords' => 0,
-            'countScrubbed' => 0,
-            'countProcessed' => 0,
-            'countPostCreated' => 0,
-            'countUserAccountsCreated' => 0,
-        ];
     }
 
     /**
@@ -439,21 +424,5 @@ class ImportRockTheVotePosts implements ShouldQueue
         }
 
         return $user;
-    }
-
-    private function getCSVRecords($filepath)
-    {
-        $file = Storage::get($filepath);
-        $csv = Reader::createFromString($file);
-        $csv->setHeaderOffset(0);
-        $records = $csv->getRecords();
-        $this->totalRecords = count($csv);
-
-        event(new LogProgress('Total rows to chomp: ' . $this->totalRecords, 'general'));
-        event(new LogProgress('', 'progress', 0));
-
-        $this->stats['totalRecords'] = $this->totalRecords;
-
-        return $records;
     }
 }

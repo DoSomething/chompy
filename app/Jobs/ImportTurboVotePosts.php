@@ -43,7 +43,7 @@ class ImportTurboVotePosts implements ShouldQueue
     {
         $this->filepath = $filepath;
 
-        $this->stats = $this->statsInit();
+        $this->stats = statsInit();
     }
 
 
@@ -151,22 +151,6 @@ class ImportTurboVotePosts implements ShouldQueue
             'total_records' => $this->stats['totalRecords'],
             'stats' => json_encode($this->stats),
         ]);
-    }
-
-    /**
-     * Initiate the stat counters.
-     *
-     * @return array
-     */
-    private function statsInit()
-    {
-        return [
-            'totalRecords' => 0,
-            'countScrubbed' => 0,
-            'countProcessed' => 0,
-            'countPostCreated' => 0,
-            'countUserAccountsCreated' => 0,
-        ];
     }
 
     /**
