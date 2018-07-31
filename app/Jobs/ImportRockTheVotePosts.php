@@ -185,29 +185,34 @@ class ImportRockTheVotePosts implements ShouldQueue
                     $value = explode('=', $value);
                 }
 
-                // Grab northstar id
-                if (strtolower($value[0]) === 'user') {
-                    $values['northstar_id'] = $value[1];
-                }
+                // Add northstar_id, campaign id and run, source, and source details into $values
+                switch (strtolower($value[0])) {
+                    case 'user':
+                        $values['northstar_id'] = $value[1];
+                        break;
 
-                // Grab the Campaign Id.
-                if (strtolower($value[0]) === 'campaignid' || strtolower($value[0]) === 'campaign') {
-                    $values['campaign_id'] = $value[1];
-                }
+                    case 'campaignid':
+                        $values['campaign_id'] = $value[1];
+                        break;
 
-                // Grab the Campaign Run Id.
-                if (strtolower($value[0]) === 'campaignrunid') {
-                    $values['campaign_run_id'] = $value[1];
-                }
+                    case 'campaign':
+                        $values['campaign_id'] = $value[1];
+                        break;
 
-                // Grab the source
-                if (strtolower($value[0]) === 'source') {
-                    $values['source'] = $value[1];
-                }
+                    case 'campaignrunid':
+                        $values['campaign_run_id'] = $value[1];
+                        break;
 
-                // Grab any source details
-                if (strtolower($value[0]) === 'source_details') {
-                    $values['source_details'] = $value[1];
+                    case 'source':
+                        $values['source'] = $value[1];
+                        break;
+
+                    case 'source_details':
+                        $values['source_details'] = $value[1];
+                        break;
+
+                    default:
+                        break;
                 }
 
                 // Is this a referral?

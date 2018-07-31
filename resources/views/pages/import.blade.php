@@ -23,6 +23,7 @@
                     <!-- @TODO - make "checked" status a variable that has a default -->
                     <input name="import-type" class="form-check-input" type="checkbox" value="turbovote">
                     TurboVote Import
+                    <br>
                     <input name="import-type" class="form-check-input" type="checkbox" value="rock-the-vote">
                     Rock the Vote Import
                 </label>
