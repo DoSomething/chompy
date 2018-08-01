@@ -43,7 +43,7 @@ class ImportTurboVotePosts implements ShouldQueue
     {
         $this->filepath = $filepath;
 
-        $this->stats = statsInit();
+        $this->stats = $this->statsInit();
     }
 
 
@@ -65,6 +65,7 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
+        // @TODO: We need to write some tests for this import!
         $records = $this->getCSVRecords($this->filepath);
 
         foreach ($records as $offset => $record)
@@ -151,6 +152,22 @@ class ImportTurboVotePosts implements ShouldQueue
             'total_records' => $this->stats['totalRecords'],
             'stats' => json_encode($this->stats),
         ]);
+    }
+
+    /**
+     * Initiate the stat counters to use with imports to Rogue.
+     *
+     * @return array
+     */
+    public function statsInit()
+    {
+        return [
+            'totalRecords' => 0,
+            'countScrubbed' => 0,
+            'countProcessed' => 0,
+            'countPostCreated' => 0,
+            'countUserAccountsCreated' => 0,
+        ];
     }
 
     /**
