@@ -91,7 +91,6 @@ class ImportFacebookSharePosts implements ShouldQueue
                     'Error' => $e->getMessage(),
                 ]);
             }
-            dd($post);
         }
     }
 

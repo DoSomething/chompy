@@ -64,6 +64,7 @@ class ImportController extends Controller
         if ($request->input('import-type') === 'rock-the-vote') {
             info('rock the vote import happening');
             ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
+        }
 
         if ($request->input('import-type') === 'facebook') {
             info("Facebook share import happening");
