@@ -76,8 +76,8 @@ class ImportFacebookSharePosts implements ShouldQueue
                 'details' => json_encode(['platform' => 'facebook']),
                 'status' => 'accepted',
                 'source' => 'importer-client',
-                'source_detail' => json_encode(['original-source' => $record['event.source']]),
-                'created_at' => $record['meta.timestamp'],
+                'source_details' => json_encode(['original-source' => $record['event.source']]),
+                'created_at' => strtotime($record['to_timestamp']),
             ];
 
             try {
