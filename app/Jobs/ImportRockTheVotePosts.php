@@ -2,21 +2,21 @@
 
 namespace Chompy\Jobs;
 
-
 use Chompy\Stat;
 use Carbon\Carbon;
 use League\Csv\Reader;
 use Chompy\Services\Rogue;
-use Chompy\Events\LogProgress;
 use Illuminate\Bus\Queueable;
+use Chompy\Events\LogProgress;
+use Chompy\Traits\ImportToRogue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
-class ImportTurboVotePosts implements ShouldQueue
+class ImportRockTheVotePosts implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable;
+    use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
 
     /**
      * The path to the stored csv.
@@ -43,9 +43,8 @@ class ImportTurboVotePosts implements ShouldQueue
     {
         $this->filepath = $filepath;
 
-        $this->stats = statsInit();
+        $this->stats = $this->statsInit();
     }
-
 
     /**
      * Get the tags that should be assigned to the job.
@@ -54,17 +53,18 @@ class ImportTurboVotePosts implements ShouldQueue
      */
     public function tags()
     {
-        return ['turbovote'];
+        return ['rock-the-vote'];
     }
 
     /**
      * Execute the job.
      *
-     * @param  Rogue $rogue
      * @return void
      */
     public function handle(Rogue $rogue)
     {
+        info('STARTING RTV IMPORT');
+
         $records = $this->getCSVRecords($this->filepath);
 
         foreach ($records as $offset => $record)
@@ -72,15 +72,15 @@ class ImportTurboVotePosts implements ShouldQueue
             $shouldProcess = $this->scrubRecord($record);
 
             if ($shouldProcess) {
-                info('progress_log: Processing: ' . $record['id']);
+                info('progress_log: Processing: ' . $record['Email address']);
 
-                $referralCode = $record['referral-code'];
+                $referralCode = $record['Tracking Source'];
                 $referralCodeValues = $this->parseReferralCode($referralCode);
 
                 try {
                     $user = $this->getOrCreateUser($record, $referralCodeValues);
                 } catch (\Exception $e) {
-                    info('There was an error with that user: ' . $record['id'], [
+                    info('There was an error with that user: ' . $record['Email address'], [
                         'Error' => $e->getMessage(),
                     ]);
                 }
@@ -93,7 +93,7 @@ class ImportTurboVotePosts implements ShouldQueue
                     ]);
 
                     if (! $post['data']) {
-                        $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
+                        $rtvCreatedAtMonth = strtolower(Carbon::parse($record['Started registration'])->format('F-Y'));
                         $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
                         $postDetails = $this->extractDetails($record);
 
@@ -102,9 +102,9 @@ class ImportTurboVotePosts implements ShouldQueue
                             'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
                             'northstar_id' => $user->id,
                             'type' => 'voter-reg',
-                            'action' => $tvCreatedAtMonth . '-turbovote',
-                            'status' => $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']),
-                            'source' => 'turbovote',
+                            'action' => $rtvCreatedAtMonth . '-rockthevote',
+                            'status' => $this->translateStatus($record['Status'], $record['Finish with State']),
+                            'source' => 'rock-the-vote',
                             'source_details' => $sourceDetails,
                             'details' => $postDetails,
                         ];
@@ -116,26 +116,25 @@ class ImportTurboVotePosts implements ShouldQueue
                                 $this->stats['countPostCreated']++;
                             }
                         } catch (\Exception $e) {
-                            info('There was an error storing the post for: ' . $record['id'], [
+                            info('There was an error storing the post', [
                                 'Error' => $e->getMessage(),
                             ]);
                         }
                     } else {
-                        $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
+                        $newStatus = $this->translateStatus($record['Status'], $record['Finish with State']);
                         $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
 
                         if ($statusShouldChange) {
                             try {
                                 $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
                             } catch (\Exception $e) {
-                                info('There was an error updating the post for: ' . $record['id'], [
+                                info('There was an error updating the post for: ' . $record['Email address'], [
                                     'Error' => $e->getMessage(),
                                 ]);
                             }
                         }
                     }
                 }
-
                 $this->stats['countProcessed']++;
             } else {
                 $this->stats['countScrubbed']++;
@@ -151,6 +150,7 @@ class ImportTurboVotePosts implements ShouldQueue
             'total_records' => $this->stats['totalRecords'],
             'stats' => json_encode($this->stats),
         ]);
+
     }
 
     /**
@@ -162,51 +162,103 @@ class ImportTurboVotePosts implements ShouldQueue
     {
         $values = [];
 
+        // Remove some nonsense that comes in front of the referral code sometimes
+        if (strrpos($referralCode, 'iframe?r=') !== false) {
+            $referralCode = str_replace('iframe?r=', null, $referralCode);  
+        }
+        if (strrpos($referralCode, 'iframe?') !== false) {
+            $referralCode = str_replace('iframe?', null, $referralCode);  
+        }
+
         if (! empty($referralCode)) {
             $referralCode = explode(',', $referralCode);
 
+            $referral = false;
+
             foreach ($referralCode as $value) {
-                $value = explode(':', $value);
 
-                // Grab northstar id
-                if (strtolower($value[0]) === 'user') {
-                    $values['northstar_id'] = $value[1];
+                // See if we are dealing with ":" or "="
+                if (strpos($value, ':')) {
+                    $value = explode(':', $value);
+                }
+                elseif (strpos($value, '=')) {
+                    $value = explode('=', $value);
                 }
 
-                // Grab the Campaign Id.
-                if (strtolower($value[0]) === 'campaignid' || strtolower($value[0]) === 'campaign') {
-                    $values['campaign_id'] = $value[1];
+                // Add northstar_id, campaign id and run, source, and source details into $values
+                switch (strtolower($value[0])) {
+                    case 'user':
+                        $values['northstar_id'] = $value[1];
+                        break;
+
+                    case 'campaignid':
+                        $values['campaign_id'] = $value[1];
+                        break;
+
+                    case 'campaign':
+                        $values['campaign_id'] = $value[1];
+                        break;
+
+                    case 'campaignrunid':
+                        $values['campaign_run_id'] = $value[1];
+                        break;
+
+                    case 'source':
+                        $values['source'] = $value[1];
+                        break;
+
+                    case 'source_details':
+                        $values['source_details'] = $value[1];
+                        break;
+
+                    default:
+                        break;
                 }
 
-                // Grab the Campaign Run Id.
-                if (strtolower($value[0]) === 'campaignrunid') {
-                    $values['campaign_run_id'] = $value[1];
-                }
-
-                // Grab the source
-                if (strtolower($value[0]) === 'source') {
-                    $values['source'] = $value[1];
-                }
-
-                // Grab any source details
-                if (strtolower($value[0]) === 'source_details') {
-                    $values['source_details'] = $value[1];
+                // Is this a referral?
+                if (strtolower($value[0]) === 'referral' && strtolower($value[1]) === 'true') {
+                    $referral = true;
                 }
             }
         }
 
-        // Make sure we have all the values we need, otherwise, use the defaults.
-        if (empty($values) || !array_has($values, ['northstar_id', 'campaign_id', 'campaign_run_id'])) {
-            $values = [
+        // See if we have all the required information we need
+        if (!array_has($values, ['northstar_id', 'campaign_id', 'campaign_run_id'])) {
+            // If we have the campaign values, use em! This also means that we do not have NS id
+            if (array_has($values, ['campaign_id', 'campaign_run_id'])) {
+                $finalValues = [
+                    'northstar_id' => null, // set the user to null so we force account creation when the code is not present.
+                    'campaign_id' => $values['campaign_id'],
+                    'campaign_run_id' => $values['campaign_run_id'],
+                    'source' => 'rock-the-vote',
+                    'source_details' => null,
+                ];
+            }
+
+            // If we have NS id, use it! This also means that we do not have both campaign_id and campaign_run_id, so use the defaults
+            if (array_has($values, ['northstar_id'])) {
+                $finalValues = [
+                    'northstar_id' => $values['northstar_id'], // set the user to null so we force account creation when the code is not present.
+                    'campaign_id' => 8017,
+                    'campaign_run_id' => 8022,
+                    'source' => 'rock-the-vote',
+                    'source_details' => null,
+                ];
+            }
+        }
+
+        // If we were missing all the necessary values or if this is a referral, use all the defaults
+        if (empty($finalValues) || $referral) {
+            $finalValues = [
                 'northstar_id' => null, // set the user to null so we force account creation when the code is not present.
                 'campaign_id' => 8017,
                 'campaign_run_id' => 8022,
-                'source' => 'turbovote',
+                'source' => 'rock-the-vote',
                 'source_details' => null,
             ];
         }
 
-        return $values;
+        return $finalValues;
     }
 
     /**
@@ -220,17 +272,9 @@ class ImportTurboVotePosts implements ShouldQueue
         $details = [];
 
         $importantKeys = [
-            'hostname',
-            'referral-code',
-            'partner-comms-opt-in',
-            'created-at',
-            'updated-at',
-            'voter-registration-status',
-            'voter-registration-source',
-            'voter-registration-method',
-            'voting-method-preference',
-            'email subscribed',
-            'sms subscribed',
+            'Tracking Source',
+            'Started registration',
+            'Finish with State',
         ];
 
         foreach ($importantKeys as $key) {
@@ -245,37 +289,35 @@ class ImportTurboVotePosts implements ShouldQueue
     }
 
     /**
-     * Translate a status from TurboVote into a status that can be sent to Rogue.
+     * Translate a status from Rock The Vote into a status that can be sent to Rogue.
      *
-     * @param  string $tvStatus
-     * @param  string $tvMethod
+     * @param  string $rtvStatus
+     * @param  string $rtvFinishWithState
      * @return string
      */
-    private function translateStatus($tvStatus, $tvMethod)
+    private function translateStatus($rtvStatus, $rtvFinishWithState)
     {
-        $translatedStatus = '';
+        $rtvStatus = strtolower($rtvStatus);
+        $rtvFinishWithState = strtolower($rtvFinishWithState);
 
-        switch($tvStatus)
-        {
-            case 'initiated':
-                $translatedStatus = 'register-form';
-                break;
-            case 'registered':
-                $translatedStatus = $tvMethod === 'online' ? 'register-OVR' : 'confirmed';
-                break;
-            case 'unknown':
-            case 'pending':
-                $translatedStatus = 'uncertain';
-                break;
-            case 'ineligible':
-            case 'not-required':
-                $translatedStatus = 'ineligible';
-                break;
-            default:
-                $translatedStatus = 'pending';
+        if($rtvStatus === 'complete') {
+            if ($rtvFinishWithState === "no") {
+                return 'register-form';
+            }
+            if ($rtvFinishWithState === "yes") {
+                return 'register-OVR';
+            }   
         }
 
-        return $translatedStatus;
+        if (strpos($rtvStatus, 'step') !== false) {
+            return 'uncertain';
+        }
+
+        if ($rtvStatus === 'rejected') {
+            return 'ineligible';
+        }
+
+        return '';
     }
 
     /*
@@ -309,11 +351,26 @@ class ImportTurboVotePosts implements ShouldQueue
     */
     private function scrubRecord($record)
     {
-        $isNotValidEmail = strrpos($record['email'], 'thing.org') !== false || strrpos($record['email'] !== false, '@dosome') || strrpos($record['email'], 'turbovote') !== false;
-        $isNotValidHostname = strrpos($record['hostname'], 'testing') !== false;
-        $isNotValidLastName = strrpos($record['last-name'], 'Baloney') !== false;
+        $isNotValidEmail = strrpos($record['Email address'], 'thing.org') !== false || strrpos($record['Email address'] !== false, '@dosome') || strrpos($record['Email address'], 'rockthevote.com') !== false || strrpos($record['Email address'], 'test') !== false || strrpos($record['Email address'], '+') !== false;
+        $isNotValidLastName = strrpos($record['Last name'], 'Baloney') !== false;
 
-        return $isNotValidEmail || $isNotValidHostname || $isNotValidLastName ? false : true;
+        return $isNotValidEmail || $isNotValidLastName ? false : true;
+    }
+
+    /*
+     * Translate "Opt-in to Partner SMS/robocall" from Rock the Vote CSV to a Northstar sms_status
+     *
+     * @param array $sms_status
+     * @return string
+    */
+    private function transformSmsStatus($sms_status)
+    {
+        if ($sms_status === 'Yes') {
+            return 'active';
+        }
+
+        // @TODO: do we want this to be 'pending' or some other status? we talked about this recently referring to something else
+        return 'stop';
     }
 
     /**
@@ -331,14 +388,14 @@ class ImportTurboVotePosts implements ShouldQueue
 
         $userFieldsToLookFor = [
             'id' => isset($values['northstar_id']) && !empty($values['northstar_id']) ? $values['northstar_id'] : null,
-            'email' => isset($record['email']) && !empty($record['email']) ? $record['email'] : null,
+            'email' => isset($record['Email address']) && !empty($record['Email address']) ? $record['Email address'] : null,
             'mobile' => isset($record['phone']) && !empty($record['phone']) ? $record['phone'] : null,
         ];
 
         foreach ($userFieldsToLookFor as $field => $value)
         {
             if ($value) {
-                // info('getting user with the '.$field.' field', [$field => $value]);
+                info('getting user with the '.$field.' field', [$field => $value]);
                 $user = gateway('northstar')->asClient()->getUser($field, $value);
             }
 
@@ -348,39 +405,29 @@ class ImportTurboVotePosts implements ShouldQueue
         }
 
         if (is_null($user)) {
-            $user = gateway('northstar')->asClient()->createUser([
-                'email' => $record['email'],
-                'mobile' => $record['phone'],
-                'first_name' => $record['first-name'],
-                'last_name' => $record['last-name'],
-                'addr_street1' => $record['registered-address-street'],
-                'addr_street2' => $record['registered-address-street-2'],
-                'addr_city' => $record['registered-address-city'],
-                'addr_state' => $record['registered-address-state'],
-                'addr_zip' => $record['registered-address-zip'],
+            $userData = [
+                'email' => $record['Email address'],
+                'mobile' => $record['Phone'],
+                'first_name' => $record['First name'],
+                'last_name' => $record['Last name'],
+                'addr_street1' => $record['Home address'],
+                'addr_street2' => $record['Home unit'],
+                'addr_city' => $record['Home city'],
+                'addr_state' => $record['Home state'],
+                'addr_zip' => $record['Home zip code'],
                 'source' => env('NORTHSTAR_CLIENT_ID'),
-            ]);
+            ];
+
+            if ($record['Phone']) {
+                $userData['sms_status'] = $this->transformSmsStatus($record['Opt-in to Partner SMS/robocall']);
+            }
+
+            $user = gateway('northstar')->asClient()->createUser($userData);
 
             info('created user', ['user' => $user->id]);
             $this->stats['countUserAccountsCreated']++;
         }
 
         return $user;
-    }
-
-    private function getCSVRecords($filepath)
-    {
-        $file = Storage::get($filepath);
-        $csv = Reader::createFromString($file);
-        $csv->setHeaderOffset(0);
-        $records = $csv->getRecords();
-        $this->totalRecords = count($csv);
-
-        event(new LogProgress('Total rows to chomp: ' . $this->totalRecords, 'general'));
-        event(new LogProgress('', 'progress', 0));
-
-        $this->stats['totalRecords'] = $this->totalRecords;
-
-        return $records;
     }
 }

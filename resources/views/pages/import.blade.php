@@ -21,8 +21,11 @@
             <div class="form-check">
                 <label class="form-check-label">
                     <!-- @TODO - make "checked" status a variable that has a default -->
-                    <input checked name="import-type" class="form-check-input" type="checkbox" value="turbovote">
+                    <input name="import-type" class="form-check-input" type="checkbox" value="turbovote">
                     TurboVote Import
+                    <br>
+                    <input name="import-type" class="form-check-input" type="checkbox" value="rock-the-vote">
+                    Rock the Vote Import
                 </label>
             </div>
         </div>

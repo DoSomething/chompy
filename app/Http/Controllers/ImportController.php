@@ -7,6 +7,7 @@ use League\Csv\Reader;
 use Illuminate\Http\Request;
 use Chompy\Jobs\ImportTurboVotePosts;
 use Illuminate\Support\Facades\Storage;
+use Chompy\Jobs\ImportRockTheVotePosts;
 
 class ImportController extends Controller
 {
@@ -57,6 +58,11 @@ class ImportController extends Controller
         if ($request->input('import-type') === 'turbovote') {
             info("turbo vote import happening");
             ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
+        }
+
+        if ($request->input('import-type') === 'rock-the-vote') {
+            info('rock the vote import happening');
+            ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
         return redirect()->route('import.show')->with('status', 'Your CSV was added to the queue to be processed.');
