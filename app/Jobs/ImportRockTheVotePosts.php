@@ -275,6 +275,7 @@ class ImportRockTheVotePosts implements ShouldQueue
             'Tracking Source',
             'Started registration',
             'Finish with State',
+            'Status',
         ];
 
         foreach ($importantKeys as $key) {
