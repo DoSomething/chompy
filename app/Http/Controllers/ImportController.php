@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use League\Csv\Reader;
 use Illuminate\Http\Request;
 use Chompy\Jobs\ImportTurboVotePosts;
+use Chompy\Jobs\ImportFacebookSharePosts;
 use Illuminate\Support\Facades\Storage;
 use Chompy\Jobs\ImportRockTheVotePosts;
 
@@ -45,7 +46,7 @@ class ImportController extends Controller
 
         // Push file to S3.
         $upload = $request->file('upload-file');
-       
+
         $path = 'uploads/' . $request->input('import-type') . '-importer' . Carbon::now() . '.csv';
         $csv = Reader::createFromPath($upload->getRealPath());
         $success = Storage::put($path, (string)$csv);
@@ -63,6 +64,11 @@ class ImportController extends Controller
         if ($request->input('import-type') === 'rock-the-vote') {
             info('rock the vote import happening');
             ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
+        }
+
+        if ($request->input('import-type') === 'facebook') {
+            info("Facebook share import happening");
+            ImportFacebookSharePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
         return redirect()->route('import.show')->with('status', 'Your CSV was added to the queue to be processed.');
