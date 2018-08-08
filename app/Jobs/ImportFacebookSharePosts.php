@@ -2,6 +2,7 @@
 
 namespace Chompy\Jobs;
 
+use Carbon\Carbon;
 use League\Csv\Reader;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
@@ -69,7 +70,7 @@ class ImportFacebookSharePosts implements ShouldQueue
         foreach ($records as $offset => $record) {
             info('process_log: Processing: ' . $record['_id']);
             $postData = [
-                'campaign_id' => (int) $record['campaign_id'],
+                'campaign_id' => $record['campaign_id'],
                 'campaign_run_id' => (int) $record['campaign_run'],
                 'northstar_id' => $record['user.northstarId'],
                 'type' => 'share-social',
@@ -78,9 +79,8 @@ class ImportFacebookSharePosts implements ShouldQueue
                 'status' => 'accepted',
                 'source' => 'importer-client',
                 'source_details' => json_encode(['original-source' => $record['event.source']]),
-                'created_at' => strtotime($record['to_timestamp']),
+                'created_at' => Carbon::parse($record['to_timestamp'])->toDateTimeString(),
             ];
-
             try {
                 $post = $rogue->createPost($postData);
 
