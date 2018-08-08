@@ -81,7 +81,6 @@ class ImportFacebookSharePosts implements ShouldQueue
                 'created_at' => date(DATE_ATOM, strtotime($record['to_timestamp'])),
             ];
             try {
-                // dd((($postData['created_at'])));
                 $post = $rogue->createPost($postData);
 
                 if ($post['data']) {
