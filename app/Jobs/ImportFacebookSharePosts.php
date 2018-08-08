@@ -69,7 +69,7 @@ class ImportFacebookSharePosts implements ShouldQueue
         foreach ($records as $offset => $record) {
             info('process_log: Processing: ' . $record['_id']);
             $postData = [
-                'campaign_id' => (int) $record['campaign_id'],
+                'campaign_id' => $record['campaign_id'],
                 'campaign_run_id' => (int) $record['campaign_run'],
                 'northstar_id' => $record['user.northstarId'],
                 'type' => 'share-social',
@@ -78,10 +78,10 @@ class ImportFacebookSharePosts implements ShouldQueue
                 'status' => 'accepted',
                 'source' => 'importer-client',
                 'source_details' => json_encode(['original-source' => $record['event.source']]),
-                'created_at' => strtotime($record['to_timestamp']),
+                'created_at' => date(DATE_ATOM, strtotime($record['to_timestamp'])),
             ];
-
             try {
+                // dd((($postData['created_at'])));
                 $post = $rogue->createPost($postData);
 
                 if ($post['data']) {
