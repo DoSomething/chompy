@@ -79,7 +79,7 @@ class ImportFacebookSharePosts implements ShouldQueue
                 'northstar_id' => $record['user.northstarId'],
                 'type' => 'share-social',
                 'action' => $record['action'],
-                'details' => json_encode(['platform' => 'facebook', '_id' => $record['_id']]),
+                'details' => json_encode(['platform' => 'facebook', 'puck_id' => $record['_id']]),
                 'status' => 'accepted',
                 'source' => 'importer-client',
                 'source_details' => json_encode(['original-source' => $record['event.source']]),
