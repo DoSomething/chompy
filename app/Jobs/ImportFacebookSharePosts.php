@@ -2,6 +2,7 @@
 
 namespace Chompy\Jobs;
 
+use Chompy\Stat;
 use Carbon\Carbon;
 use League\Csv\Reader;
 use Chompy\Services\Rogue;
@@ -65,10 +66,13 @@ class ImportFacebookSharePosts implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
+        info('STARTING HISTORICAL FB IMPORT');
+
         $records = $this->getCSVRecords($this->filepath);
 
         foreach ($records as $offset => $record) {
             info('process_log: Processing: ' . $record['_id']);
+
             $postData = [
                 'campaign_id' => $record['campaign_id'],
                 'campaign_run_id' => (int) $record['campaign_run'],
@@ -81,6 +85,7 @@ class ImportFacebookSharePosts implements ShouldQueue
                 'source_details' => json_encode(['original-source' => $record['event.source']]),
                 'created_at' => Carbon::parse($record['to_timestamp'])->toDateTimeString(),
             ];
+
             try {
                 $post = $rogue->createPost($postData);
 
@@ -92,6 +97,18 @@ class ImportFacebookSharePosts implements ShouldQueue
                     'Error' => $e->getMessage(),
                 ]);
             }
+
+            $this->stats['countProcessed']++;
+
+            event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
         }
+
+        event(new LogProgress('Done!', 'general'));
+
+        Stat::create([
+            'filename' => $this->filepath,
+            'total_records' => $this->stats['totalRecords'],
+            'stats' => json_encode($this->stats),
+        ]);
     }
 }
