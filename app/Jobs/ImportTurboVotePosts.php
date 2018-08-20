@@ -388,17 +388,11 @@ class ImportTurboVotePosts implements ShouldQueue
     private function getCSVRecords($filepath)
     {
         $file = Storage::get($filepath);
+        $file = str_replace("\r","\n", $file);
+
         $csv = Reader::createFromString($file);
         $csv->setHeaderOffset(0);
-        // $csv = str_replace("\r","\n", $csv);
-        // dd($csv);
-
-        // // $cvs = array_map('trim', $csv->getHeader());
-        // // dd($headers);
-        // foreach ($csv->getRecords($headers) as $record) {
-        //     dd('hi');
-        // }
-        $csv = $csv->getRecords();
+        $records = $csv->getRecords();
         $this->totalRecords = count($csv);
 
         event(new LogProgress('Total rows to chomp: ' . $this->totalRecords, 'general'));
