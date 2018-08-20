@@ -390,7 +390,7 @@ class ImportTurboVotePosts implements ShouldQueue
         $file = Storage::get($filepath);
         $csv = Reader::createFromString($file);
         $csv->setHeaderOffset(0);
-        $csv = str_replace("\r","\n", $csv);
+        // $csv = str_replace("\r","\n", $csv);
         // dd($csv);
 
         // // $cvs = array_map('trim', $csv->getHeader());
@@ -398,7 +398,7 @@ class ImportTurboVotePosts implements ShouldQueue
         // foreach ($csv->getRecords($headers) as $record) {
         //     dd('hi');
         // }
-        $records = $csv->getRecords();
+        $csv = $csv->getRecords();
         $this->totalRecords = count($csv);
 
         event(new LogProgress('Total rows to chomp: ' . $this->totalRecords, 'general'));
