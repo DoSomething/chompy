@@ -27,6 +27,8 @@ trait ImportToRogue
     public function getCSVRecords($filepath)
     {
         $file = Storage::get($filepath);
+        $file = str_replace("\r","\n", $file);
+
         $csv = Reader::createFromString($file);
         $csv->setHeaderOffset(0);
         $records = $csv->getRecords();
