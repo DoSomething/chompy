@@ -6,6 +6,10 @@ This is **Chompy**, the DoSomething.org importer app. Chompy is built using [Lar
 
 To get started with development, follow the [installation](https://github.com/DoSomething/chompy/blob/master/docs/installation.md) and [contributing](https://github.com/DoSomething/chompy/blob/master/docs/development/contributing.md) documentation.
 
+### Testing
+Performance & debug information is available at [`/__clockwork`](http://chompy.test/__clockwork), or using the [Chrome Extension](https://chrome.google.com/webstore/detail/clockwork/dmggabnehkmmfmdffgajcflpdjlnoemp).
+
+
 ### Security Vulnerabilities
 
 We take security very seriously. Any vulnerabilities in Chompy should be reported to [security@dosomething.org](mailto:security@dosomething.org),
