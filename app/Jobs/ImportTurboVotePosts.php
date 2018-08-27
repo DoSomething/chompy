@@ -67,8 +67,13 @@ class ImportTurboVotePosts implements ShouldQueue
     {
         // @TODO: We need to write some tests for this import!
         info("getting records");
+        clock()->startEvent('getting-records', "Getting records from CSV");
+
         $records = $this->getCSVRecords($this->filepath);
+
         info("records received");
+        clock()->endEvent('getting-records');
+
         foreach ($records as $offset => $record)
         {
             $shouldProcess = $this->scrubRecord($record);
@@ -356,7 +361,7 @@ class ImportTurboVotePosts implements ShouldQueue
         foreach ($userFieldsToLookFor as $field => $value)
         {
             if ($value) {
-                // info('getting user with the '.$field.' field', [$field => $value]);
+                info('getting user with the '.$field.' field', [$field => $value]);
                 $user = gateway('northstar')->asClient()->getUser($field, $value);
             }
 
