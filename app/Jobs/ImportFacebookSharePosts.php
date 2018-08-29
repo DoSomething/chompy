@@ -73,30 +73,40 @@ class ImportFacebookSharePosts implements ShouldQueue
         foreach ($records as $offset => $record) {
             info('process_log: Processing: ' . $record['_id']);
 
-            $postData = [
-                'campaign_id' => $record['campaign_id'],
-                'campaign_run_id' => (int) $record['campaign_run'],
-                'northstar_id' => $record['user.northstarId'],
-                'type' => 'share-social',
-                'action' => $record['action'],
-                'details' => json_encode(['platform' => 'facebook', 'puck_id' => $record['_id']]),
-                'status' => 'accepted',
-                'source' => 'importer-client',
-                'source_details' => json_encode(['original-source' => $record['event.source']]),
-                'created_at' => Carbon::parse($record['to_timestamp'])->toDateTimeString(),
-            ];
+            $post = $rogue->getPost([
+                        'campaign_id' => (int) $record['campaign_id'],
+                        'northstar_id' => $record['user.northstarId'],
+                        'type' => 'share-social',
+                        'created_at' => Carbon::parse($record['to_timestamp'])->toDateTimeString(),
+                    ]);
 
-            try {
-                $post = $rogue->createPost($postData);
+            if (! $post['data']) {
+                $postData = [
+                    'campaign_id' => $record['campaign_id'],
+                    'campaign_run_id' => (int) $record['campaign_run'],
+                    'northstar_id' => $record['user.northstarId'],
+                    'type' => 'share-social',
+                    'action' => $record['action'],
+                    'details' => json_encode(['platform' => 'facebook', 'puck_id' => $record['_id']]),
+                    'status' => 'accepted',
+                    'source' => 'importer-client',
+                    'source_details' => json_encode(['original-source' => $record['event.source']]),
+                    'created_at' => Carbon::parse($record['to_timestamp'])->toDateTimeString(),
+                ];
 
-                if ($post['data']) {
-                    $this->stats['countPostCreated']++;
+                try {
+                    $post = $rogue->createPost($postData);
+
+                    if ($post['data']) {
+                        $this->stats['countPostCreated']++;
+                    }
+                } catch (\Exception $e) {
+                    info('There was an error storing the post for: ' . $record['_id'], [
+                        'Error' => $e->getMessage(),
+                    ]);
                 }
-            } catch (\Exception $e) {
-                info('There was an error storing the post for: ' . $record['_id'], [
-                    'Error' => $e->getMessage(),
-                ]);
             }
+
 
             $this->stats['countProcessed']++;
 
@@ -104,6 +114,8 @@ class ImportFacebookSharePosts implements ShouldQueue
         }
 
         event(new LogProgress('Done!', 'general'));
+
+        info('HISTORICAL FB IMPORT FINISHED');
 
         Stat::create([
             'filename' => $this->filepath,
