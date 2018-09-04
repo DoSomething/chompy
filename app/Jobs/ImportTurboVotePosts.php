@@ -4,7 +4,7 @@ namespace Chompy\Jobs;
 
 
 use Chompy\Stat;
-use Carbon\Carbon;
+// use Carbon\Carbon;
 use League\Csv\Reader;
 use Chompy\Services\Rogue;
 use Chompy\Events\LogProgress;
@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Chompy\Jobs\CreateTurboVotePostInRogue;
 
 class ImportTurboVotePosts implements ShouldQueue
 {
@@ -100,32 +101,39 @@ class ImportTurboVotePosts implements ShouldQueue
                     ]);
 
                     if (! $post['data']) {
-                        $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
-                        $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
-                        $postDetails = $this->extractDetails($record);
+                        CreateTurboVotePostInRogue::dispatch($record, $referralCodeValues, $user);
+                        // $tvCreatedAtMonth = strtolower(Carbon::parse($record['created-at'])->format('F-Y'));
+                        // $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
+                        // $postDetails = $this->extractDetails($record);
 
-                        $postData = [
-                            'campaign_id' => (int) $referralCodeValues['campaign_id'],
-                            'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
-                            'northstar_id' => $user->id,
-                            'type' => 'voter-reg',
-                            'action' => $tvCreatedAtMonth . '-turbovote',
-                            'status' => $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']),
-                            'source' => 'turbovote',
-                            'source_details' => $sourceDetails,
-                            'details' => $postDetails,
-                        ];
+                        // $postData = [
+                        //     'campaign_id' => (int) $referralCodeValues['campaign_id'],
+                        //     'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
+                        //     'northstar_id' => $user->id,
+                        //     'type' => 'voter-reg',
+                        //     'action' => $tvCreatedAtMonth . '-turbovote',
+                        //     'status' => $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']),
+                        //     'source' => 'turbovote',
+                        //     'source_details' => $sourceDetails,
+                        //     'details' => $postDetails,
+                        // ];
 
-                        try {
-                            $post = $rogue->createPost($postData);
+                        // try {
+                        //     $post = $rogue->createPost($postData);
 
-                            if ($post['data']) {
-                                $this->stats['countPostCreated']++;
-                            }
-                        } catch (\Exception $e) {
-                            info('There was an error storing the post for: ' . $record['id'], [
-                                'Error' => $e->getMessage(),
-                            ]);
+                        //     if ($post['data']) {
+                        //         $this->stats['countPostCreated']++;
+                        //     }
+                        // } catch (\Exception $e) {
+                        //     info('There was an error storing the post for: ' . $record['id'], [
+                        //         'Error' => $e->getMessage(),
+                        //     ]);
+                        // }
+
+
+                        // do we want to move this to the createturbovotepostinrogue job ?
+                        if ($post['data']) {
+                            $this->stats['countPostCreated']++;
                         }
                     } else {
                         $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
@@ -232,74 +240,74 @@ class ImportTurboVotePosts implements ShouldQueue
         return $values;
     }
 
-    /**
-     * Parse the record for extra details and return them as a JSON object.
-     *
-     * @param  array $record
-     * @param  array $extraData
-     */
-    private function extractDetails($record, $extraData = null)
-    {
-        $details = [];
+    // /**
+    //  * Parse the record for extra details and return them as a JSON object.
+    //  *
+    //  * @param  array $record
+    //  * @param  array $extraData
+    //  */
+    // private function extractDetails($record, $extraData = null)
+    // {
+    //     $details = [];
 
-        $importantKeys = [
-            'hostname',
-            'referral-code',
-            'partner-comms-opt-in',
-            'created-at',
-            'updated-at',
-            'voter-registration-status',
-            'voter-registration-source',
-            'voter-registration-method',
-            'voting-method-preference',
-            'email subscribed',
-            'sms subscribed',
-        ];
+    //     $importantKeys = [
+    //         'hostname',
+    //         'referral-code',
+    //         'partner-comms-opt-in',
+    //         'created-at',
+    //         'updated-at',
+    //         'voter-registration-status',
+    //         'voter-registration-source',
+    //         'voter-registration-method',
+    //         'voting-method-preference',
+    //         'email subscribed',
+    //         'sms subscribed',
+    //     ];
 
-        foreach ($importantKeys as $key) {
-            $details[$key] = $record[$key];
-        }
+    //     foreach ($importantKeys as $key) {
+    //         $details[$key] = $record[$key];
+    //     }
 
-        if ($extraData) {
-            $details = array_merge($details, $extraData);
-        }
+    //     if ($extraData) {
+    //         $details = array_merge($details, $extraData);
+    //     }
 
-        return json_encode($details);
-    }
+    //     return json_encode($details);
+    // }
 
-    /**
-     * Translate a status from TurboVote into a status that can be sent to Rogue.
-     *
-     * @param  string $tvStatus
-     * @param  string $tvMethod
-     * @return string
-     */
-    private function translateStatus($tvStatus, $tvMethod)
-    {
-        $translatedStatus = '';
+    // *
+    //  * Translate a status from TurboVote into a status that can be sent to Rogue.
+    //  *
+    //  * @param  string $tvStatus
+    //  * @param  string $tvMethod
+    //  * @return string
 
-        switch($tvStatus)
-        {
-            case 'initiated':
-                $translatedStatus = 'register-form';
-                break;
-            case 'registered':
-                $translatedStatus = $tvMethod === 'online' ? 'register-OVR' : 'confirmed';
-                break;
-            case 'unknown':
-            case 'pending':
-                $translatedStatus = 'uncertain';
-                break;
-            case 'ineligible':
-            case 'not-required':
-                $translatedStatus = 'ineligible';
-                break;
-            default:
-                $translatedStatus = 'pending';
-        }
+    // private function translateStatus($tvStatus, $tvMethod)
+    // {
+    //     $translatedStatus = '';
 
-        return $translatedStatus;
-    }
+    //     switch($tvStatus)
+    //     {
+    //         case 'initiated':
+    //             $translatedStatus = 'register-form';
+    //             break;
+    //         case 'registered':
+    //             $translatedStatus = $tvMethod === 'online' ? 'register-OVR' : 'confirmed';
+    //             break;
+    //         case 'unknown':
+    //         case 'pending':
+    //             $translatedStatus = 'uncertain';
+    //             break;
+    //         case 'ineligible':
+    //         case 'not-required':
+    //             $translatedStatus = 'ineligible';
+    //             break;
+    //         default:
+    //             $translatedStatus = 'pending';
+    //     }
+
+    //     return $translatedStatus;
+    // }
 
     /*
      * Determines if a status should be changed and what it should be changed to.
