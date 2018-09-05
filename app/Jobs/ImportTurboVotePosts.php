@@ -2,16 +2,13 @@
 
 namespace Chompy\Jobs;
 
-
 use Chompy\Stat;
-// use Carbon\Carbon;
 use League\Csv\Reader;
 use Chompy\Services\Rogue;
 use Chompy\Events\LogProgress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Chompy\Jobs\CreateTurboVotePostInRogue;
@@ -100,14 +97,11 @@ class ImportTurboVotePosts implements ShouldQueue
                     ]);
 
                     if (! $post['data']) {
-                        if (CreateTurboVotePostInRogue::dispatch($record, $referralCodeValues, $user)) {
+                        $post = CreateTurboVotePostInRogue::dispatch($record, $referralCodeValues, $user);
+
+                        if ($post) {
                             $this->stats['countPostCreated']++;
                         }
-
-
-                        // if ($post['data']) {
-                        //     // $this->stats['countPostCreated']++;
-                        // }
                     } else {
                         $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
                         $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
