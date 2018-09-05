@@ -72,7 +72,11 @@ class CreateTurboVotePostInRogue implements ShouldQueue
         ];
 
         try {
-            $rogue->createPost($postData);
+            $post = $rogue->createPost($postData);
+
+            if ($post['data']) {
+                return true;
+            }
     	} catch (\Exception $e) {
                             info('There was an error storing the post for: ' . $this->record['id'], [
                                 'Error' => $e->getMessage(),

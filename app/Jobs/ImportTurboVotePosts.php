@@ -60,22 +60,6 @@ class ImportTurboVotePosts implements ShouldQueue
     }
 
     /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        Queue::after(function(JobProcessed $event) {
-            dd('hi');
-            // If a post was successfully created in Rogue, incease countPostCreated stat.
-            if ($event->job instanceof CreateTurboVotePostInRogue) {
-                $this->stats['countPostCreated']++;
-            }
-        });
-    }
-
-    /**
      * Execute the job.
      *
      * @param  Rogue $rogue
@@ -116,7 +100,10 @@ class ImportTurboVotePosts implements ShouldQueue
                     ]);
 
                     if (! $post['data']) {
-                        CreateTurboVotePostInRogue::dispatch($record, $referralCodeValues, $user);
+                        if (CreateTurboVotePostInRogue::dispatch($record, $referralCodeValues, $user)) {
+                            $this->stats['countPostCreated']++;
+                        }
+
 
                         // if ($post['data']) {
                         //     // $this->stats['countPostCreated']++;
