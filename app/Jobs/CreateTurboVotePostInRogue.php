@@ -55,8 +55,10 @@ class CreateTurboVotePostInRogue implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
+        info('creating post in rogue for ' . $this->record['id']);
+
         $tvCreatedAtMonth = strtolower(Carbon::parse($this->record['created-at'])->format('F-Y'));
-        $sourceDetails = isset($this->referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
+        $sourceDetails = isset($this->referralCodeValues['source_details']) ? $this->referralCodeValues['source_details'] : null;
         $postDetails = $this->extractDetails($this->record);
 
         $postData = [
@@ -75,6 +77,8 @@ class CreateTurboVotePostInRogue implements ShouldQueue
             $post = $rogue->createPost($postData);
 
             if ($post['data']) {
+                info('post created in rogue for ' . $this->record['id']);
+
                 return true;
             }
     	} catch (\Exception $e) {
