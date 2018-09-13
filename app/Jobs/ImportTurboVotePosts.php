@@ -7,6 +7,7 @@ use League\Csv\Reader;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Chompy\Events\LogProgress;
+use Chompy\Traits\ImportToRogue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,7 +16,7 @@ use Chompy\Jobs\CreateTurboVotePostInRogue;
 
 class ImportTurboVotePosts implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable;
+    use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
 
     /**
      * The path to the stored csv.
@@ -99,7 +100,7 @@ class ImportTurboVotePosts implements ShouldQueue
                     if (! $post['data']) {
                         CreateTurboVotePostInRogue::dispatch($record, $referralCodeValues, $user);
                     } else {
-                        $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
+                        $newStatus = $this->translateTVStatus($record['voter-registration-status'], $record['voter-registration-method']);
                         $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
 
                         if ($statusShouldChange) {
@@ -290,23 +291,5 @@ class ImportTurboVotePosts implements ShouldQueue
         }
 
         return $user;
-    }
-
-    private function getCSVRecords($filepath)
-    {
-        $file = Storage::get($filepath);
-        $file = str_replace("\r","\n", $file);
-
-        $csv = Reader::createFromString($file);
-        $csv->setHeaderOffset(0);
-        $records = $csv->getRecords();
-        $this->totalRecords = count($csv);
-
-        event(new LogProgress('Total rows to chomp: ' . $this->totalRecords, 'general'));
-        event(new LogProgress('', 'progress', 0));
-
-        $this->stats['totalRecords'] = $this->totalRecords;
-
-        return $records;
     }
 }

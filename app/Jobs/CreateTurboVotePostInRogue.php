@@ -67,7 +67,7 @@ class CreateTurboVotePostInRogue implements ShouldQueue
             'northstar_id' => $this->user->id,
             'type' => 'voter-reg',
             'action' => $tvCreatedAtMonth . '-turbovote',
-            'status' => $this->translateStatus($this->record['voter-registration-status'], $this->record['voter-registration-method']),
+            'status' => $this->translateTVStatus($this->record['voter-registration-status'], $this->record['voter-registration-method']),
             'source' => 'turbovote',
             'source_details' => $sourceDetails,
             'details' => $postDetails,
@@ -120,39 +120,4 @@ class CreateTurboVotePostInRogue implements ShouldQueue
 
         return json_encode($details);
     }
-
-    /**
-     * Translate a status from TurboVote into a status that can be sent to Rogue.
-     *
-     * @param  string $tvStatus
-     * @param  string $tvMethod
-     * @return string
-     */
-    private function translateStatus($tvStatus, $tvMethod)
-    {
-        $translatedStatus = '';
-
-        switch($tvStatus)
-        {
-            case 'initiated':
-                $translatedStatus = 'register-form';
-                break;
-            case 'registered':
-                $translatedStatus = $tvMethod === 'online' ? 'register-OVR' : 'confirmed';
-                break;
-            case 'unknown':
-            case 'pending':
-                $translatedStatus = 'uncertain';
-                break;
-            case 'ineligible':
-            case 'not-required':
-                $translatedStatus = 'ineligible';
-                break;
-            default:
-                $translatedStatus = 'pending';
-        }
-
-        return $translatedStatus;
-    }
-
 }

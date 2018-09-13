@@ -42,4 +42,38 @@ trait ImportToRogue
         return $records;
     }
 
+    /**
+     * Translate a status from TurboVote into a status that can be sent to Rogue.
+     *
+     * @param  string $tvStatus
+     * @param  string $tvMethod
+     * @return string
+     */
+    public function translateTVStatus($tvStatus, $tvMethod)
+    {
+        $translatedStatus = '';
+
+        switch($tvStatus)
+        {
+            case 'initiated':
+                $translatedStatus = 'register-form';
+                break;
+            case 'registered':
+                $translatedStatus = $tvMethod === 'online' ? 'register-OVR' : 'confirmed';
+                break;
+            case 'unknown':
+            case 'pending':
+                $translatedStatus = 'uncertain';
+                break;
+            case 'ineligible':
+            case 'not-required':
+                $translatedStatus = 'ineligible';
+                break;
+            default:
+                $translatedStatus = 'pending';
+        }
+
+        return $translatedStatus;
+    }
+
 }
