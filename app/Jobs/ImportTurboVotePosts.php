@@ -97,11 +97,7 @@ class ImportTurboVotePosts implements ShouldQueue
                     ]);
 
                     if (! $post['data']) {
-                        $post = CreateTurboVotePostInRogue::dispatch($record, $referralCodeValues, $user);
-
-                        if ($post) {
-                            $this->stats['countPostCreated']++;
-                        }
+                        CreateTurboVotePostInRogue::dispatch($record, $referralCodeValues, $user);
                     } else {
                         $newStatus = $this->translateStatus($record['voter-registration-status'], $record['voter-registration-method']);
                         $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
@@ -146,7 +142,6 @@ class ImportTurboVotePosts implements ShouldQueue
             'totalRecords' => 0,
             'countScrubbed' => 0,
             'countProcessed' => 0,
-            'countPostCreated' => 0,
             'countUserAccountsCreated' => 0,
         ];
     }
