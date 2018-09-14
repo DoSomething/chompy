@@ -41,5 +41,4 @@ trait ImportToRogue
 
         return $records;
     }
-
 }
