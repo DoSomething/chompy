@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Chompy\Jobs\CreateRockTheVotePostInRogue;
 
 class ImportRockTheVotePosts implements ShouldQueue
 {
@@ -69,6 +70,8 @@ class ImportRockTheVotePosts implements ShouldQueue
 
         foreach ($records as $offset => $record)
         {
+
+            CreateRockTheVotePostInRogue::dispatch($record);
             $shouldProcess = $this->scrubRecord($record);
 
             if ($shouldProcess) {
@@ -84,7 +87,7 @@ class ImportRockTheVotePosts implements ShouldQueue
                         'Error' => $e->getMessage(),
                     ]);
                 }
-                
+
                 if ($user) {
                     $post = $rogue->getPost([
                         'campaign_id' => (int) $referralCodeValues['campaign_id'],
@@ -164,10 +167,10 @@ class ImportRockTheVotePosts implements ShouldQueue
 
         // Remove some nonsense that comes in front of the referral code sometimes
         if (strrpos($referralCode, 'iframe?r=') !== false) {
-            $referralCode = str_replace('iframe?r=', null, $referralCode);  
+            $referralCode = str_replace('iframe?r=', null, $referralCode);
         }
         if (strrpos($referralCode, 'iframe?') !== false) {
-            $referralCode = str_replace('iframe?', null, $referralCode);  
+            $referralCode = str_replace('iframe?', null, $referralCode);
         }
 
         if (! empty($referralCode)) {
@@ -309,7 +312,7 @@ class ImportRockTheVotePosts implements ShouldQueue
             }
             if ($rtvFinishWithState === "yes") {
                 return 'register-OVR';
-            }   
+            }
         }
 
         if (strpos($rtvStatus, 'step') !== false) {
