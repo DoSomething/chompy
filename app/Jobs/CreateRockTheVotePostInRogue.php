@@ -2,7 +2,6 @@
 
 namespace Chompy\Jobs;
 
-use Chompy\Stat;
 use Carbon\Carbon;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
@@ -80,11 +79,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                     ];
 
                     try {
-                        $post = $rogue->createPost($postData);
-
-                        if ($post['data']) {
-                            $this->stats['countPostCreated']++;
-                        }
+                        $rogue->createPost($postData);
                     } catch (\Exception $e) {
                         info('There was an error storing the post', [
                             'Error' => $e->getMessage(),
@@ -105,16 +100,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                     }
                 }
             }
-            $this->stats['countProcessed']++;
-        } else {
-            $this->stats['countScrubbed']++;
         }
-
-        Stat::create([
-            'filename' => $this->filepath,
-            'total_records' => $this->stats['totalRecords'],
-            'stats' => json_encode($this->stats),
-        ]);
     }
 
     /*
@@ -292,7 +278,6 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
             if ($user->id) {
                 info('created user', ['user' => $user->id]);
-                $this->stats['countUserAccountsCreated']++;
             }
         }
 

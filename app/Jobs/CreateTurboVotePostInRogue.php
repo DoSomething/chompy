@@ -2,7 +2,6 @@
 
 namespace Chompy\Jobs;
 
-use Chompy\Stat;
 use Carbon\Carbon;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;

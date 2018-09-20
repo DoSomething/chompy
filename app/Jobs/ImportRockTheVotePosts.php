@@ -2,7 +2,6 @@
 
 namespace Chompy\Jobs;
 
-use Chompy\Stat;
 use Carbon\Carbon;
 use League\Csv\Reader;
 use Chompy\Services\Rogue;
@@ -27,12 +26,10 @@ class ImportRockTheVotePosts implements ShouldQueue
     protected $filepath;
 
     /**
-     * The path to the stored csv.
+     * The total records in the stored csv.
      *
      * @var array
      */
-    protected $stats;
-
     protected $totalRecords;
 
     /**
@@ -43,8 +40,6 @@ class ImportRockTheVotePosts implements ShouldQueue
     public function __construct($filepath)
     {
         $this->filepath = $filepath;
-
-        $this->stats = $this->statsInit();
     }
 
     /**
@@ -70,7 +65,6 @@ class ImportRockTheVotePosts implements ShouldQueue
 
         foreach ($records as $offset => $record)
         {
-
             CreateRockTheVotePostInRogue::dispatch($record);
 
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
