@@ -192,8 +192,8 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         // See if we have all the required information we need
         if (!array_has($values, ['northstar_id', 'campaign_id', 'campaign_run_id'])) {
-            // If we have the campaign values, use em! This also means that we do not have NS id
-            if (array_has($values, ['campaign_id', 'campaign_run_id'])) {
+            // If we have valid campaign values, use em! This also means that we do not have NS id
+            if (array_has($values, ['campaign_id', 'campaign_run_id']) && is_numeric($values['campaign_id']) && is_numeric($values['campaign_run_id'])) {
                 $finalValues = [
                     'northstar_id' => null, // set the user to null so we force account creation when the code is not present.
                     'campaign_id' => $values['campaign_id'],
