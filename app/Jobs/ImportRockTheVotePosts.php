@@ -26,7 +26,7 @@ class ImportRockTheVotePosts implements ShouldQueue
     protected $filepath;
 
     /**
-     * The total records in the stored csv.
+     * The count of the total records in the stored csv.
      *
      * @var array
      */
