@@ -82,7 +82,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                         $post = $rogue->createPost($postData);
 
                         if ($post['data']) {
-                            info('post created in rogue for ' . $this->record['id']);
+                            info('post created in rogue for ' . $this->record['Email address']);
                         }
                     } catch (\Exception $e) {
                         info('There was an error storing the post', [
