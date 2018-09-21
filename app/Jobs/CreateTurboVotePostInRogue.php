@@ -2,7 +2,6 @@
 
 namespace Chompy\Jobs;
 
-use Chompy\Stat;
 use Carbon\Carbon;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
@@ -55,7 +54,7 @@ class CreateTurboVotePostInRogue implements ShouldQueue
                 ]);
             }
 
-            if ($user) {
+            if (isset($user)) {
                 $post = $rogue->getPost([
                     'campaign_id' => (int) $referralCodeValues['campaign_id'],
                     'northstar_id' => $user->id,
@@ -226,7 +225,10 @@ class CreateTurboVotePostInRogue implements ShouldQueue
                 'source' => env('NORTHSTAR_CLIENT_ID'),
             ]);
 
-            info('created user', ['user' => $user->id]);
+            // Log if the user was successfully created.
+            if ($user->id) {
+                info('created user', ['user' => $user->id]);
+            }
         }
 
         return $user;
