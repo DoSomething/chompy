@@ -55,6 +55,8 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             }
 
             if (isset($user)) {
+                $this->updateNorthstarStatus($user, $this->translateStatus($this->record['Status'], $this->record['Finish with State']));
+
                 $post = $rogue->getPost([
                     'campaign_id' => (int) $referralCodeValues['campaign_id'],
                     'northstar_id' => $user->id,
@@ -388,5 +390,26 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         // @TODO: do we want this to be 'pending' or some other status? we talked about this recently referring to something else
         return 'stop';
+    }
+
+    /*
+     * Translate to Northstar status and update Northstar user (Northstar takes care of the hierarchy)
+     *
+     * @param Object $user
+     * @param string $statusToSend
+    */
+    private function updateNorthstarStatus($user, $statusToSend)
+    {
+        if ($statusToSend === 'register-form' || $statusToSend === 'register-OVR') {
+            $statusToSend = 'registration_complete';
+        }
+
+        try {
+            gateway('northstar')->asClient()->updateUser($user->id, ['voter_registration_status' => $statusToSend]);
+        } catch (\Exception $e) {
+            info('Error updating voter_registration_status for user: ' . $user->id, [
+                'Error' => $e->getMessage(),
+            ]);
+        }
     }
 }
