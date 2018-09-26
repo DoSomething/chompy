@@ -55,6 +55,7 @@ class CreateTurboVotePostInRogue implements ShouldQueue
             }
 
             if (isset($user)) {
+                // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
                 $this->updateNorthstarStatus($user, $this->translateTVStatus($this->record['voter-registration-status'], $this->record['voter-registration-method']));
 
                 $post = $rogue->getPost([

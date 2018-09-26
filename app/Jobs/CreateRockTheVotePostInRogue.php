@@ -55,6 +55,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             }
 
             if (isset($user)) {
+                // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
                 $this->updateNorthstarStatus($user, $this->translateStatus($this->record['Status'], $this->record['Finish with State']));
 
                 $post = $rogue->getPost([
