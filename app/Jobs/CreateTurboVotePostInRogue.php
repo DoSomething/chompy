@@ -55,6 +55,8 @@ class CreateTurboVotePostInRogue implements ShouldQueue
             }
 
             if (isset($user)) {
+                $this->updateNorthstarStatus($user, $this->translateTVStatus($this->record['voter-registration-status'], $this->record['voter-registration-method']));
+
                 $post = $rogue->getPost([
                     'campaign_id' => (int) $referralCodeValues['campaign_id'],
                     'northstar_id' => $user->id,
@@ -324,5 +326,26 @@ class CreateTurboVotePostInRogue implements ShouldQueue
         $indexOfNewStatus = array_search($newStatus, $statusHierarchy);
 
         return $indexOfCurrentStatus < $indexOfNewStatus ? $newStatus : null;
+    }
+
+    /*
+     * Translate to Northstar status and update Northstar user (Northstar takes care of the hierarchy)
+     *
+     * @param Object $user
+     * @param string $statusToSend
+    */
+    private function updateNorthstarStatus($user, $statusToSend)
+    {
+        if ($statusToSend === 'register-form' || $statusToSend === 'register-OVR') {
+            $statusToSend = 'registration_complete';
+        }
+
+        try {
+            gateway('northstar')->asClient()->updateUser($user->id, ['voter_registration_status' => $statusToSend]);
+        } catch (\Exception $e) {
+            info('Error updating voter_registration_status for user: ' . $user->id, [
+                'Error' => $e->getMessage(),
+            ]);
+        }
     }
 }
