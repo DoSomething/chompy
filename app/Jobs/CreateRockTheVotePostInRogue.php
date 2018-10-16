@@ -75,17 +75,8 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                     'details' => $postDetails,
                 ];
 
-                try {
-                    $post = $rogue->createPost($postData);
-
-                    if ($post['data']) {
-                        info('post created in rogue for ' . $this->record['Email address']);
-                    }
-                } catch (\Exception $e) {
-                    info('There was an error storing the post', [
-                        'Error' => $e->getMessage(),
-                    ]);
-                }
+                $post = $rogue->createPost($postData);
+                info('post created in rogue for ' . $this->record['Email address']);
             } else {
                 $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
                 $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
@@ -279,7 +270,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             if ($user->id) {
                 info('created user', ['user' => $user->id]);
             } else {
-                throw new HttpException(500, "Unable to create user: $this->record['Email address']");
+                throw new HttpException(500, 'Unable to create user: ' . $this->record['Email address']);
             }
         }
 
