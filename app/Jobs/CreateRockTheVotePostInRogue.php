@@ -9,6 +9,7 @@ use Chompy\Traits\ImportToRogue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CreateRockTheVotePostInRogue implements ShouldQueue
 {
@@ -46,64 +47,56 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             $referralCode = $this->record['Tracking Source'];
             $referralCodeValues = $this->parseReferralCode($referralCode);
 
-            try {
-                $user = $this->getOrCreateUser($this->record, $referralCodeValues);
-            } catch (\Exception $e) {
-                info('There was an error with that user: ' . $this->record['Email address'], [
-                    'Error' => $e->getMessage(),
-                ]);
-            }
+            $user = $this->getOrCreateUser($this->record, $referralCodeValues);
 
-            if (isset($user)) {
-                // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
-                $this->updateNorthstarStatus($user, $this->translateStatus($this->record['Status'], $this->record['Finish with State']));
+            // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
+            $this->updateNorthstarStatus($user, $this->translateStatus($this->record['Status'], $this->record['Finish with State']));
 
-                $post = $rogue->getPost([
+            $post = $rogue->getPost([
+                'campaign_id' => (int) $referralCodeValues['campaign_id'],
+                'northstar_id' => $user->id,
+                'type' => 'voter-reg',
+            ]);
+
+            if (! $post['data']) {
+                $rtvCreatedAtMonth = strtolower(Carbon::parse($this->record['Started registration'])->format('F-Y'));
+                $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
+                $postDetails = $this->extractDetails($this->record);
+
+                $postData = [
                     'campaign_id' => (int) $referralCodeValues['campaign_id'],
+                    'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
                     'northstar_id' => $user->id,
                     'type' => 'voter-reg',
-                ]);
+                    'action' => $rtvCreatedAtMonth . '-rockthevote',
+                    'status' => $this->translateStatus($this->record['Status'], $this->record['Finish with State']),
+                    'source' => 'rock-the-vote',
+                    'source_details' => $sourceDetails,
+                    'details' => $postDetails,
+                ];
 
-                if (! $post['data']) {
-                    $rtvCreatedAtMonth = strtolower(Carbon::parse($this->record['Started registration'])->format('F-Y'));
-                    $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
-                    $postDetails = $this->extractDetails($this->record);
+                try {
+                    $post = $rogue->createPost($postData);
 
-                    $postData = [
-                        'campaign_id' => (int) $referralCodeValues['campaign_id'],
-                        'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
-                        'northstar_id' => $user->id,
-                        'type' => 'voter-reg',
-                        'action' => $rtvCreatedAtMonth . '-rockthevote',
-                        'status' => $this->translateStatus($this->record['Status'], $this->record['Finish with State']),
-                        'source' => 'rock-the-vote',
-                        'source_details' => $sourceDetails,
-                        'details' => $postDetails,
-                    ];
+                    if ($post['data']) {
+                        info('post created in rogue for ' . $this->record['Email address']);
+                    }
+                } catch (\Exception $e) {
+                    info('There was an error storing the post', [
+                        'Error' => $e->getMessage(),
+                    ]);
+                }
+            } else {
+                $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
+                $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
 
+                if ($statusShouldChange) {
                     try {
-                        $post = $rogue->createPost($postData);
-
-                        if ($post['data']) {
-                            info('post created in rogue for ' . $this->record['Email address']);
-                        }
+                        $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
                     } catch (\Exception $e) {
-                        info('There was an error storing the post', [
+                        info('There was an error updating the post for: ' . $this->record['Email address'], [
                             'Error' => $e->getMessage(),
                         ]);
-                    }
-                } else {
-                    $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
-                    $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
-
-                    if ($statusShouldChange) {
-                        try {
-                            $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
-                        } catch (\Exception $e) {
-                            info('There was an error updating the post for: ' . $this->record['Email address'], [
-                                'Error' => $e->getMessage(),
-                            ]);
-                        }
                     }
                 }
             }
@@ -285,6 +278,8 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
             if ($user->id) {
                 info('created user', ['user' => $user->id]);
+            } else {
+                throw new HttpException(500, "Unable to create user: $this->record['Email address']");
             }
         }
 
