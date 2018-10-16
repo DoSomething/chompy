@@ -5,6 +5,8 @@ namespace Chompy\Services;
 use DoSomething\Gateway\AuthorizesWithOAuth2;
 use DoSomething\Gateway\Common\RestApiClient;
 use DoSomething\Gateway\Exceptions\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
 
 class Rogue extends RestApiClient
 {
