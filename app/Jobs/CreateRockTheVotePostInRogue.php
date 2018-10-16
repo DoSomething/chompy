@@ -264,7 +264,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             if ($user->id) {
                 info('created user', ['user' => $user->id]);
             } else {
-                throw new HttpException(500, 'Unable to create user: ' . $this->record['Email address']);
+                throw new HttpException(500, 'Unable to create user: ' . $record['Email address']);
             }
         }
 
