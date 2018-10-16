@@ -82,13 +82,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                 $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
 
                 if ($statusShouldChange) {
-                    try {
-                        $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
-                    } catch (\Exception $e) {
-                        info('There was an error updating the post for: ' . $this->record['Email address'], [
-                            'Error' => $e->getMessage(),
-                        ]);
-                    }
+                    $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
                 }
             }
         }
