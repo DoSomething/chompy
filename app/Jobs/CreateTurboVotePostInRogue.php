@@ -324,12 +324,6 @@ class CreateTurboVotePostInRogue implements ShouldQueue
             $statusToSend = 'registration_complete';
         }
 
-        try {
-            gateway('northstar')->asClient()->updateUser($user->id, ['voter_registration_status' => $statusToSend]);
-        } catch (\Exception $e) {
-            info('Error updating voter_registration_status for user: ' . $user->id, [
-                'Error' => $e->getMessage(),
-            ]);
-        }
+        gateway('northstar')->asClient()->updateUser($user->id, ['voter_registration_status' => $statusToSend]);
     }
 }
