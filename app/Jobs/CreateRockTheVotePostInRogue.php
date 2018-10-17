@@ -2,6 +2,7 @@
 
 namespace Chompy\Jobs;
 
+use Exception;
 use Carbon\Carbon;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
@@ -9,9 +10,8 @@ use Chompy\Traits\ImportToRogue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-
 class CreateRockTheVotePostInRogue implements ShouldQueue
+
 {
     use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
 
@@ -264,7 +264,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             if ($user->id) {
                 info('created user', ['user' => $user->id]);
             } else {
-                throw new HttpException(500, 'Unable to create user: ' . $record['Email address']);
+                throw new Exception(500, 'Unable to create user: ' . $record['Email address']);
             }
         }
 
