@@ -2,6 +2,7 @@
 
 namespace Chompy\Jobs;
 
+use Exception;
 use Carbon\Carbon;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
@@ -46,67 +47,47 @@ class CreateTurboVotePostInRogue implements ShouldQueue
             $referralCode = $this->record['referral-code'];
             $referralCodeValues = $this->parseReferralCode($referralCode);
 
-            try {
-                $user = $this->getOrCreateUser($this->record, $referralCodeValues);
-            } catch (\Exception $e) {
-                info('There was an error with that user: ' . $this->record['id'], [
-                    'Error' => $e->getMessage(),
-                ]);
-            }
+            $user = $this->getOrCreateUser($this->record, $referralCodeValues);
 
-            if (isset($user)) {
-                // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
-                $this->updateNorthstarStatus($user, $this->translateTVStatus($this->record['voter-registration-status'], $this->record['voter-registration-method']));
+            // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
+            $this->updateNorthstarStatus($user, $this->translateTVStatus($this->record['voter-registration-status'], $this->record['voter-registration-method']));
 
-                $post = $rogue->getPost([
+            $post = $rogue->getPost([
+                'campaign_id' => (int) $referralCodeValues['campaign_id'],
+                'northstar_id' => $user->id,
+                'type' => 'voter-reg',
+            ]);
+
+            if (! $post['data']) {
+                info('creating post in rogue for ' . $this->record['id']);
+
+                $tvCreatedAtMonth = strtolower(Carbon::parse($this->record['created-at'])->format('F-Y'));
+                $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
+                $postDetails = $this->extractDetails($this->record);
+
+                $postData = [
                     'campaign_id' => (int) $referralCodeValues['campaign_id'],
+                    'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
                     'northstar_id' => $user->id,
                     'type' => 'voter-reg',
-                ]);
+                    'action' => $tvCreatedAtMonth . '-turbovote',
+                    'status' => $this->translateTVStatus($this->record['voter-registration-status'], $this->record['voter-registration-method']),
+                    'source' => 'turbovote',
+                    'source_details' => $sourceDetails,
+                    'details' => $postDetails,
+                ];
 
-                if (! $post['data']) {
-                    info('creating post in rogue for ' . $this->record['id']);
+                $post = $rogue->createPost($postData);
 
-                    $tvCreatedAtMonth = strtolower(Carbon::parse($this->record['created-at'])->format('F-Y'));
-                    $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
-                    $postDetails = $this->extractDetails($this->record);
+                if ($post['data']) {
+                    info('post created in rogue for ' . $this->record['id']);
+                }
+            } else {
+                $newStatus = $this->translateTVStatus($this->record['voter-registration-status'], $this->record['voter-registration-method']);
+                $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
 
-                    $postData = [
-                        'campaign_id' => (int) $referralCodeValues['campaign_id'],
-                        'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
-                        'northstar_id' => $user->id,
-                        'type' => 'voter-reg',
-                        'action' => $tvCreatedAtMonth . '-turbovote',
-                        'status' => $this->translateTVStatus($this->record['voter-registration-status'], $this->record['voter-registration-method']),
-                        'source' => 'turbovote',
-                        'source_details' => $sourceDetails,
-                        'details' => $postDetails,
-                    ];
-
-                    try {
-                        $post = $rogue->createPost($postData);
-
-                        if ($post['data']) {
-                            info('post created in rogue for ' . $this->record['id']);
-                        }
-                    } catch (\Exception $e) {
-                        info('There was an error storing the post for: ' . $this->record['id'], [
-                            'Error' => $e->getMessage(),
-                        ]);
-                    }
-                } else {
-                    $newStatus = $this->translateTVStatus($this->record['voter-registration-status'], $this->record['voter-registration-method']);
-                    $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
-
-                    if ($statusShouldChange) {
-                        try {
-                            $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
-                        } catch (\Exception $e) {
-                            info('There was an error updating the post for: ' . $this->record['id'], [
-                                'Error' => $e->getMessage(),
-                            ]);
-                        }
-                    }
+                if ($statusShouldChange) {
+                    $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
                 }
             }
         }
@@ -231,6 +212,8 @@ class CreateTurboVotePostInRogue implements ShouldQueue
             // Log if the user was successfully created.
             if ($user->id) {
                 info('created user', ['user' => $user->id]);
+            } else {
+                throw new Exception(500, 'Unable to create user: ' . $record['Email address']);
             }
         }
 
@@ -341,12 +324,6 @@ class CreateTurboVotePostInRogue implements ShouldQueue
             $statusToSend = 'registration_complete';
         }
 
-        try {
-            gateway('northstar')->asClient()->updateUser($user->id, ['voter_registration_status' => $statusToSend]);
-        } catch (\Exception $e) {
-            info('Error updating voter_registration_status for user: ' . $user->id, [
-                'Error' => $e->getMessage(),
-            ]);
-        }
+        gateway('northstar')->asClient()->updateUser($user->id, ['voter_registration_status' => $statusToSend]);
     }
 }

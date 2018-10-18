@@ -2,9 +2,11 @@
 
 namespace Chompy\Services;
 
+use Exception;
 use DoSomething\Gateway\AuthorizesWithOAuth2;
 use DoSomething\Gateway\Common\RestApiClient;
 use DoSomething\Gateway\Exceptions\ValidationException;
+
 
 class Rogue extends RestApiClient
 {
@@ -72,6 +74,10 @@ class Rogue extends RestApiClient
 
         $post = $this->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
 
+        if (! $post['data']) {
+            throw new Exception(500, 'Unable to create post for user: ' . $data['northstar_id']);
+        }
+
         return $post;
     }
 
@@ -84,6 +90,10 @@ class Rogue extends RestApiClient
     public function updatePost($postId, $input)
     {
         $post = $this->asClient()->patch('v3/posts/'.$postId, $input);
+
+        if (! $post['data']) {
+            throw new Exception(500, 'Unable to update post for post: ' . $postId);
+        }
 
         return $post;
     }
