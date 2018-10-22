@@ -326,7 +326,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             return 'uncertain';
         }
 
-        if ($rtvStatus === 'rejected') {
+        if ($rtvStatus === 'rejected' || $rtvStatus === 'under 18') {
             return 'ineligible';
         }
 
