@@ -226,7 +226,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         $userFieldsToLookFor = [
             'id' => isset($values['northstar_id']) && !empty($values['northstar_id']) ? $values['northstar_id'] : null,
             'email' => isset($record['Email address']) && !empty($record['Email address']) ? $record['Email address'] : null,
-            'mobile' => isset($record['phone']) && !empty($record['phone']) ? $record['phone'] : null,
+            'mobile' => isset($record['Phone']) && !empty($record['Phone']) ? $record['Phone'] : null,
         ];
 
         foreach ($userFieldsToLookFor as $field => $value)
