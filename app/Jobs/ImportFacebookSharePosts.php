@@ -83,7 +83,6 @@ class ImportFacebookSharePosts implements ShouldQueue
             if (! $post['data']) {
                 $postData = [
                     'campaign_id' => $record['campaign_id'],
-                    'campaign_run_id' => (int) $record['campaign_run'],
                     'northstar_id' => $record['user.northstarId'],
                     'type' => 'share-social',
                     'action' => $record['action'],
