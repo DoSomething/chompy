@@ -253,6 +253,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                 'addr_state' => $record['Home state'],
                 'addr_zip' => $record['Home zip code'],
                 'source' => env('NORTHSTAR_CLIENT_ID'),
+                'email_subscription_status' => $this->transformEmailSubscriptionStatus($record['Opt-in to Partner email?'])
             ];
 
             if ($record['Phone']) {
@@ -356,6 +357,20 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         return $indexOfCurrentStatus < $indexOfNewStatus ? $newStatus : null;
     }
 
+    /*
+     * Translate "Opt-in to Partner email?" from Rock the Vote CSV to a Northstar email_subscription_status
+     *
+     * @param array $sms_status
+     * @return string
+    */
+    private function transformEmailSubscriptionStatus($email_subscription_status)
+    {
+        if ($email_subscription_status === 'Yes') {
+            return true;
+        }
+
+        return false;
+    }
 
     /*
      * Translate "Opt-in to Partner SMS/robocall" from Rock the Vote CSV to a Northstar sms_status
