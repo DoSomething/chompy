@@ -253,11 +253,15 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                 'addr_state' => $record['Home state'],
                 'addr_zip' => $record['Home zip code'],
                 'source' => env('NORTHSTAR_CLIENT_ID'),
-                'email_subscription_status' => $this->transformEmailSubscriptionStatus($record['Opt-in to Partner email?'])
             ];
 
             if ($record['Phone']) {
                 $userData['sms_status'] = $this->transformSmsStatus($record['Opt-in to Partner SMS/robocall']);
+            }
+
+            $emailSubscriptionColumn = $record['Opt-in to Partner email?'];
+            if ($emailSubscriptionColumn) {
+                $userData['email_subscription_status'] = $emailSubscriptionColumn === 'Yes';
             }
 
             $user = gateway('northstar')->asClient()->createUser($userData);
@@ -355,21 +359,6 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         $indexOfNewStatus = array_search($newStatus, $statusHierarchy);
 
         return $indexOfCurrentStatus < $indexOfNewStatus ? $newStatus : null;
-    }
-
-    /*
-     * Translate "Opt-in to Partner email?" from Rock the Vote CSV to a Northstar email_subscription_status
-     *
-     * @param array $sms_status
-     * @return string
-    */
-    private function transformEmailSubscriptionStatus($email_subscription_status)
-    {
-        if ($email_subscription_status === 'Yes') {
-            return true;
-        }
-
-        return false;
     }
 
     /*
