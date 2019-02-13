@@ -56,21 +56,23 @@ class ImportController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        if ($request->input('import-type') === 'turbovote') {
+        $type = $request->input('import-type');
+
+        if ($type === 'turbovote') {
             info("turbo vote import happening");
             ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        if ($request->input('import-type') === 'rock-the-vote') {
+        if ($type === 'rock-the-vote') {
             info('rock the vote import happening');
             ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        if ($request->input('import-type') === 'facebook') {
+        if ($type === 'facebook') {
             info("Facebook share import happening");
             ImportFacebookSharePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        return redirect()->route('import.show')->with('status', 'Your CSV was added to the queue to be processed.');
+        return redirect()->route('import.show', ['type' => $type])->with('status', 'Your CSV was added to the queue to be processed.');
     }
 }

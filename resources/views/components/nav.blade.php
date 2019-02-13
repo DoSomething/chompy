@@ -13,8 +13,16 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
-                    <li><a class="nav-item nav-link" href="/import">Import</a></li>
-                    <li><a class="nav-item nav-link" href="/logout">Logout</a></li>
+                    <li>
+                        <a class="nav-item nav-link" href="/import?type=turbovote">TurboVote</a>
+                    </li>
+                    <li>
+                        <a class="nav-item nav-link" href="/import?type=rock-the-vote">Rock The Vote</a></li>
+                    <li>
+                        <a class="nav-item nav-link" href="/import?type=facebook">Facebook Share</a></li>
+                    <li>
+                        <a class="nav-item nav-link" href="/logout">Logout</a>
+                    </li>
                 @else
                     <li><a class="nav-item nav-link" href="/login">Login</a></li>
                 @endif
