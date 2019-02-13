@@ -14,17 +14,17 @@
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
                     <li class="{{ (app('request')->input('type') === get_import_type_turbovote()) ? 'active' : '' }}">
-                        <a class="nav-item nav-link" href="/import?type={{get_import_type_turbovote()}}">
+                        <a class="nav-item nav-link" href="/import?type={{ get_import_type_turbovote() }}">
                             TurboVote
                         </a>
                     </li>
                     <li class="{{ (app('request')->input('type') === get_import_type_rock_the_vote()) ? 'active' : '' }}">
-                        <a class="nav-item nav-link" href="/import?type={{get_import_type_rock_the_vote()}}">
+                        <a class="nav-item nav-link" href="/import?type={{ get_import_type_rock_the_vote() }}">
                             Rock The Vote
                         </a>
                     </li>
                     <li class="{{ (app('request')->input('type') === get_import_type_facebook()) ? 'active' : '' }}">
-                        <a class="nav-item nav-link" href="/import?type={{get_import_type_facebook()}}">
+                        <a class="nav-item nav-link" href="/import?type={{ get_import_type_facebook() }}">
                             Facebook Share
                         </a>
                     </li>

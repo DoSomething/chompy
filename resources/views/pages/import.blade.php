@@ -5,7 +5,7 @@
 @if (in_array(app('request')->input('type'), get_import_types()))
     <div>
         <form action={{url('/import')}} method="post" enctype="multipart/form-data">
-            {{ csrf_field()}}
+            {{ csrf_field() }}
             <div class="form-group">
                 <div class="input-group">
                     <label class="input-group-btn">
