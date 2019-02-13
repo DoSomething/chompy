@@ -211,6 +211,23 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     }
 
     /**
+     * Parse a CSV field value as boolean.
+     *
+     * @param string $value
+     * @return boolean
+     */
+    private function parseBoolean($value) {
+        // Although we expect a "Yes" value to be passed, sanity check for any variations.
+        $sanitized = strtolower($value);
+
+        if ($sanitized === 'y') {
+            return true;
+        }
+
+        return filter_var($sanitized, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
      * For a given record and referral code values, first check if we have a northstar ID, then grab the user using that.
      * Otherwise, see if we can find the user with the given email (if it exists), if not check if we can find them with the given phone number (if it exists).
      * If all else fails, create the user .
@@ -222,11 +239,14 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     private function getOrCreateUser($record, $values)
     {
         $user = null;
+        $userIdValue = $values['northstar_id'];
+        $recordEmail = $record['Email address'];
+        $recordMobile = $record['Phone'];
 
         $userFieldsToLookFor = [
-            'id' => isset($values['northstar_id']) && !empty($values['northstar_id']) ? $values['northstar_id'] : null,
-            'email' => isset($record['Email address']) && !empty($record['Email address']) ? $record['Email address'] : null,
-            'mobile' => isset($record['Phone']) && !empty($record['Phone']) ? $record['Phone'] : null,
+            'id' => isset($userIdValue) && !empty($userIdValue) ? $userIdValue : null,
+            'email' => isset($recordEmail) && !empty($recordEmail) ? $recordEmail : null,
+            'mobile' => isset($recordMobile) && !empty($recordMobile) ? $recordMobile : null,
         ];
 
         foreach ($userFieldsToLookFor as $field => $value)
@@ -243,8 +263,8 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         if (is_null($user)) {
             $userData = [
-                'email' => $record['Email address'],
-                'mobile' => $record['Phone'],
+                'email' => $recordEmail,
+                'mobile' => $recordMobile,
                 'first_name' => $record['First name'],
                 'last_name' => $record['Last name'],
                 'addr_street1' => $record['Home address'],
@@ -255,13 +275,15 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                 'source' => env('NORTHSTAR_CLIENT_ID'),
             ];
 
-            if ($record['Phone']) {
-                $userData['sms_status'] = $this->transformSmsStatus($record['Opt-in to Partner SMS/robocall']);
+            $recordEmailOptIn = $record['Opt-in to Partner email?'];
+            if ($recordEmailOptIn) {
+                $userData['email_subscription_status'] = $this->parseBoolean($recordEmailOptIn);
             }
 
-            $emailSubscriptionColumn = $record['Opt-in to Partner email?'];
-            if ($emailSubscriptionColumn) {
-                $userData['email_subscription_status'] = $emailSubscriptionColumn === 'Yes';
+            // Note: Not a typo -- this column name does not have the trailing question mark.
+            $recordSmsOptIn = $record['Opt-in to Partner SMS/robocall'];
+            if ($recordSmsOptIn && $recordMobile) {
+                $userData['sms_status'] = $this->parseBoolean($recordSmsOptIn) ? 'active' : 'stop';
             }
 
             $user = gateway('northstar')->asClient()->createUser($userData);
@@ -269,7 +291,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             if ($user->id) {
                 info('created user', ['user' => $user->id]);
             } else {
-                throw new Exception(500, 'Unable to create user: ' . $record['Email address']);
+                throw new Exception(500, 'Unable to create user: ' . $recordEmail);
             }
         }
 
@@ -359,22 +381,6 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         $indexOfNewStatus = array_search($newStatus, $statusHierarchy);
 
         return $indexOfCurrentStatus < $indexOfNewStatus ? $newStatus : null;
-    }
-
-    /*
-     * Translate "Opt-in to Partner SMS/robocall" from Rock the Vote CSV to a Northstar sms_status
-     *
-     * @param array $sms_status
-     * @return string
-    */
-    private function transformSmsStatus($sms_status)
-    {
-        if ($sms_status === 'Yes') {
-            return 'active';
-        }
-
-        // @TODO: do we want this to be 'pending' or some other status? we talked about this recently referring to something else
-        return 'stop';
     }
 
     /*
