@@ -211,23 +211,6 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     }
 
     /**
-     * Parse a CSV field value as boolean.
-     *
-     * @param string $value
-     * @return boolean
-     */
-    private function parseBoolean($value) {
-        // Although we expect a "Yes" value to be passed, sanity check for any variations.
-        $sanitized = strtolower($value);
-
-        if ($sanitized === 'y') {
-            return true;
-        }
-
-        return filter_var($sanitized, FILTER_VALIDATE_BOOLEAN);
-    }
-
-    /**
      * For a given record and referral code values, first check if we have a northstar ID, then grab the user using that.
      * Otherwise, see if we can find the user with the given email (if it exists), if not check if we can find them with the given phone number (if it exists).
      * If all else fails, create the user .
@@ -277,13 +260,13 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
             $recordEmailOptIn = $record['Opt-in to Partner email?'];
             if ($recordEmailOptIn) {
-                $userData['email_subscription_status'] = $this->parseBoolean($recordEmailOptIn);
+                $userData['email_subscription_status'] = str_to_boolean($recordEmailOptIn);
             }
 
             // Note: Not a typo -- this column name does not have the trailing question mark.
             $recordSmsOptIn = $record['Opt-in to Partner SMS/robocall'];
             if ($recordSmsOptIn && $recordMobile) {
-                $userData['sms_status'] = $this->parseBoolean($recordSmsOptIn) ? 'active' : 'stop';
+                $userData['sms_status'] = str_to_boolean($recordSmsOptIn) ? 'active' : 'stop';
             }
 
             $user = gateway('northstar')->asClient()->createUser($userData);
