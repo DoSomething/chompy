@@ -8,27 +8,12 @@
         <div class="form-group">
             <div class="input-group">
                 <label class="input-group-btn">
-                    <span class="btn btn-primary">
+                    <span class="btn btn-default">
                         Browse <input type="file" name="upload-file" style="display: none;" multiple>
                     </span>
                 </label>
+                <input type="hidden" name="import-type" value={{ app('request')->input('type') }}>
                 <input type="text" class="form-control" readonly>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Import Type</label>
-            <div class="form-check">
-                <label class="form-check-label">
-                    <input name="import-type" class="form-check-input" type="radio" value="turbovote" {{ (isset($_GET['type']) && $_GET['type'] === 'turbovote') ? 'checked' : '' }} >
-                    TurboVote
-                    <br>
-                    <input name="import-type" class="form-check-input" type="radio" value="rock-the-vote" {{ (isset($_GET['type']) && $_GET['type'] === 'rock-the-vote') ? 'checked' : '' }} >
-                    Rock the Vote
-                    <br>
-                    <input name="import-type" class="form-check-input" type="radio" value="facebook" {{ (isset($_GET['type']) && $_GET['type'] === 'facebook') ? 'checked' : '' }} >
-                    Facebook Share
-                </label>
             </div>
         </div>
         <div>

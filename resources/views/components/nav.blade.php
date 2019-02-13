@@ -13,13 +13,15 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
-                    <li>
+                    <li class="{{ (isset($_GET['type']) && $_GET['type'] === 'turbovote') ? 'active' : '' }}">
                         <a class="nav-item nav-link" href="/import?type=turbovote">TurboVote</a>
                     </li>
-                    <li>
-                        <a class="nav-item nav-link" href="/import?type=rock-the-vote">Rock The Vote</a></li>
-                    <li>
-                        <a class="nav-item nav-link" href="/import?type=facebook">Facebook Share</a></li>
+                    <li class="{{ (isset($_GET['type']) && $_GET['type'] === 'rock-the-vote') ? 'active' : '' }}">
+                        <a class="nav-item nav-link" href="/import?type=rock-the-vote">Rock The Vote</a>
+                    </li>
+                    <li class="{{ (isset($_GET['type']) && $_GET['type'] === 'facebook') ? 'active' : '' }}">
+                        <a class="nav-item nav-link" href="/import?type=facebook">Facebook Share</a>
+                    </li>
                     <li>
                         <a class="nav-item nav-link" href="/logout">Logout</a>
                     </li>
