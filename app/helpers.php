@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Returns import type of Facebook share files.
+ * Returns import type for Facebook share files.
+ * @return string
  */
 function get_import_type_facebook()
 {
@@ -9,7 +10,7 @@ function get_import_type_facebook()
 }
 
 /**
- * Returns import type of Rock the Vote files.
+ * Returns import type for Rock the Vote files.
  * @return string
  */
 function get_import_type_rock_the_vote()
@@ -18,7 +19,7 @@ function get_import_type_rock_the_vote()
 }
 
 /**
- * Returns import type of Turbovote files.
+ * Returns import type for Turbovote files.
  * @return string
  */
 function get_import_type_turbovote()
