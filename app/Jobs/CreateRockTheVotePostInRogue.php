@@ -61,13 +61,13 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         $campaignId = (int) $referralCodeValues['campaign_id'];
         $postType = 'voter-reg';
-        // Check if post exists.
+
         $existingPosts = $rogue->getPost([
             'campaign_id' => $campaignId,
             'northstar_id' => $user->id,
             'type' => $postType,
         ]);
-        // If post does not exist, create it.
+
         if (!$existingPosts['data']) {
             info('post not found for user ' . $user->id);
             $rtvCreatedAtMonth = strtolower(Carbon::parse($this->record['Started registration'])->format('F-Y'));
@@ -87,16 +87,16 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
             $post = $rogue->createPost($postData);
             info('post created in rogue for ' . $this->recordEmail);
-        // Else if post exists, update post status if required.
-        } else {
-            $postId = $existingPosts['data'][0]['id'];
-            info($postType.' post '.$postId.' found for user ' . $user->id.' and campaign '.$campaignId);
-            $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
-            $statusShouldChange = $this->updateStatus($existingPosts['data'][0]['status'], $newStatus);
+            return;
+        }
 
-            if ($statusShouldChange) {
-                $rogue->updatePost($postId, ['status' => $statusShouldChange]);
-            }
+        $postId = $existingPosts['data'][0]['id'];
+        info($postType.' post '.$postId.' found for user ' . $user->id.' and campaign '.$campaignId);
+        $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
+        $statusShouldChange = $this->updateStatus($existingPosts['data'][0]['status'], $newStatus);
+
+        if ($statusShouldChange) {
+            $rogue->updatePost($postId, ['status' => $statusShouldChange]);
         }
     }
 
@@ -286,11 +286,10 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         $user = gateway('northstar')->asClient()->createUser($userData);
 
-        if ($user->id) {
-            info('created user', ['user' => $user->id]);
-        } else {
+        if (!$user->id) {
             throw new Exception(500, 'Unable to create user: ' . $this->recordEmail);
         }
+        info('created user', ['user' => $user->id]);
 
         return $user;
     }
