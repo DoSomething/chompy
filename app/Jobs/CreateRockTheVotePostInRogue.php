@@ -30,6 +30,8 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     public function __construct($record)
     {
     	$this->record = $record;
+        $this->recordEmail = $record['Email address'];
+        $this->recordMobile = $record['Phone'];
     }
 
     /**
@@ -39,61 +41,61 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-    	$isTestData = $this->isTestData($this->record);
+    	if ($this->isTestData($this->record)) {
+            info('progress_log: Skipping test: ' . $this->recordEmail);
+            return;
+        }
 
-        if (!$isTestData) {
-            info('progress_log: Processing: ' . $this->record['Email address']);
+        info('progress_log: Processing: ' . $this->recordEmail);
 
-            $referralCodeValues = $this->parseReferralCode($this->record['Tracking Source']);
-            info('Referral code: ' . implode(', ', $referralCodeValues));
+        $referralCodeValues = $this->parseReferralCode($this->record['Tracking Source']);
+        info('Referral code: ' . implode(', ', $referralCodeValues));
 
-            $userId = $referralCodeValues['northstar_id'];
-            $campaignId = (int) $referralCodeValues['campaign_id'];
+        $user = $this->getUser($referralCodeValues['northstar_id']);
+        if (!($user && $user->id)) {
+            $user = $this->createUser();
+        }
 
-            if (empty($userId)) {
-                $userId = $this->getOrCreateUserId($this->record);
-            }
+        // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
+        $this->updateNorthstarStatus($user, $this->translateStatus($this->record['Status'], $this->record['Finish with State']));
 
-            // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
-            $this->updateNorthstarStatus($userId, $this->translateStatus($this->record['Status'], $this->record['Finish with State']));
+        $campaignId = (int) $referralCodeValues['campaign_id'];
+        $postType = 'voter-reg';
+        // Check if post exists.
+        $existingPosts = $rogue->getPost([
+            'campaign_id' => $campaignId,
+            'northstar_id' => $user->id,
+            'type' => $postType,
+        ]);
+        // If post does not exist, create it.
+        if (!$existingPosts['data']) {
+            info('post not found for user ' . $user->id);
+            $rtvCreatedAtMonth = strtolower(Carbon::parse($this->record['Started registration'])->format('F-Y'));
+            $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
+            $postDetails = $this->extractDetails($this->record);
 
-            $postType = 'voter-reg';
-            // Check if post exists.
-            $existingPosts = $rogue->getPost([
+            $postData = [
                 'campaign_id' => $campaignId,
-                'northstar_id' => $userId,
+                'northstar_id' => $user->id,
                 'type' => $postType,
-            ]);
-            // If post does not exist, create it.
-            if (!$existingPosts['data']) {
-                info('post not found for user ' . $userId);
-                $rtvCreatedAtMonth = strtolower(Carbon::parse($this->record['Started registration'])->format('F-Y'));
-                $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
-                $postDetails = $this->extractDetails($this->record);
+                'action' => $rtvCreatedAtMonth . '-rockthevote',
+                'status' => $this->translateStatus($this->record['Status'], $this->record['Finish with State']),
+                'source' => 'rock-the-vote',
+                'source_details' => $sourceDetails,
+                'details' => $postDetails,
+            ];
 
-                $postData = [
-                    'campaign_id' => $campaignId,
-                    'northstar_id' => $userId,
-                    'type' => $postType,
-                    'action' => $rtvCreatedAtMonth . '-rockthevote',
-                    'status' => $this->translateStatus($this->record['Status'], $this->record['Finish with State']),
-                    'source' => 'rock-the-vote',
-                    'source_details' => $sourceDetails,
-                    'details' => $postDetails,
-                ];
+            $post = $rogue->createPost($postData);
+            info('post created in rogue for ' . $this->recordEmail);
+        // Else if post exists, update post status if required.
+        } else {
+            $postId = $existingPosts['data'][0]['id'];
+            info($postType.' post '.$postId.' found for user ' . $user->id.' and campaign '.$campaignId);
+            $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
+            $statusShouldChange = $this->updateStatus($existingPosts['data'][0]['status'], $newStatus);
 
-                $post = $rogue->createPost($postData);
-                info('post created in rogue for ' . $this->record['Email address']);
-            // Else if post exists, update post status if required.
-            } else {
-                $postId = $existingPosts['data'][0]['id'];
-                info($postType.' post '.$postId.' found for user ' . $userId.' and campaign '.$campaignId);
-                $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
-                $statusShouldChange = $this->updateStatus($existingPosts['data'][0]['status'], $newStatus);
-
-                if ($statusShouldChange) {
-                    $rogue->updatePost($postId, ['status' => $statusShouldChange]);
-                }
+            if ($statusShouldChange) {
+                $rogue->updatePost($postId, ['status' => $statusShouldChange]);
             }
         }
     }
@@ -222,33 +224,45 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     }
 
     /**
-     * Finds User ID by email or mobile if exists as property in given record array.
-     * If not found, creates new user and returns ID.
+     * If userId param is given, check for valid user.
+     * Otherwise check by job record email, mobile.
+     * TODO: Move this to DRY with TurboVote imports (if we keep it).
+     * @see https://www.pivotaltracker.com/n/projects/2019429/stories/164114650
      *
-     * @param array
-     * @return string
+     * @param string
+     * @return NorthstarUser
      */
-    private function getOrCreateUserId($record)
+    private function getUser($userId)
     {
-        $user = null;
-        $recordEmail = $record['Email address'];
-        $recordMobile = $record['Phone'];
-
-        if (isset($recordEmail) && !empty($recordEmail)) {
-            info('fetching user by email '.$recordEmail);
-            $user = gateway('northstar')->asClient()->getUser('email', $recordEmail);
-        } else {
-            info('fetching user by mobile '.$recordMobile);
-            $user = gateway('northstar')->asClient()->getUser('mobile', $recordMobile);
+        if ($userId) {
+            $user = gateway('northstar')->asClient()->getUser('id', $userId);
+            if ($user && $user->id) {
+                return $user;
+            }
         }
-
-        if (!is_null($user)) {
-            return $user->id;
+        if ($this->recordEmail) {
+            $user = gateway('northstar')->asClient()->getUser('email', $this->recordEmail);
+            if ($user && $user->id) {
+                return $user;
+            }
         }
+        if (!$this->recordMobile) {
+            return null;
+        }
+        return gateway('northstar')->asClient()->getUser('mobile', $this->recordMobile);
+    }
 
+    /**
+     * Creates new user from job record.
+     *
+     * @return NorthstarUser
+     */
+    private function createUser()
+    {
+        $record = $this->record;
         $userData = [
-            'email' => $recordEmail,
-            'mobile' => $recordMobile,
+            'email' => $this->recordEmail,
+            'mobile' => $this->recordMobile,
             'first_name' => $record['First name'],
             'last_name' => $record['Last name'],
             'addr_street1' => $record['Home address'],
@@ -256,17 +270,17 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             'addr_city' => $record['Home city'],
             'addr_state' => $record['Home state'],
             'addr_zip' => $record['Home zip code'],
-            'source' => config('services.northstar.client_credentials.client_id')
+            'source' => config('services.northstar.client_credentials.client_id'),
         ];
 
         $recordEmailOptIn = $record['Opt-in to Partner email?'];
-        if (isset($recordEmailOptIn)) {
+        if (!empty($recordEmailOptIn)) {
             $userData['email_subscription_status'] = str_to_boolean($recordEmailOptIn);
         }
 
         // Note: Not a typo -- this column name does not have the trailing question mark.
         $recordSmsOptIn = $record['Opt-in to Partner SMS/robocall'];
-        if (isset($recordSmsOptIn) && isset($recordMobile) & !empty($recordMobile)) {
+        if (!empty($recordSmsOptIn) && !empty($recordMobile)) {
             $userData['sms_status'] = str_to_boolean($recordSmsOptIn) ? 'active' : 'stop';
         }
 
@@ -275,10 +289,10 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         if ($user->id) {
             info('created user', ['user' => $user->id]);
         } else {
-            throw new Exception(500, 'Unable to create user: ' . $recordEmail);
+            throw new Exception(500, 'Unable to create user: ' . $this->recordEmail);
         }
 
-        return $user->id;
+        return $user;
     }
 
     /**
@@ -369,15 +383,15 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     /*
      * Translate to Northstar status and update Northstar user (Northstar takes care of the hierarchy)
      *
-     * @param string $userId
+     * @param Object $user
      * @param string $statusToSend
     */
-    private function updateNorthstarStatus($userId, $statusToSend)
+    private function updateNorthstarStatus($user, $statusToSend)
     {
         if ($statusToSend === 'register-form' || $statusToSend === 'register-OVR') {
             $statusToSend = 'registration_complete';
         }
 
-        gateway('northstar')->asClient()->updateUser($userId, ['voter_registration_status' => $statusToSend]);
+        gateway('northstar')->asClient()->updateUser($user->id, ['voter_registration_status' => $statusToSend]);
     }
 }
