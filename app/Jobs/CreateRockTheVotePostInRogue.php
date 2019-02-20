@@ -39,35 +39,42 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-    	$shouldProcess = $this->scrubRecord($this->record);
+    	$isTestData = $this->isTestData($this->record);
 
-        if ($shouldProcess) {
+        if (!$isTestData) {
             info('progress_log: Processing: ' . $this->record['Email address']);
 
-            $referralCode = $this->record['Tracking Source'];
-            $referralCodeValues = $this->parseReferralCode($referralCode);
+            $referralCodeValues = $this->parseReferralCode($this->record['Tracking Source']);
+            info('Referral code: ' . implode(', ', $referralCodeValues));
 
-            $user = $this->getOrCreateUser($this->record, $referralCodeValues);
+            $userId = $referralCodeValues['northstar_id'];
+            $campaignId = (int) $referralCodeValues['campaign_id'];
+
+            if (!isset($userId) || empty($userId)) {
+                $userId = $this->getOrCreateUserId($this->record);
+            }
 
             // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
-            $this->updateNorthstarStatus($user, $this->translateStatus($this->record['Status'], $this->record['Finish with State']));
+            $this->updateNorthstarStatus($userId, $this->translateStatus($this->record['Status'], $this->record['Finish with State']));
 
-            $post = $rogue->getPost([
-                'campaign_id' => (int) $referralCodeValues['campaign_id'],
-                'northstar_id' => $user->id,
-                'type' => 'voter-reg',
+            $postType = 'voter-reg';
+            // Check if post exists.
+            $fetchPostRes = $rogue->getPost([
+                'campaign_id' => $campaignId,
+                'northstar_id' => $userId,
+                'type' => $postType,
             ]);
-
-            if (! $post['data']) {
+            // If post does not exist, create it.
+            if (!$fetchPostRes['data']) {
+                info('post not found for user ' . $userId);
                 $rtvCreatedAtMonth = strtolower(Carbon::parse($this->record['Started registration'])->format('F-Y'));
                 $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
                 $postDetails = $this->extractDetails($this->record);
 
                 $postData = [
-                    'campaign_id' => (int) $referralCodeValues['campaign_id'],
-                    'campaign_run_id' => (int) $referralCodeValues['campaign_run_id'],
-                    'northstar_id' => $user->id,
-                    'type' => 'voter-reg',
+                    'campaign_id' => $campaignId,
+                    'northstar_id' => $userId,
+                    'type' => $postType,
                     'action' => $rtvCreatedAtMonth . '-rockthevote',
                     'status' => $this->translateStatus($this->record['Status'], $this->record['Finish with State']),
                     'source' => 'rock-the-vote',
@@ -77,29 +84,33 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
                 $post = $rogue->createPost($postData);
                 info('post created in rogue for ' . $this->record['Email address']);
+            // Else if post exists, update post status if required.
             } else {
+                $postId = $fetchPostRes['data'][0]['id'];
+                info($postType.' post '.$postId.' found for user ' . $userId.' and campaign '.$campaignId);
                 $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
-                $statusShouldChange = $this->updateStatus($post['data'][0]['status'], $newStatus);
+                $statusShouldChange = $this->updateStatus($fetchPostRes['data'][0]['status'], $newStatus);
 
                 if ($statusShouldChange) {
-                    $rogue->updatePost($post['data'][0]['id'], ['status' => $statusShouldChange]);
+                    $rogue->updatePost($postId, ['status' => $statusShouldChange]);
                 }
             }
         }
     }
 
     /*
-     * Determines if a record should be process to be stored or if it is not valid.
+     * Returns whether a record is test data that should not create/update users and/or posts.
+     * TODO: Move this into helpers and DRY with any other Jobs that are still relevant.
      *
      * @param array $record
      * @return bool
-    */
-    private function scrubRecord($record)
+     */
+    private function isTestData($record)
     {
         $isNotValidEmail = strrpos($record['Email address'], 'thing.org') !== false || strrpos($record['Email address'] !== false, '@dosome') || strrpos($record['Email address'], 'rockthevote.com') !== false || strrpos($record['Email address'], 'test') !== false || strrpos($record['Email address'], '+') !== false;
         $isNotValidLastName = strrpos($record['Last name'], 'Baloney') !== false;
 
-        return $isNotValidEmail || $isNotValidLastName ? false : true;
+        return $isNotValidEmail || $isNotValidLastName ? true : false;
     }
 
     /**
@@ -211,74 +222,61 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     }
 
     /**
-     * For a given record and referral code values, first check if we have a northstar ID, then grab the user using that.
-     * Otherwise, see if we can find the user with the given email (if it exists), if not check if we can find them with the given phone number (if it exists).
-     * If all else fails, create the user .
+     * Fetch user ID by given email or mobile if exists. If not found, create new user.
      *
-     * @TODO - If we have a northstar id in the referral code, then we probably don't need to make a call to northstar for the full user object.
-     *
-     * @return array
+     * @return string
      */
-    private function getOrCreateUser($record, $values)
+    private function getOrCreateUserId($record)
     {
         $user = null;
-        $userIdValue = $values['northstar_id'];
         $recordEmail = $record['Email address'];
         $recordMobile = $record['Phone'];
 
-        $userFieldsToLookFor = [
-            'id' => isset($userIdValue) && !empty($userIdValue) ? $userIdValue : null,
-            'email' => isset($recordEmail) && !empty($recordEmail) ? $recordEmail : null,
-            'mobile' => isset($recordMobile) && !empty($recordMobile) ? $recordMobile : null,
+        if (isset($recordEmail) && !empty($recordEmail)) {
+            info('fetching user by email '.$recordEmail);
+            $user = gateway('northstar')->asClient()->getUser('email', $recordEmail);
+        } else {
+            info('fetching user by mobile '.$recordMobile);
+            $user = gateway('northstar')->asClient()->getUser('mobile', $recordMobile);
+        }
+
+        if (!is_null($user)) {
+            return $user->id;
+        }
+
+        $userData = [
+            'email' => $recordEmail,
+            'mobile' => $recordMobile,
+            'first_name' => $record['First name'],
+            'last_name' => $record['Last name'],
+            'addr_street1' => $record['Home address'],
+            'addr_street2' => $record['Home unit'],
+            'addr_city' => $record['Home city'],
+            'addr_state' => $record['Home state'],
+            'addr_zip' => $record['Home zip code'],
+            'source' => env('NORTHSTAR_CLIENT_ID'),
         ];
 
-        foreach ($userFieldsToLookFor as $field => $value)
-        {
-            if ($value) {
-                info('getting user with the '.$field.' field', [$field => $value]);
-                $user = gateway('northstar')->asClient()->getUser($field, $value);
-            }
-
-            if ($user) {
-                break;
-            }
+        $recordEmailOptIn = $record['Opt-in to Partner email?'];
+        if (isset($recordEmailOptIn)) {
+            $userData['email_subscription_status'] = str_to_boolean($recordEmailOptIn);
         }
 
-        if (is_null($user)) {
-            $userData = [
-                'email' => $recordEmail,
-                'mobile' => $recordMobile,
-                'first_name' => $record['First name'],
-                'last_name' => $record['Last name'],
-                'addr_street1' => $record['Home address'],
-                'addr_street2' => $record['Home unit'],
-                'addr_city' => $record['Home city'],
-                'addr_state' => $record['Home state'],
-                'addr_zip' => $record['Home zip code'],
-                'source' => env('NORTHSTAR_CLIENT_ID'),
-            ];
-
-            $recordEmailOptIn = $record['Opt-in to Partner email?'];
-            if ($recordEmailOptIn) {
-                $userData['email_subscription_status'] = str_to_boolean($recordEmailOptIn);
-            }
-
-            // Note: Not a typo -- this column name does not have the trailing question mark.
-            $recordSmsOptIn = $record['Opt-in to Partner SMS/robocall'];
-            if ($recordSmsOptIn && $recordMobile) {
-                $userData['sms_status'] = str_to_boolean($recordSmsOptIn) ? 'active' : 'stop';
-            }
-
-            $user = gateway('northstar')->asClient()->createUser($userData);
-
-            if ($user->id) {
-                info('created user', ['user' => $user->id]);
-            } else {
-                throw new Exception(500, 'Unable to create user: ' . $recordEmail);
-            }
+        // Note: Not a typo -- this column name does not have the trailing question mark.
+        $recordSmsOptIn = $record['Opt-in to Partner SMS/robocall'];
+        if (isset($recordSmsOptIn) && isset($recordMobile) & !empty($recordMobile)) {
+            $userData['sms_status'] = str_to_boolean($recordSmsOptIn) ? 'active' : 'stop';
         }
 
-        return $user;
+        $user = gateway('northstar')->asClient()->createUser($userData);
+
+        if ($user->id) {
+            info('created user', ['user' => $user->id]);
+        } else {
+            throw new Exception(500, 'Unable to create user: ' . $recordEmail);
+        }
+
+        return $user->id;
     }
 
     /**
@@ -369,15 +367,15 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     /*
      * Translate to Northstar status and update Northstar user (Northstar takes care of the hierarchy)
      *
-     * @param Object $user
+     * @param string $userId
      * @param string $statusToSend
     */
-    private function updateNorthstarStatus($user, $statusToSend)
+    private function updateNorthstarStatus($userId, $statusToSend)
     {
         if ($statusToSend === 'register-form' || $statusToSend === 'register-OVR') {
             $statusToSend = 'registration_complete';
         }
 
-        gateway('northstar')->asClient()->updateUser($user->id, ['voter_registration_status' => $statusToSend]);
+        gateway('northstar')->asClient()->updateUser($userId, ['voter_registration_status' => $statusToSend]);
     }
 }
