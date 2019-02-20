@@ -1,46 +1,6 @@
 <?php
 
 /**
- * Returns import type for Facebook share files.
- * @return string
- */
-function get_import_type_facebook()
-{
-  return 'facebook';
-}
-
-/**
- * Returns import type for Rock the Vote files.
- * @return string
- */
-function get_import_type_rock_the_vote()
-{
-  return 'rock-the-vote';
-}
-
-/**
- * Returns import type for Turbovote files.
- * @return string
- */
-function get_import_type_turbovote()
-{
-  return 'turbovote';
-}
-
-/**
- * Returns array of supported import types.
- * @return array
- */
-function get_import_types()
-{
-    return [
-      get_import_type_facebook(),
-      get_import_type_rock_the_vote(),
-      get_import_type_turbovote(),
-    ];
-}
-
-/**
  * Parse a string as boolean.
  *
  * @param string $text

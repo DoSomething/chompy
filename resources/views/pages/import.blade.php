@@ -2,7 +2,7 @@
 
 @section('main_content')
 
-@if (in_array(app('request')->input('type'), get_import_types()))
+@if (in_array(request()->input('type'), \Chompy\ImportType::all()))
     <div>
         <form action={{url('/import')}} method="post" enctype="multipart/form-data">
             {{ csrf_field() }}
