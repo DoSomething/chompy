@@ -58,17 +58,17 @@ class ImportController extends Controller
 
         $type = $request->input('import-type');
 
-        if ($type === get_import_type_turbovote()) {
+        if ($type === \Chompy\ImportType::$turbovote) {
             info("turbo vote import happening");
             ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        if ($type === get_import_type_rock_the_vote()) {
+        if ($type === \Chompy\ImportType::$rockTheVote) {
             info('rock the vote import happening');
             ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        if ($type === get_import_type_facebook()) {
+        if ($type === \Chompy\ImportType::$facebook) {
             info("Facebook share import happening");
             ImportFacebookSharePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
