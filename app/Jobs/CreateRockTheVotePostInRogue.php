@@ -50,7 +50,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             $userId = $referralCodeValues['northstar_id'];
             $campaignId = (int) $referralCodeValues['campaign_id'];
 
-            if (!isset($userId) || empty($userId)) {
+            if (empty($userId)) {
                 $userId = $this->getOrCreateUserId($this->record);
             }
 
@@ -59,13 +59,13 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
             $postType = 'voter-reg';
             // Check if post exists.
-            $fetchPostRes = $rogue->getPost([
+            $existingPosts = $rogue->getPost([
                 'campaign_id' => $campaignId,
                 'northstar_id' => $userId,
                 'type' => $postType,
             ]);
             // If post does not exist, create it.
-            if (!$fetchPostRes['data']) {
+            if (!$existingPosts['data']) {
                 info('post not found for user ' . $userId);
                 $rtvCreatedAtMonth = strtolower(Carbon::parse($this->record['Started registration'])->format('F-Y'));
                 $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
@@ -86,10 +86,10 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                 info('post created in rogue for ' . $this->record['Email address']);
             // Else if post exists, update post status if required.
             } else {
-                $postId = $fetchPostRes['data'][0]['id'];
+                $postId = $existingPosts['data'][0]['id'];
                 info($postType.' post '.$postId.' found for user ' . $userId.' and campaign '.$campaignId);
                 $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
-                $statusShouldChange = $this->updateStatus($fetchPostRes['data'][0]['status'], $newStatus);
+                $statusShouldChange = $this->updateStatus($existingPosts['data'][0]['status'], $newStatus);
 
                 if ($statusShouldChange) {
                     $rogue->updatePost($postId, ['status' => $statusShouldChange]);
@@ -222,8 +222,10 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     }
 
     /**
-     * Fetch user ID by given email or mobile if exists. If not found, create new user.
+     * Finds User ID by email or mobile if exists as property in given record array.
+     * If not found, creates new user and returns ID.
      *
+     * @param array
      * @return string
      */
     private function getOrCreateUserId($record)
@@ -254,7 +256,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             'addr_city' => $record['Home city'],
             'addr_state' => $record['Home state'],
             'addr_zip' => $record['Home zip code'],
-            'source' => env('NORTHSTAR_CLIENT_ID'),
+            'source' => config('services.northstar.client_credentials.client_id')
         ];
 
         $recordEmailOptIn = $record['Opt-in to Partner email?'];
