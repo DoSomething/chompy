@@ -9,6 +9,7 @@ use Chompy\Jobs\ImportTurboVotePosts;
 use Chompy\Jobs\ImportFacebookSharePosts;
 use Illuminate\Support\Facades\Storage;
 use Chompy\Jobs\ImportRockTheVotePosts;
+use Chompy\ImportType;
 
 class ImportController extends Controller
 {
@@ -58,17 +59,17 @@ class ImportController extends Controller
 
         $type = $request->input('import-type');
 
-        if ($type === \Chompy\ImportType::$turbovote) {
+        if ($type === ImportType::$turbovote) {
             info("turbo vote import happening");
             ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        if ($type === \Chompy\ImportType::$rockTheVote) {
+        if ($type === ImportType::$rockTheVote) {
             info('rock the vote import happening');
             ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        if ($type === \Chompy\ImportType::$facebook) {
+        if ($type === ImportType::$facebook) {
             info("Facebook share import happening");
             ImportFacebookSharePosts::dispatch($path)->delay(now()->addSeconds(3));
         }

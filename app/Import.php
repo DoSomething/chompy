@@ -2,12 +2,35 @@
 
 namespace Chompy;
 
-class ImportType {
-  public static $facebook = 'facebook';
-  public static $rockTheVote = 'rock-the-vote';
-  public static $turbovote = 'turbovote';
+class ImportType
+{
+    /**
+     * A Facebook share import type.
+     *
+     * @var string
+     */
+    public static $facebook = 'facebook';
 
-  public static function all() {
-    return [self::$facebook, self::$rockTheVote, self::$turbovote];
-  }
+    /**
+     * A Rock The Vote import type.
+     *
+     * @var string
+     */
+    public static $rockTheVote = 'rock-the-vote';
+
+    /**
+     * A Turbovote import type.
+     *
+     * @var string
+     */
+    public static $turbovote = 'turbovote';
+
+    /**
+     * Returns list of all valid import types.
+     *
+     * @return array
+     */
+    public static function all() {
+        return [self::$facebook, self::$rockTheVote, self::$turbovote];
+    }
 }
