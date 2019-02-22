@@ -14,23 +14,38 @@ use Illuminate\Foundation\Bus\Dispatchable;
 class RockTheVoteRecord {
     public function __construct($record)
     {
-        $this->post_type = 'voter-reg';
-        $this->source = 'rock-the-vote';
-
+        $this->addr_street1 = $record['Home address'];
+        $this->addr_street2 = $record['Home unit'];
+        $this->addr_city = $record['Home city'];
+        $this->addr_state = $record['Home state'];
+        $this->addr_zip = $record['Home zip code'];
         $this->email = $record['Email address'];
+        $this->first_name = $record['First name'];
+        $this->last_name = $record['Last name'];
         $this->mobile = $record['Phone'];
-        $this->email_opt_in = $record['Opt-in to Partner email?'];
+
+        $emailOptIn = $record['Opt-in to Partner email?'];
+        if ($emailOptIn) {
+            $this->email_subscription_status = str_to_boolean($emailOptIn);
+        }
         // Note: Not a typo, this column name does not have the trailing question mark.
-        $this->sms_opt_in = $record['Opt-in to Partner SMS/robocall'];
+        $smsOptIn = $record['Opt-in to Partner SMS/robocall'];
+        if ($smsOptIn && $this->mobile) {
+            $this->sms_status = str_to_boolean($smsOptIn) ? 'active' : 'stop';
+        }
 
         $this->voter_registration_status = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
 
-        $referral = $this->parseReferralCode($record['Tracking Source']);
-        $this->user_id = $referral['northstar_id'];
-        $this->campaign_id = (int) $referral['campaign_id'];
-        $this->source_details = $referral['source_details'];
+        $this->post_type = 'voter-reg';
+        $this->post_action = strtolower(Carbon::parse($record['Started registration'])->format('F-Y')) . '-rockthevote';
 
-        // TODO: Add all other properties used for getting/validating/creating users/posts.
+        $referral = $this->parseReferralCode($record['Tracking Source']);
+        $this->user_id = !empty($referral['user_id']) ? $referral['user_id'] : null;
+        // TODO: Do we need to check the referral for these values? Don't seem they are ever used.
+        $this->campaign_id = 8017;
+        $this->post_source = 'rock-the-vote';
+        $this->post_source_details = null;
+        $this->post_details = $this->parsePostDetails($record);
     }
 
     /**
@@ -52,95 +67,30 @@ class RockTheVoteRecord {
             $referralCode = str_replace('iframe?', null, $referralCode);
         }
 
-        if (! empty($referralCode)) {
-            $referralCode = explode(',', $referralCode);
+        if (empty($referralCode)) {
+            return $values;
+        }
 
-            $referral = false;
+        $referralCode = explode(',', $referralCode);
 
-            foreach ($referralCode as $value) {
-
-                // See if we are dealing with ":" or "="
-                if (strpos($value, ':')) {
-                    $value = explode(':', $value);
-                }
-                elseif (strpos($value, '=')) {
-                    $value = explode('=', $value);
-                }
-
-                // Add northstar_id, campaign id and run, source, and source details into $values
-                switch (strtolower($value[0])) {
-                    case 'user':
-                        $values['northstar_id'] = $value[1];
-                        break;
-
-                    case 'campaignid':
-                        $values['campaign_id'] = $value[1];
-                        break;
-
-                    case 'campaign':
-                        $values['campaign_id'] = $value[1];
-                        break;
-
-                    case 'campaignrunid':
-                        $values['campaign_run_id'] = $value[1];
-                        break;
-
-                    case 'source':
-                        $values['source'] = $value[1];
-                        break;
-
-                    case 'source_details':
-                        $values['source_details'] = $value[1];
-                        break;
-
-                    default:
-                        break;
-                }
-
-                // Is this a referral?
-                if (strtolower($value[0]) === 'referral' && strtolower($value[1]) === 'true') {
-                    $referral = true;
-                }
+        foreach ($referralCode as $value) {
+            // See if we are dealing with ":" or "="
+            if (strpos($value, ':')) {
+                $value = explode(':', $value);
+            }
+            elseif (strpos($value, '=')) {
+                $value = explode('=', $value);
+            }
+            $key = strtolower($value[0]);
+            if ($key === 'user') {
+                $values['user_id'] = $value[1];
+            }
+            if (($key === 'campaignid' || $key === 'campaign') && is_numeric($value[1])) {
+                $values['campaign_id'] = (int) $value[1];
             }
         }
 
-        // See if we have all the required information we need
-        if (!array_has($values, ['northstar_id', 'campaign_id', 'campaign_run_id'])) {
-            // If we have valid campaign values, use em! This also means that we do not have NS id
-            if (array_has($values, ['campaign_id', 'campaign_run_id']) && is_numeric($values['campaign_id']) && is_numeric($values['campaign_run_id'])) {
-                $finalValues = [
-                    'northstar_id' => null, // set the user to null so we force account creation when the code is not present.
-                    'campaign_id' => $values['campaign_id'],
-                    'campaign_run_id' => $values['campaign_run_id'],
-                    'source' => $this->source,
-                    'source_details' => null,
-                ];
-            }
-
-            // If we have NS id, use it! This also means that we do not have both campaign_id and campaign_run_id, so use the defaults
-            if (array_has($values, ['northstar_id'])) {
-                $finalValues = [
-                    'northstar_id' => $values['northstar_id'], // set the user to null so we force account creation when the code is not present.
-                    'campaign_id' => 8017,
-                    'campaign_run_id' => 8022,
-                    'source' => $this->source,
-                    'source_details' => null,
-                ];
-            }
-        }
-
-        // If we were missing all the necessary values or if this is a referral, use all the defaults
-        if (empty($finalValues) || $referral) {
-            $finalValues = [
-                'northstar_id' => null, // set the user to null so we force account creation when the code is not present.
-                'campaign_id' => 8017,
-                'campaign_run_id' => 8022,
-                'source' => $this->source,
-                'source_details' => null,
-            ];
-        }
-
-        return $finalValues;
+        return $values;
     }
 
     /**
@@ -169,162 +119,13 @@ class RockTheVoteRecord {
         return '';
     }
 
-}
-
-class CreateRockTheVotePostInRogue implements ShouldQueue
-{
-    use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
-
-    /**
-     * The record to be created into a post from the csv.
-     *
-     * @var array
-     */
-    protected $data;
-    protected $record;
-
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
-    public function __construct($record)
-    {
-        $this->data = new RockTheVoteRecord($record);
-        // TODO: Remove once all $this->record references have been replaced with $this->data.
-        $this->record = $record;
-    }
-
-    /**
-     * Execute the job to create a Turbo Vote post in Rogue.
-     *
-     * @return array
-     */
-    public function handle(Rogue $rogue)
-    {
-        if (is_test_email($this->data->email)) {
-            info('progress_log: Skipping test: ' . $this->data->email);
-            return;
-        }
-
-        info('progress_log: Processing: ' . $this->data->email);
-
-        $user = $this->getUser($this->data);
-        if (!($user && $user->id)) {
-            $user = $this->createUser();
-        }
-
-        // @TODO: Refactor this to only update for existing users, add to create payload.
-        $this->updateNorthstarStatus($user, $this->data->voter_registration_status);
-
-        $existingPosts = $rogue->getPost([
-            'campaign_id' => $this->data->campaign_id,
-            'northstar_id' => $user->id,
-            'type' => $this->data->post_type,
-        ]);
-
-        if (!$existingPosts['data']) {
-            info('post not found for user ' . $user->id);
-            $rtvCreatedAtMonth = strtolower(Carbon::parse($this->record['Started registration'])->format('F-Y'));
-            $postDetails = $this->extractDetails($this->record);
-
-            $postData = [
-                'campaign_id' => $this->data->campaign_id,
-                'northstar_id' => $user->id,
-                'type' => $this->data->post_type,
-                'action' => $rtvCreatedAtMonth . '-rockthevote',
-                'status' => $this->data->voter_registration_status,
-                'source' => $this->data->source,
-                'source_details' => $this->data->source_details,
-                'details' => $postDetails,
-            ];
-
-            $post = $rogue->createPost($postData);
-            info('post created in rogue for ' . $this->data->email);
-            return;
-        }
-
-        $postId = $existingPosts['data'][0]['id'];
-        info('Found post ' . $postId . ' for user ' . $user->id);
-
-        $newStatus = $this->getVoterRegistrationStatusChange($existingPosts['data'][0]['status'], $this->data->voter_registration_status);
-        if ($newStatus) {
-            $rogue->updatePost($postId, ['status' => $newStatus]);
-        }
-    }
-
-    /**
-     * Check for user first by id, next by email, last by mobile..
-     * TODO: Move this to DRY with TurboVote imports (if we keep it).
-     * @see https://www.pivotaltracker.com/n/projects/2019429/stories/164114650
-     *
-     * @param string $data
-     * @return NorthstarUser
-     */
-    private function getUser($data)
-    {
-        if ($data->user_id) {
-            $user = gateway('northstar')->asClient()->getUser('id', $data->user_id);
-            if ($user && $user->id) {
-                return $user;
-            }
-        }
-        if ($data->email) {
-            $user = gateway('northstar')->asClient()->getUser('email', $data->email);
-            if ($user && $user->id) {
-                return $user;
-            }
-        }
-        if (!$data->mobile) {
-            return null;
-        }
-        return gateway('northstar')->asClient()->getUser('mobile', $data->mobile);
-    }
-
-    /**
-     * Creates new user from job record.
-     *
-     * @return NorthstarUser
-     */
-    private function createUser()
-    {
-        $record = $this->record;
-        $userData = [
-            'email' => $this->data->email,
-            'mobile' => $this->data->mobile,
-            'first_name' => $record['First name'],
-            'last_name' => $record['Last name'],
-            'addr_street1' => $record['Home address'],
-            'addr_street2' => $record['Home unit'],
-            'addr_city' => $record['Home city'],
-            'addr_state' => $record['Home state'],
-            'addr_zip' => $record['Home zip code'],
-            'source' => config('services.northstar.client_credentials.client_id'),
-        ];
-        if (!empty($this->data->email_opt_in)) {
-            $userData['email_subscription_status'] = str_to_boolean($this->data->email_opt_in);
-        }
-        if (!empty($this->data->sms_opt_in) && !empty($this->data->mobile)) {
-            $userData['sms_status'] = str_to_boolean($this->data->sms_opt_in) ? 'active' : 'stop';
-        }
-
-        $user = gateway('northstar')->asClient()->createUser($userData);
-
-        if (!$user->id) {
-            throw new Exception(500, 'Unable to create user: ' . $this->data->email);
-        }
-        info('created user', ['user' => $user->id]);
-
-        return $user;
-    }
-
     /**
      * Parse the record for extra details and return them as a JSON object.
      *
      * @param  array $record
      * @return string
      */
-    private function extractDetails($record)
+    private function parsePostDetails($record)
     {
         $details = [];
 
@@ -343,7 +144,139 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         return json_encode($details);
     }
+}
 
+class CreateRockTheVotePostInRogue implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
+
+    /**
+     * The record parsed from a Rock the Vote csv.
+     *
+     * @var array
+     */
+    protected $record;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct($record)
+    {
+        $this->record = new RockTheVoteRecord($record);
+    }
+
+    /**
+     * Execute the job to create a Rock The Vote post in Rogue.
+     *
+     * @return array
+     */
+    public function handle(Rogue $rogue)
+    {
+        if (is_test_email($this->record->email)) {
+            info('progress_log: Skipping test: ' . $this->record->email);
+            return;
+        }
+
+        info('progress_log: Processing: ' . $this->record->email);
+
+        $user = $this->getUser($this->record);
+        if (!($user && $user->id)) {
+            $user = $this->createUser($this->record);
+        }
+
+        // @TODO: Refactor this to only update for existing users, add to create payload.
+        $this->updateNorthstarStatus($user, $this->record->voter_registration_status);
+
+        $existingPosts = $rogue->getPost([
+            'campaign_id' => $this->record->campaign_id,
+            'northstar_id' => $user->id,
+            'type' => $this->record->post_type,
+        ]);
+
+        if (!$existingPosts['data']) {
+            info('post not found for user ' . $user->id);
+            $post = $rogue->createPost([
+                'campaign_id' => $this->record->campaign_id,
+                'northstar_id' => $user->id,
+                'type' => $this->record->post_type,
+                'action' => $this->record->post_action,
+                'status' => $this->record->voter_registration_status,
+                'source' => $this->record->source,
+                'source_details' => $this->record->source_details,
+                'details' => $this->record->post_details,
+            ]);
+            info('post created in rogue for ' . $this->record->email);
+            return;
+        }
+
+        $post = $existingPosts['data'][0];
+        info('Found post ' . $post['id'] . ' for user ' . $user->id);
+
+        $newStatus = $this->getVoterRegistrationStatusChange($post['status'], $this->record->voter_registration_status);
+        if ($newStatus) {
+            $rogue->updatePost($post['id'], ['status' => $newStatus]);
+        }
+    }
+
+    /**
+     * Check for user first by id, next by email, last by mobile.
+     *
+     * @param array $record
+     * @return NorthstarUser
+     */
+    private function getUser($record)
+    {
+        if ($record->user_id) {
+            $user = gateway('northstar')->asClient()->getUser('id', $record->user_id);
+            if ($user && $user->id) {
+                return $user;
+            }
+        }
+        if ($record->email) {
+            $user = gateway('northstar')->asClient()->getUser('email', $record->email);
+            if ($user && $user->id) {
+                return $user;
+            }
+        }
+        if (!$record->mobile) {
+            return null;
+        }
+        return gateway('northstar')->asClient()->getUser('mobile', $record->mobile);
+    }
+
+    /**
+     * Creates new user.
+     *
+     * @return NorthstarUser
+     */
+    private function createUser($record)
+    {
+        $userData = [];
+        $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name'];
+        foreach ($userFields as $key) {
+            $userData[$key] = $record->{$key};
+        }
+
+        $userData['source'] = config('services.northstar.client_credentials.client_id');
+    
+        if (!empty($record->email_subscription_status)) {
+            $userData['email_subscription_status'] = $record->email_subscription_status;
+        }
+        if (!empty($record->sms_status)) {
+            $userData['sms_status'] = $record->sms_status;
+        }
+
+        $user = gateway('northstar')->asClient()->createUser($userData);
+
+        if (!$user->id) {
+            throw new Exception(500, 'Unable to create user: ' . $record->email);
+        }
+        info('created user', ['user' => $user->id]);
+
+        return $user;
+    }
 
     /*
      * Determines if a status should be changed and what it should be changed to.
