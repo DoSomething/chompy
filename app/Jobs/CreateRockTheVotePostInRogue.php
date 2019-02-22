@@ -14,112 +14,30 @@ use Illuminate\Foundation\Bus\Dispatchable;
 class RockTheVoteRecord {
     public function __construct($record)
     {
+        $this->post_type = 'voter-reg';
         $this->email = $record['Email address'];
         $this->mobile = $record['Phone'];
         $this->email_opt_in = $record['Opt-in to Partner email?'];
         // Note: Not a typo, this column name does not have the trailing question mark.
         $this->sms_opt_in = $record['Opt-in to Partner SMS/robocall'];
+
+        $referral = $this->parseReferralCode($record['Tracking Source']);
+        $this->user_id = $referral['northstar_id'];
+        $this->campaign_id = (int) $referral['campaign_id'];
+        $this->source_details = $referral['source_details'];
         // TODO: Add all other properties used for getting/validating/creating users/posts.
     }
-}
-
-class CreateRockTheVotePostInRogue implements ShouldQueue
-{
-    use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
 
     /**
-     * The record to be created into a post from the csv.
+     * Parse key values from referral code string.
      *
-     * @var array
-     */
-    protected $record;
-
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
-    public function __construct($record)
-    {
-    	$this->data = new RockTheVoteRecord($record);
-        // TODO: Remove once all $this->record references have been replaced with $this->data.
-        $this->record = $record;
-    }
-
-    /**
-     * Execute the job to create a Turbo Vote post in Rogue.
-     *
+     * @param  string $referralCode
      * @return array
-     */
-    public function handle(Rogue $rogue)
-    {
-    	if (is_test_email($this->data->email)) {
-            info('progress_log: Skipping test: ' . $this->data->email);
-            return;
-        }
-
-        info('progress_log: Processing: ' . $this->data->email);
-
-        $referralCodeValues = $this->parseReferralCode($this->record['Tracking Source']);
-        info('Referral code: ' . implode(', ', $referralCodeValues));
-
-        $user = $this->getUser($referralCodeValues['northstar_id']);
-        if (!($user && $user->id)) {
-            $user = $this->createUser();
-        }
-
-        // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
-        $this->updateNorthstarStatus($user, $this->translateStatus($this->record['Status'], $this->record['Finish with State']));
-
-        $campaignId = (int) $referralCodeValues['campaign_id'];
-        $postType = 'voter-reg';
-
-        $existingPosts = $rogue->getPost([
-            'campaign_id' => $campaignId,
-            'northstar_id' => $user->id,
-            'type' => $postType,
-        ]);
-
-        if (!$existingPosts['data']) {
-            info('post not found for user ' . $user->id);
-            $rtvCreatedAtMonth = strtolower(Carbon::parse($this->record['Started registration'])->format('F-Y'));
-            $sourceDetails = isset($referralCodeValues['source_details']) ? $referralCodeValues['source_details'] : null;
-            $postDetails = $this->extractDetails($this->record);
-
-            $postData = [
-                'campaign_id' => $campaignId,
-                'northstar_id' => $user->id,
-                'type' => $postType,
-                'action' => $rtvCreatedAtMonth . '-rockthevote',
-                'status' => $this->translateStatus($this->record['Status'], $this->record['Finish with State']),
-                'source' => 'rock-the-vote',
-                'source_details' => $sourceDetails,
-                'details' => $postDetails,
-            ];
-
-            $post = $rogue->createPost($postData);
-            info('post created in rogue for ' . $this->data->email);
-            return;
-        }
-
-        $postId = $existingPosts['data'][0]['id'];
-        info($postType.' post '.$postId.' found for user ' . $user->id.' and campaign '.$campaignId);
-        $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
-        $statusShouldChange = $this->updateStatus($existingPosts['data'][0]['status'], $newStatus);
-
-        if ($statusShouldChange) {
-            $rogue->updatePost($postId, ['status' => $statusShouldChange]);
-        }
-    }
-
-    /**
-     * Parse the referral code field to grab individual values.
-     *
-     * @param  array $refferalCode
      */
     private function parseReferralCode($referralCode)
     {
         $values = [];
+        info('Parsing referral code: ' . $referralCode);
 
         // Remove some nonsense that comes in front of the referral code sometimes
         if (strrpos($referralCode, 'iframe?r=') !== false) {
@@ -219,20 +137,101 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         return $finalValues;
     }
+}
+
+class CreateRockTheVotePostInRogue implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
 
     /**
-     * If userId param is given, check for valid user.
-     * Otherwise check by job record email, mobile.
+     * The record to be created into a post from the csv.
+     *
+     * @var array
+     */
+    protected $record;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct($record)
+    {
+        $this->data = new RockTheVoteRecord($record);
+        // TODO: Remove once all $this->record references have been replaced with $this->data.
+        $this->record = $record;
+    }
+
+    /**
+     * Execute the job to create a Turbo Vote post in Rogue.
+     *
+     * @return array
+     */
+    public function handle(Rogue $rogue)
+    {
+        if (is_test_email($this->data->email)) {
+            info('progress_log: Skipping test: ' . $this->data->email);
+            return;
+        }
+
+        info('progress_log: Processing: ' . $this->data->email);
+
+        $user = $this->getUser();
+        if (!($user && $user->id)) {
+            $user = $this->createUser();
+        }
+
+        // @TODO: If we write more functions that are identical across all voter reg imports, pull out into a ImportsVoterReg trait
+        $this->updateNorthstarStatus($user, $this->translateStatus($this->record['Status'], $this->record['Finish with State']));
+
+        $existingPosts = $rogue->getPost([
+            'campaign_id' => $this->data->campaign_id,
+            'northstar_id' => $user->id,
+            'type' => $this->data->post_type,
+        ]);
+
+        if (!$existingPosts['data']) {
+            info('post not found for user ' . $user->id);
+            $rtvCreatedAtMonth = strtolower(Carbon::parse($this->record['Started registration'])->format('F-Y'));
+            $postDetails = $this->extractDetails($this->record);
+
+            $postData = [
+                'campaign_id' => $this->data->campaign_id,
+                'northstar_id' => $user->id,
+                'type' => $this->data->post_type,
+                'action' => $rtvCreatedAtMonth . '-rockthevote',
+                'status' => $this->translateStatus($this->record['Status'], $this->record['Finish with State']),
+                'source' => 'rock-the-vote',
+                'source_details' => $this->data->source_details,
+                'details' => $postDetails,
+            ];
+
+            $post = $rogue->createPost($postData);
+            info('post created in rogue for ' . $this->data->email);
+            return;
+        }
+
+        $postId = $existingPosts['data'][0]['id'];
+        info('Found post ' . $postId . ' for user ' . $user->id);
+        $newStatus = $this->translateStatus($this->record['Status'], $this->record['Finish with State']);
+        $statusShouldChange = $this->updateStatus($existingPosts['data'][0]['status'], $newStatus);
+
+        if ($statusShouldChange) {
+            $rogue->updatePost($postId, ['status' => $statusShouldChange]);
+        }
+    }
+
+    /**
+     * Check for user first by id, next by email, last by mobile..
      * TODO: Move this to DRY with TurboVote imports (if we keep it).
      * @see https://www.pivotaltracker.com/n/projects/2019429/stories/164114650
      *
-     * @param string
      * @return NorthstarUser
      */
-    private function getUser($userId)
+    private function getUser()
     {
-        if ($userId) {
-            $user = gateway('northstar')->asClient()->getUser('id', $userId);
+        if ($this->data->user_id) {
+            $user = gateway('northstar')->asClient()->getUser('id', $this->data->user_id);
             if ($user && $user->id) {
                 return $user;
             }
