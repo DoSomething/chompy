@@ -47,6 +47,8 @@ class Rogue extends RestApiClient
 
     /**
      * Get a post from Rogue give a set of filters.
+     * TODO: Rename this as getPosts, or refactor it to return the first array item.
+     * @see https://github.com/DoSomething/chompy/pull/58/files#r258543126
      *
      * @param array $inputs - The filters to use to grab the post.
      * @return array $post - The found post.

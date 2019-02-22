@@ -27,6 +27,9 @@
     },
     "autoload": {
         "classmap": ["database"],
+        "files": [
+          "app/helpers.php"
+        ],
         "psr-4": {
             "Chompy\\": "app/"
         }
