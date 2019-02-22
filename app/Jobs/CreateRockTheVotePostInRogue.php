@@ -11,6 +11,18 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
+class RockTheVoteRecord {
+    public function __construct($record)
+    {
+        $this->email = $record['Email address'];
+        $this->mobile = $record['Phone'];
+        $this->email_opt_in = $record['Opt-in to Partner email?'];
+        // Note: Not a typo, this column name does not have the trailing question mark.
+        $this->sms_opt_in = $record['Opt-in to Partner SMS/robocall'];
+        // TODO: Add all other properties used for getting/validating/creating users/posts.
+    }
+}
+
 class CreateRockTheVotePostInRogue implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
@@ -29,9 +41,9 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      */
     public function __construct($record)
     {
-    	$this->record = $record;
-        $this->recordEmail = $record['Email address'];
-        $this->recordMobile = $record['Phone'];
+    	$this->data = new RockTheVoteRecord($record);
+        // TODO: Remove once all $this->record references have been replaced with $this->data.
+        $this->record = $record;
     }
 
     /**
@@ -42,11 +54,11 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     public function handle(Rogue $rogue)
     {
     	if ($this->isTestData($this->record)) {
-            info('progress_log: Skipping test: ' . $this->recordEmail);
+            info('progress_log: Skipping test: ' . $this->data->email);
             return;
         }
 
-        info('progress_log: Processing: ' . $this->recordEmail);
+        info('progress_log: Processing: ' . $this->data->email);
 
         $referralCodeValues = $this->parseReferralCode($this->record['Tracking Source']);
         info('Referral code: ' . implode(', ', $referralCodeValues));
@@ -86,7 +98,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             ];
 
             $post = $rogue->createPost($postData);
-            info('post created in rogue for ' . $this->recordEmail);
+            info('post created in rogue for ' . $this->data->email);
             return;
         }
 
@@ -240,16 +252,16 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                 return $user;
             }
         }
-        if ($this->recordEmail) {
-            $user = gateway('northstar')->asClient()->getUser('email', $this->recordEmail);
+        if ($this->data->email) {
+            $user = gateway('northstar')->asClient()->getUser('email', $this->data->email);
             if ($user && $user->id) {
                 return $user;
             }
         }
-        if (!$this->recordMobile) {
+        if (!$this->data->mobile) {
             return null;
         }
-        return gateway('northstar')->asClient()->getUser('mobile', $this->recordMobile);
+        return gateway('northstar')->asClient()->getUser('mobile', $this->data->mobile);
     }
 
     /**
@@ -261,8 +273,8 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     {
         $record = $this->record;
         $userData = [
-            'email' => $this->recordEmail,
-            'mobile' => $this->recordMobile,
+            'email' => $this->data->email,
+            'mobile' => $this->data->mobile,
             'first_name' => $record['First name'],
             'last_name' => $record['Last name'],
             'addr_street1' => $record['Home address'],
@@ -272,22 +284,17 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             'addr_zip' => $record['Home zip code'],
             'source' => config('services.northstar.client_credentials.client_id'),
         ];
-
-        $recordEmailOptIn = $record['Opt-in to Partner email?'];
-        if (!empty($recordEmailOptIn)) {
-            $userData['email_subscription_status'] = str_to_boolean($recordEmailOptIn);
+        if (!empty($this->data->email_opt_in)) {
+            $userData['email_subscription_status'] = str_to_boolean($this->data->email_opt_in);
         }
-
-        // Note: Not a typo -- this column name does not have the trailing question mark.
-        $recordSmsOptIn = $record['Opt-in to Partner SMS/robocall'];
-        if (!empty($recordSmsOptIn) && !empty($recordMobile)) {
-            $userData['sms_status'] = str_to_boolean($recordSmsOptIn) ? 'active' : 'stop';
+        if (!empty($this->data->sms_opt_in) && !empty($this->data->mobile)) {
+            $userData['sms_status'] = str_to_boolean($this->data->sms_opt_in) ? 'active' : 'stop';
         }
 
         $user = gateway('northstar')->asClient()->createUser($userData);
 
         if (!$user->id) {
-            throw new Exception(500, 'Unable to create user: ' . $this->recordEmail);
+            throw new Exception(500, 'Unable to create user: ' . $this->data->email);
         }
         info('created user', ['user' => $user->id]);
 
