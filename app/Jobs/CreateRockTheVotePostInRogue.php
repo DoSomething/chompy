@@ -214,7 +214,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         info('progress_log: Processing: ' . $this->data->email);
 
-        $user = $this->getUser();
+        $user = $this->getUser($this->data);
         if (!($user && $user->id)) {
             $user = $this->createUser();
         }
@@ -239,7 +239,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                 'type' => $this->data->post_type,
                 'action' => $rtvCreatedAtMonth . '-rockthevote',
                 'status' => $this->data->voter_registration_status,
-                'source' => 'rock-the-vote',
+                'source' => $this->data->source,
                 'source_details' => $this->data->source_details,
                 'details' => $postDetails,
             ];
@@ -263,26 +263,27 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      * TODO: Move this to DRY with TurboVote imports (if we keep it).
      * @see https://www.pivotaltracker.com/n/projects/2019429/stories/164114650
      *
+     * @param  string $data
      * @return NorthstarUser
      */
-    private function getUser()
+    private function getUser($data)
     {
-        if ($this->data->user_id) {
-            $user = gateway('northstar')->asClient()->getUser('id', $this->data->user_id);
+        if ($data->user_id) {
+            $user = gateway('northstar')->asClient()->getUser('id', $data->user_id);
             if ($user && $user->id) {
                 return $user;
             }
         }
-        if ($this->data->email) {
-            $user = gateway('northstar')->asClient()->getUser('email', $this->data->email);
+        if ($data->email) {
+            $user = gateway('northstar')->asClient()->getUser('email', $data->email);
             if ($user && $user->id) {
                 return $user;
             }
         }
-        if (!$this->data->mobile) {
+        if (!$data->mobile) {
             return null;
         }
-        return gateway('northstar')->asClient()->getUser('mobile', $this->data->mobile);
+        return gateway('northstar')->asClient()->getUser('mobile', $data->mobile);
     }
 
     /**
@@ -326,9 +327,9 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      * Parse the record for extra details and return them as a JSON object.
      *
      * @param  array $record
-     * @param  array $extraData
+     * @return string
      */
-    private function extractDetails($record, $extraData = null)
+    private function extractDetails($record)
     {
         $details = [];
 
@@ -343,10 +344,6 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         foreach ($importantKeys as $key) {
             $details[$key] = $record[$key];
-        }
-
-        if ($extraData) {
-            $details = array_merge($details, $extraData);
         }
 
         return json_encode($details);
