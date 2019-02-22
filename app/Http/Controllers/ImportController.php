@@ -9,6 +9,7 @@ use Chompy\Jobs\ImportTurboVotePosts;
 use Chompy\Jobs\ImportFacebookSharePosts;
 use Illuminate\Support\Facades\Storage;
 use Chompy\Jobs\ImportRockTheVotePosts;
+use Chompy\ImportType;
 
 class ImportController extends Controller
 {
@@ -56,21 +57,23 @@ class ImportController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        if ($request->input('import-type') === 'turbovote') {
+        $type = $request->input('import-type');
+
+        if ($type === ImportType::$turbovote) {
             info("turbo vote import happening");
             ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        if ($request->input('import-type') === 'rock-the-vote') {
+        if ($type === ImportType::$rockTheVote) {
             info('rock the vote import happening');
             ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        if ($request->input('import-type') === 'facebook') {
+        if ($type === ImportType::$facebook) {
             info("Facebook share import happening");
             ImportFacebookSharePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        return redirect()->route('import.show')->with('status', 'Your CSV was added to the queue to be processed.');
+        return redirect()->route('import.show', ['type' => $type])->with('status', 'Your CSV was added to the queue to be processed.');
     }
 }

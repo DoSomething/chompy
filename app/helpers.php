@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Parse a CSV field value as boolean.
+ * Parse a string as boolean.
  *
  * @param string $text
  * @return boolean
