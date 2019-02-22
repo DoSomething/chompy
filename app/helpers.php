@@ -1,5 +1,18 @@
 <?php
 
+use Illuminate\Support\Str;
+
+/**
+ * Returns whether email is a test email.
+ *
+ * @param string $email
+ * @return boolean
+ */
+function is_test_email($email)
+{
+    return Str::contains($email, ['thing.org', '@dosome','rockthevote.com', 'test', '+']);
+}
+
 /**
  * Parse a string as boolean.
  *

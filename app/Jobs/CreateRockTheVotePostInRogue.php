@@ -53,7 +53,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-    	if ($this->isTestData($this->record)) {
+    	if (is_test_email($this->data->email)) {
             info('progress_log: Skipping test: ' . $this->data->email);
             return;
         }
@@ -110,21 +110,6 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         if ($statusShouldChange) {
             $rogue->updatePost($postId, ['status' => $statusShouldChange]);
         }
-    }
-
-    /*
-     * Returns whether a record is test data that should not create/update users and/or posts.
-     * TODO: Move this into helpers and DRY with any other Jobs that are still relevant.
-     *
-     * @param array $record
-     * @return bool
-     */
-    private function isTestData($record)
-    {
-        $isNotValidEmail = strrpos($record['Email address'], 'thing.org') !== false || strrpos($record['Email address'] !== false, '@dosome') || strrpos($record['Email address'], 'rockthevote.com') !== false || strrpos($record['Email address'], 'test') !== false || strrpos($record['Email address'], '+') !== false;
-        $isNotValidLastName = strrpos($record['Last name'], 'Baloney') !== false;
-
-        return $isNotValidEmail || $isNotValidLastName ? true : false;
     }
 
     /**
