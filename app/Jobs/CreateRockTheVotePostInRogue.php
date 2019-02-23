@@ -35,7 +35,7 @@ class RockTheVoteRecord {
             $this->sms_status = str_to_boolean($smsOptIn) ? 'active' : 'stop';
         }
 
-        $rtvStatus = $this->parseRtvStatus($record['Status'], $record['Finish with State']);
+        $rtvStatus = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
        
         $this->voter_registration_status =  Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
 
@@ -103,7 +103,7 @@ class RockTheVoteRecord {
      * @param  string $rtvFinishWithState
      * @return string
      */
-    private function parseRtvStatus($rtvStatus, $rtvFinishWithState)
+    private function parseVoterRegistrationStatus($rtvStatus, $rtvFinishWithState)
     {
         $rtvStatus = strtolower($rtvStatus);
 
@@ -222,7 +222,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     }
 
     /**
-     * Check for user first by id, next by email, last by mobile.
+     * Check for user first by record user_id, next by email, last by mobile.
      *
      * @param array $record
      * @return NorthstarUser
@@ -248,14 +248,17 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     }
 
     /**
-     * Creates new user.
+     * Creates new user from record.
      *
+     * @param array $record
      * @return NorthstarUser
      */
     private function createUser($record)
     {
         $userData = [];
+
         $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name', 'voter_registration_status'];
+
         foreach ($userFields as $key) {
             $userData[$key] = $record->{$key};
         }
@@ -265,6 +268,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         if (!empty($record->email_subscription_status)) {
             $userData['email_subscription_status'] = $record->email_subscription_status;
         }
+
         if (!empty($record->sms_status)) {
             $userData['sms_status'] = $record->sms_status;
         }
@@ -279,7 +283,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         return $user;
     }
 
-    /*
+    /**
      * Determines if a status should be changed and what it should be changed to.
      *
      * @param string $currentStatus
@@ -302,8 +306,8 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         return $indexOfCurrentStatus < $indexOfNewStatus ? $newStatus : null;
     }
 
-    /*
-     * Translate to Northstar status and update Northstar user (Northstar takes care of the hierarchy)
+    /**
+     * Update Northstar user with given data.
      *
      * @param Object $user
      * @param Array $data
