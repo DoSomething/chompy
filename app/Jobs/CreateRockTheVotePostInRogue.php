@@ -263,7 +263,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      * TODO: Move this to DRY with TurboVote imports (if we keep it).
      * @see https://www.pivotaltracker.com/n/projects/2019429/stories/164114650
      *
-     * @param  string $data
+     * @param string $data
      * @return NorthstarUser
      */
     private function getUser($data)
