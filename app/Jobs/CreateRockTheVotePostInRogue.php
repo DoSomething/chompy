@@ -10,6 +10,7 @@ use Chompy\Traits\ImportToRogue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Str;
 
 class RockTheVoteRecord {
     public function __construct($record)
@@ -34,10 +35,9 @@ class RockTheVoteRecord {
             $this->sms_status = str_to_boolean($smsOptIn) ? 'active' : 'stop';
         }
 
-        $this->voter_registration_status = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
-
-        $this->post_type = 'voter-reg';
-        $this->post_action = strtolower(Carbon::parse($record['Started registration'])->format('F-Y')) . '-rockthevote';
+        $rtvStatus = $this->parseRtvStatus($record['Status'], $record['Finish with State']);
+       
+        $this->voter_registration_status =  Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
 
         $referral = $this->parseReferralCode($record['Tracking Source']);
         $this->user_id = !empty($referral['user_id']) ? $referral['user_id'] : null;
@@ -46,6 +46,9 @@ class RockTheVoteRecord {
         $this->post_source = 'rock-the-vote';
         $this->post_source_details = null;
         $this->post_details = $this->parsePostDetails($record);
+        $this->post_status = $rtvStatus;
+        $this->post_type = 'voter-reg';
+        $this->post_action = strtolower(Carbon::parse($record['Started registration'])->format('F-Y')) . '-rockthevote';
     }
 
     /**
@@ -94,13 +97,13 @@ class RockTheVoteRecord {
     }
 
     /**
-     * Translate a status from Rock The Vote into a status that can be sent to Rogue.
+     * Translate a status from Rock The Vote into a Rogue post status.
      *
      * @param  string $rtvStatus
      * @param  string $rtvFinishWithState
      * @return string
      */
-    private function parseVoterRegistrationStatus($rtvStatus, $rtvFinishWithState)
+    private function parseRtvStatus($rtvStatus, $rtvFinishWithState)
     {
         $rtvStatus = strtolower($rtvStatus);
 
@@ -182,12 +185,11 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         info('progress_log: Processing: ' . $this->record->email);
 
         $user = $this->getUser($this->record);
-        if (!($user && $user->id)) {
+        if ($user && $user->id) {
+            $this->updateUser($user, ['voter_registration_status' => $this->record->voter_registration_status]);
+        } else {
             $user = $this->createUser($this->record);
         }
-
-        // @TODO: Refactor this to only update for existing users, add to create payload.
-        $this->updateNorthstarStatus($user, $this->record->voter_registration_status);
 
         $existingPosts = $rogue->getPost([
             'campaign_id' => $this->record->campaign_id,
@@ -196,25 +198,24 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         ]);
 
         if (!$existingPosts['data']) {
-            info('post not found for user ' . $user->id);
             $post = $rogue->createPost([
                 'campaign_id' => $this->record->campaign_id,
                 'northstar_id' => $user->id,
                 'type' => $this->record->post_type,
                 'action' => $this->record->post_action,
-                'status' => $this->record->voter_registration_status,
-                'source' => $this->record->source,
-                'source_details' => $this->record->source_details,
+                'status' => $this->record->post_status,
+                'source' => $this->record->post_source,
+                'source_details' => $this->record->post_source_details,
                 'details' => $this->record->post_details,
             ]);
-            info('post created in rogue for ' . $this->record->email);
+            info('Created post', ['user' => $user->id]);
             return;
         }
 
         $post = $existingPosts['data'][0];
-        info('Found post ' . $post['id'] . ' for user ' . $user->id);
+        info('Found post', ['post' => $post['id'], 'user' => $user->id]);
 
-        $newStatus = $this->getVoterRegistrationStatusChange($post['status'], $this->record->voter_registration_status);
+        $newStatus = $this->getVoterRegistrationStatusChange($post['status'], $this->record->post_status);
         if ($newStatus) {
             $rogue->updatePost($post['id'], ['status' => $newStatus]);
         }
@@ -254,7 +255,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     private function createUser($record)
     {
         $userData = [];
-        $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name'];
+        $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name', 'voter_registration_status'];
         foreach ($userFields as $key) {
             $userData[$key] = $record->{$key};
         }
@@ -273,7 +274,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         if (!$user->id) {
             throw new Exception(500, 'Unable to create user: ' . $record->email);
         }
-        info('created user', ['user' => $user->id]);
+        info('Created user', ['user' => $user->id]);
 
         return $user;
     }
@@ -305,14 +306,11 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      * Translate to Northstar status and update Northstar user (Northstar takes care of the hierarchy)
      *
      * @param Object $user
-     * @param string $statusToSend
-    */
-    private function updateNorthstarStatus($user, $statusToSend)
+     * @param Array $data
+     */
+    private function updateUser($user, $data)
     {
-        if ($statusToSend === 'register-form' || $statusToSend === 'register-OVR') {
-            $statusToSend = 'registration_complete';
-        }
-        gateway('northstar')->asClient()->updateUser($user->id, ['voter_registration_status' => $statusToSend]);
-        info('updated user', ['user' => $user->id]);
+        gateway('northstar')->asClient()->updateUser($user->id, $data);
+        info('Updated user', ['user' => $user->id]);
     }
 }
