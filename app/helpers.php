@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
  */
 function is_test_email($email)
 {
-    return Str::contains($email, ['thing.org', '@dosome','rockthevote.com', 'test', '+']);
+    return Str::contains($email, ['@dosomething.org', '@example']);
 }
 
 /**

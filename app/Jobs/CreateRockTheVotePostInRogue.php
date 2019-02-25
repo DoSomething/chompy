@@ -142,6 +142,7 @@ class RockTheVoteRecord {
 
         return $finalValues;
     }
+
     /**
      * Translate a status from Rock The Vote into a status that can be sent to Rogue.
      *
@@ -152,18 +153,12 @@ class RockTheVoteRecord {
     private function parseVoterRegistrationStatus($rtvStatus, $rtvFinishWithState)
     {
         $rtvStatus = strtolower($rtvStatus);
-        $rtvFinishWithState = strtolower($rtvFinishWithState);
 
-        if($rtvStatus === 'complete') {
-            if ($rtvFinishWithState === "no") {
-                return 'register-form';
-            }
-            if ($rtvFinishWithState === "yes") {
-                return 'register-OVR';
-            }
+        if ($rtvStatus === 'complete') {
+            return str_to_boolean($rtvFinishWithState) ? 'register-OVR' : 'register-form';
         }
 
-        if (strpos($rtvStatus, 'step') !== false) {
+        if (str_contains($rtvStatus, 'step') !== false) {
             return 'uncertain';
         }
 
