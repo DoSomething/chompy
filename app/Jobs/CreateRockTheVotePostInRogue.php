@@ -24,6 +24,7 @@ class RockTheVoteRecord {
         $this->first_name = $record['First name'];
         $this->last_name = $record['Last name'];
         $this->mobile = $record['Phone'];
+        $this->source = config('services.northstar.client_credentials.client_id');
 
         $emailOptIn = $record['Opt-in to Partner email?'];
         if ($emailOptIn) {
@@ -37,14 +38,15 @@ class RockTheVoteRecord {
 
         $rtvStatus = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
        
-        $this->voter_registration_status =  Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
+        $this->voter_registration_status = Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
 
         $this->user_id = $this->parseUserId($record['Tracking Source']);
-
+       
         $this->post_source = 'rock-the-vote';
         $this->post_source_details = null;
         $this->post_details = $this->parsePostDetails($record);
         $this->post_status = $rtvStatus;
+
         // TODO: Replace these with a post_action_id variable once available,
         // @see https://github.com/DoSomething/rogue/pull/837.
         $this->campaign_id = 8017;
@@ -86,7 +88,7 @@ class RockTheVoteRecord {
             }
 
             $key = strtolower($value[0]);
-            // We expect 'user', but check for any variations/typos for any manually entered URLs.
+            // We expect 'user', but check for any variations/typos in any manually entered URLs.
             if ($key === 'user' || $key === 'user_id' || $key === 'userid') {
                 $userId = $value[1];
             }
@@ -95,7 +97,7 @@ class RockTheVoteRecord {
              * If referral parameter is set to true, the user parameter belongs to the referring
              * user, not the user that should be associated with this voter registration record.
              */ 
-            // We expect 'referral', but check for any typos for any manually entered URLs.
+            // We expect 'referral', but check for any typos in any manually entered URLs.
             if (($key === 'referral' || $key === 'refferal') && str_to_boolean($value[1])) {
                 /**
                  * Return null to force querying for existing user via this record email or mobile
@@ -123,7 +125,7 @@ class RockTheVoteRecord {
             return str_to_boolean($rtvFinishWithState) ? 'register-OVR' : 'register-form';
         }
 
-        if (str_contains($rtvStatus, 'step') !== false) {
+        if (str_contains($rtvStatus, 'step')) {
             return 'uncertain';
         }
 
@@ -269,13 +271,11 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     {
         $userData = [];
 
-        $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name', 'voter_registration_status'];
+        $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name', 'source', 'voter_registration_status'];
 
         foreach ($userFields as $key) {
             $userData[$key] = $record->{$key};
         }
-
-        $userData['source'] = config('services.northstar.client_credentials.client_id');
     
         if (!empty($record->email_subscription_status)) {
             $userData['email_subscription_status'] = $record->email_subscription_status;
