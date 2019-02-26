@@ -39,61 +39,73 @@ class RockTheVoteRecord {
        
         $this->voter_registration_status =  Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
 
-        $referral = $this->parseReferralCode($record['Tracking Source']);
-        $this->user_id = !empty($referral['user_id']) ? $referral['user_id'] : null;
-        // TODO: Do we need to check the referral for these values? Don't seem they are ever used.
-        $this->campaign_id = 8017;
+        $this->user_id = $this->parseUserId($record['Tracking Source']);
+
         $this->post_source = 'rock-the-vote';
         $this->post_source_details = null;
         $this->post_details = $this->parsePostDetails($record);
         $this->post_status = $rtvStatus;
+        // TODO: Replace these with a post_action_id variable once available,
+        // @see https://github.com/DoSomething/rogue/pull/837.
+        $this->campaign_id = 8017;
         $this->post_type = 'voter-reg';
         $this->post_action = strtolower(Carbon::parse($record['Started registration'])->format('F-Y')) . '-rockthevote';
     }
 
     /**
-     * Parse key values from referral code string.
+     * Parse existing user ID from referral code string.
      *
      * @param  string $referralCode
-     * @return array
+     * @return string
      */
-    private function parseReferralCode($referralCode)
+    private function parseUserId($referralCode)
     {
-        $values = [];
         info('Parsing referral code: ' . $referralCode);
 
         // Remove some nonsense that comes in front of the referral code sometimes
-        if (strrpos($referralCode, 'iframe?r=') !== false) {
+        if (str_contains($referralCode, 'iframe?r=')) {
             $referralCode = str_replace('iframe?r=', null, $referralCode);
         }
-        if (strrpos($referralCode, 'iframe?') !== false) {
+        if (str_contains($referralCode, 'iframe?')) {
             $referralCode = str_replace('iframe?', null, $referralCode);
         }
 
         if (empty($referralCode)) {
-            return $values;
+            return null;
         }
 
         $referralCode = explode(',', $referralCode);
 
         foreach ($referralCode as $value) {
             // See if we are dealing with ":" or "="
-            if (strpos($value, ':')) {
+            if (str_contains($value, ':')) {
                 $value = explode(':', $value);
             }
-            elseif (strpos($value, '=')) {
+            elseif (str_contains($value, '=')) {
                 $value = explode('=', $value);
             }
+
             $key = strtolower($value[0]);
-            if ($key === 'user') {
-                $values['user_id'] = $value[1];
+            // We expect 'user', but check for any variations/typos for any manually entered URLs.
+            if ($key === 'user' || $key === 'user_id' || $key === 'userid') {
+                $userId = $value[1];
             }
-            if (($key === 'campaignid' || $key === 'campaign') && is_numeric($value[1])) {
-                $values['campaign_id'] = (int) $value[1];
+
+            /**
+             * If referral parameter is set to true, the user parameter belongs to the referring
+             * user, not the user that should be associated with this voter registration record.
+             */ 
+            // We expect 'referral', but check for any typos for any manually entered URLs.
+            if (($key === 'referral' || $key === 'refferal') && str_to_boolean($value[1])) {
+                /**
+                 * Return null to force querying for existing user via this record email or mobile
+                 * upon import.
+                 */
+                return null;
             }
         }
 
-        return $values;
+        return isset($userId) ? $userId : null;
     }
 
     /**
