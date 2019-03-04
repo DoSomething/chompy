@@ -3,7 +3,6 @@
 namespace Chompy\Jobs;
 
 use Exception;
-use Carbon\Carbon;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Chompy\Traits\ImportToRogue;
@@ -41,17 +40,15 @@ class RockTheVoteRecord {
         $this->voter_registration_status = Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
 
         $this->user_id = $this->parseUserId($record['Tracking Source']);
+
+        $postConfig = config('import.rock_the_vote.post');
        
-        $this->post_source = 'rock-the-vote';
+        $this->post_source = $postConfig['source'];
         $this->post_source_details = null;
         $this->post_details = $this->parsePostDetails($record);
         $this->post_status = $rtvStatus;
-
-        // TODO: Replace these with a post_action_id variable once available,
-        // @see https://github.com/DoSomething/rogue/pull/837.
-        $this->campaign_id = 8017;
-        $this->post_type = 'voter-reg';
-        $this->post_action = strtolower(Carbon::parse($record['Started registration'])->format('F-Y')) . '-rockthevote';
+        $this->post_type = $postConfig['type'];
+        $this->post_action_id =  $postConfig['action_id'];
     }
 
     /**
@@ -206,17 +203,15 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         }
 
         $existingPosts = $rogue->getPost([
-            'campaign_id' => $this->record->campaign_id,
+            'action_id' => $this->record->post_action_id,
             'northstar_id' => $user->id,
-            'type' => $this->record->post_type,
         ]);
 
         if (!$existingPosts['data']) {
             $post = $rogue->createPost([
-                'campaign_id' => $this->record->campaign_id,
+                'action_id' => $this->record->post_action_id,
                 'northstar_id' => $user->id,
                 'type' => $this->record->post_type,
-                'action' => $this->record->post_action,
                 'status' => $this->record->post_status,
                 'source' => $this->record->post_source,
                 'source_details' => $this->record->post_source_details,
