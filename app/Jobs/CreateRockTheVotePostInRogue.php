@@ -40,13 +40,15 @@ class RockTheVoteRecord {
         $this->voter_registration_status = Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
 
         $this->user_id = $this->parseUserId($record['Tracking Source']);
+
+        $postConfig = config('import.rock_the_vote.post');
        
-        $this->post_source = 'rock-the-vote';
+        $this->post_source = $postConfig['source'];
         $this->post_source_details = null;
         $this->post_details = $this->parsePostDetails($record);
         $this->post_status = $rtvStatus;
-        $this->post_type = 'voter-reg';
-        $this->post_action_id = config('import.rock_the_vote.action_id');
+        $this->post_type = $postConfig['type'];
+        $this->post_action_id =  $postConfig['action_id'];
     }
 
     /**
