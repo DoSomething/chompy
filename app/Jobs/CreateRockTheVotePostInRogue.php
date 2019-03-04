@@ -3,7 +3,6 @@
 namespace Chompy\Jobs;
 
 use Exception;
-use Carbon\Carbon;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Chompy\Traits\ImportToRogue;
@@ -46,12 +45,8 @@ class RockTheVoteRecord {
         $this->post_source_details = null;
         $this->post_details = $this->parsePostDetails($record);
         $this->post_status = $rtvStatus;
-
-        // TODO: Replace these with a post_action_id variable once available,
-        // @see https://github.com/DoSomething/rogue/pull/837.
-        $this->campaign_id = 8017;
         $this->post_type = 'voter-reg';
-        $this->post_action = strtolower(Carbon::parse($record['Started registration'])->format('F-Y')) . '-rockthevote';
+        $this->post_action_id = config('import.rock_the_vote.action_id');
     }
 
     /**
@@ -206,17 +201,15 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         }
 
         $existingPosts = $rogue->getPost([
-            'campaign_id' => $this->record->campaign_id,
+            'action_id' => $this->record->post_action_id,
             'northstar_id' => $user->id,
-            'type' => $this->record->post_type,
         ]);
 
         if (!$existingPosts['data']) {
             $post = $rogue->createPost([
-                'campaign_id' => $this->record->campaign_id,
+                'action_id' => $this->record->post_action_id,
                 'northstar_id' => $user->id,
                 'type' => $this->record->post_type,
-                'action' => $this->record->post_action,
                 'status' => $this->record->post_status,
                 'source' => $this->record->post_source,
                 'source_details' => $this->record->post_source_details,
