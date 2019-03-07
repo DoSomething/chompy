@@ -16,3 +16,9 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Third Party Integration
+$router->group(['prefix' => 'api/v1'], 'middleware' => ['third-party-api-token-auth']], function() {
+	// CallPower
+	$this->post('callpower/call', 'ThirdParty\CallPowerController@store');
+});

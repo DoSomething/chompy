@@ -22,7 +22,3 @@ Route::get('/', function () {
 $router->get('login', 'Auth\LoginController@getLogin')->name('login');
 $router->get('logout', 'Auth\LoginController@getLogout')->name('logout');
 
-// Route::get('/import', function () {
-//     return 'import';
-// });
-
