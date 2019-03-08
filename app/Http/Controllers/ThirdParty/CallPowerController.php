@@ -24,6 +24,7 @@ class CallPowerController extends Controller
      */
     public function store(Request $request)
     {
+    	dd('hi');
     	$request->validate([
     		// @TODO: how do we validate a phone number? What format will this come in from CallPower?
             'mobile' => 'required',
