@@ -23,8 +23,8 @@ class AuthenticateWithApiKey
             return $next($request);
         }
 
-        // Check the `X-DS-Chompy-API-Key` header for authorization.
-        if ($request->header('X-DS-Chompy-API-Key') !== config('app.api_key')) {
+        // Check the `X-DS-Importer-API-Key` header for authorization.
+        if ($request->header('X-DS-Importer-API-Key') !== config('app.api_key')) {
             throw new AuthenticationException;
         }
 

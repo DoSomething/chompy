@@ -99,6 +99,17 @@ class CallPowerController extends Controller
      */
     private function extractDetails($call)
     {
-    	// If the call isn't completed, store CallPower status status.
+    	$details = [];
+
+    	$keys = [
+    		'status_details',
+    		'call_timestamp',
+    		'call_duration',
+    		'campaign_target_name',
+    		'campaign_target_district',
+    		'callpower_campaign_name',
+    		'number_dialed_into',
+    	];
+
     }
 }
