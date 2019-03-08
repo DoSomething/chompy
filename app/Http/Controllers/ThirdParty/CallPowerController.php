@@ -1,9 +1,10 @@
 <?php
 
-namespace Rogue\Http\Controllers\ThirdParty;
+namespace Chompy\Http\Controllers\ThirdParty;
 
 use Illuminate\Http\Request;
 use Chompy\Services\Rogue;
+use Chompy\Http\Controllers\Controller;
 
 class CallPowerController extends Controller
 {
@@ -71,7 +72,7 @@ class CallPowerController extends Controller
      * @param integer $mobile
      * @return NorthstarUser
      */
-    pritvate function getOrCreateUser($mobile)
+    private function getOrCreateUser($mobile)
     {
     	// Get the user by mobile number.
     	info('getting user with the mobile: ' . $mobile);
@@ -107,6 +108,7 @@ class CallPowerController extends Controller
     		'call_timestamp',
     		'call_duration',
     		'campaign_target_name',
+    		'campaign_target_title',
     		'campaign_target_district',
     		'callpower_campaign_name',
     		'number_dialed_into',
