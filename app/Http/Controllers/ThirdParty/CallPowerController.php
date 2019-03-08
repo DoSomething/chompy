@@ -39,7 +39,28 @@ class CallPowerController extends Controller
         // Using the callpower_campaign_id, get the action_id from Rogue.
         $action = $rogue->getActionFromCallPowerCampaignId($request['callpower_campaign_id']);
 
-        // Create a post in Rogue.
+        // Check if the post exists in Rogue. If not, create the post.
+       	$existingPost = $rogue->getPost([
+            'action_id' => $action['data']['id'],
+            'northstar_id' => $user->id,
+        ]);
+
+        if (!$existingPost['data']) {
+        	info('creating post in rogue for northstar user: ' . $user->id);
+
+        	$details = $this->extractDetails($request);
+
+        	// Determine source details.
+        	$post = $rogue->createPost([
+        		'northstar_id' => $user->id,
+        		'action_id' => $$action['data']['id'],
+        		'type' => 'phone-call',
+        		'status' => $request['status'] === 'completed' ? 'accepted' : 'incomplete',
+        		'quantity' => 1,
+        		'source' => 'CallPower',
+        		'source_details' => $details,
+        	]);
+        }
     }
 
     /**
@@ -69,5 +90,15 @@ class CallPowerController extends Controller
             } else {
                 throw new Exception(500, 'Unable to create user with mobile: ' . $mobile);
             }
+    }
+
+    /**
+     * Parse the call and return details we want to store in Rogue as a JSON object.
+     *
+     * @param array $call
+     */
+    private function extractDetails($call)
+    {
+    	// If the call isn't completed, store CallPower status status.
     }
 }
