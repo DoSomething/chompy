@@ -99,4 +99,22 @@ class Rogue extends RestApiClient
 
         return $post;
     }
+
+    /**
+     * Get an action from Rogue based on CallPower campaign id.
+     *
+     * @param integer $callpowerCampaignId
+     * @return array $action
+     */
+    public function getActionFromCallPowerCampaignId($callpowerCampaignId) {
+        $action = $this->asClient()->get('v3/actions', [
+            'filter' => ['callpower_campaign_id' => $callpowerCampaignId],
+        ]);
+
+        if (! $action['data']) {
+            throw new Exception(500, 'Unable to get action data for CallPower campaign id : ' . $callpowerCampaignId);
+        }
+
+        return $action;
+    }
 }

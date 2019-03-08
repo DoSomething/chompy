@@ -3,6 +3,7 @@
 namespace Rogue\Http\Controllers\ThirdParty;
 
 use Illuminate\Http\Request;
+use Chompy\Services\Rogue;
 
 class CallPowerController extends Controller
 {
@@ -36,6 +37,7 @@ class CallPowerController extends Controller
         $user = $this->getOrCreateUser($request['mobile']);
 
         // Using the callpower_campaign_id, get the action_id from Rogue.
+        $action = $rogue->getActionFromCallPowerCampaignId($request['callpower_campaign_id']);
 
         // Create a post in Rogue.
     }
