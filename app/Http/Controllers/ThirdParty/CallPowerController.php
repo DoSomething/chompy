@@ -2,6 +2,7 @@
 
 namespace Chompy\Http\Controllers\ThirdParty;
 
+use Exception;
 use Illuminate\Http\Request;
 use Chompy\Services\Rogue;
 use Chompy\Http\Controllers\Controller;
@@ -14,9 +15,11 @@ class CallPowerController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Rogue $rogue)
     {
-      // @TODO: add role middleware
+      // @TODO: add role middleware?
+    	$this->rogue = $rogue;
+
     }
 
     /**
@@ -25,29 +28,34 @@ class CallPowerController extends Controller
      */
     public function store(Request $request)
     {
-    	dd('hi');
     	$request->validate([
-    		// @TODO: how do we validate a phone number? What format will this come in from CallPower?
+    		// QUESTION - We shouldn't have to validate phone number because this will come from Twilio and phone numbers are validated in NS?
             'mobile' => 'required',
             'callpower_campaign_id' => 'required|integer',
             // QUESTION: do we want to make it this rigid? What if CallPower statuses change?
             'status' => 'required|string|in:completed,busy,failed,no answer,cancelled, unknown',
-            'details' => 'required',
+    		'call_timestamp' => 'required|date',
+    		'call_duration' => 'required|integer',
+    		'campaign_target_name' => 'required|string',
+    		'campaign_target_title' => 'required|string',
+    		'campaign_target_district' => 'required|string',
+    		'callpower_campaign_name' => 'required|string',
+    		'number_dialed_into' => 'required',
         ]);
 
         // Using the mobile number, get or create a northstar_id.
         $user = $this->getOrCreateUser($request['mobile']);
 
         // Using the callpower_campaign_id, get the action_id from Rogue.
-        $action = $rogue->getActionFromCallPowerCampaignId($request['callpower_campaign_id']);
+        $action = $this->rogue->getActionFromCallPowerCampaignId($request['callpower_campaign_id']);
 
         // Check if the post exists in Rogue. If not, create the post.
-       	$existingPost = $rogue->getPost([
+       	$existingPost = $this->rogue->getPost([
             'action_id' => $action['data']['id'],
             'northstar_id' => $user->id,
         ]);
 
-        if (!$existingPost['data']) {
+        if (! $existingPost['data']) {
         	info('creating post in rogue for northstar user: ' . $user->id);
 
         	$details = $this->extractDetails($request);
@@ -60,8 +68,12 @@ class CallPowerController extends Controller
         		'status' => $request['status'] === 'completed' ? 'accepted' : 'incomplete',
         		'quantity' => 1,
         		'source' => 'CallPower',
-        		'source_details' => $details,
+        		'details' => $details,
         	]);
+
+        	if ($post['data']) {
+                info('post created in rogue for northstar user: ' . $user->id);
+            }
         }
     }
 
@@ -92,6 +104,8 @@ class CallPowerController extends Controller
             } else {
                 throw new Exception(500, 'Unable to create user with mobile: ' . $mobile);
             }
+
+        return $user;
     }
 
     /**
@@ -114,5 +128,10 @@ class CallPowerController extends Controller
     		'number_dialed_into',
     	];
 
+    	foreach ($keys as $key) {
+    		$details[$key] = $call[$key];
+    	}
+
+    	return json_encode($details);
     }
 }

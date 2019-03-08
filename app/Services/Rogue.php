@@ -7,7 +7,6 @@ use DoSomething\Gateway\AuthorizesWithOAuth2;
 use DoSomething\Gateway\Common\RestApiClient;
 use DoSomething\Gateway\Exceptions\ValidationException;
 
-
 class Rogue extends RestApiClient
 {
     use AuthorizesWithOAuth2;
@@ -106,13 +105,14 @@ class Rogue extends RestApiClient
      * @param integer $callpowerCampaignId
      * @return array $action
      */
-    public function getActionFromCallPowerCampaignId($callpowerCampaignId) {
+    public function getActionFromCallPowerCampaignId($callpowerCampaignId)
+    {
         $action = $this->asClient()->get('v3/actions', [
             'filter' => ['callpower_campaign_id' => $callpowerCampaignId],
         ]);
 
         if (! $action['data']) {
-            throw new Exception(500, 'Unable to get action data for CallPower campaign id : ' . $callpowerCampaignId);
+            throw ValidationException::withMessages('Unable to get action data for CallPower campaign id : ' . $callpowerCampaignId);
         }
 
         return $action;
