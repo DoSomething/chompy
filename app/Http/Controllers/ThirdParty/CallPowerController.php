@@ -28,19 +28,19 @@ class CallPowerController extends Controller
      */
     public function store(Request $request)
     {
-    	$request->validate([
-    		// QUESTION - We shouldn't have to validate phone number because this will come from Twilio and phone numbers are validated in NS?
+        $request->validate([
+            // QUESTION - We shouldn't have to validate phone number because this will come from Twilio and phone numbers are validated in NS?
             'mobile' => 'required',
             'callpower_campaign_id' => 'required|integer',
             // QUESTION: do we want to make it this rigid? What if CallPower statuses change?
             'status' => 'required|string|in:completed,busy,failed,no answer,cancelled, unknown',
-    		'call_timestamp' => 'required|date',
-    		'call_duration' => 'required|integer',
-    		'campaign_target_name' => 'required|string',
-    		'campaign_target_title' => 'required|string',
-    		'campaign_target_district' => 'required|string',
-    		'callpower_campaign_name' => 'required|string',
-    		'number_dialed_into' => 'required',
+            'call_timestamp' => 'required|date',
+            'call_duration' => 'required|integer',
+            'campaign_target_name' => 'required|string',
+            'campaign_target_title' => 'required|string',
+            'campaign_target_district' => 'required|string',
+            'callpower_campaign_name' => 'required|string',
+            'number_dialed_into' => 'required',
         ]);
 
         // Using the mobile number, get or create a northstar_id.
@@ -51,19 +51,18 @@ class CallPowerController extends Controller
 
         // Check if the post exists in Rogue. If not, create the post.
        	$existingPost = $this->rogue->getPost([
-            'action_id' => $action['data']['id'],
+            'action_id' => $action['data'][0]['id'],
             'northstar_id' => $user->id,
         ]);
-
         if (! $existingPost['data']) {
-        	info('creating post in rogue for northstar user: ' . $user->id);
+            info('creating post in rogue for northstar user: ' . $user->id);
 
-        	$details = $this->extractDetails($request);
+            $details = $this->extractDetails($request);
 
         	// Determine source details.
-        	$post = $rogue->createPost([
+        	$post = $this->rogue->createPost([
         		'northstar_id' => $user->id,
-        		'action_id' => $$action['data']['id'],
+        		'action_id' => $action['data'][0]['id'],
         		'type' => 'phone-call',
         		'status' => $request['status'] === 'completed' ? 'accepted' : 'incomplete',
         		'quantity' => 1,
@@ -88,7 +87,7 @@ class CallPowerController extends Controller
     {
     	// Get the user by mobile number.
     	info('getting user with the mobile: ' . $mobile);
-    	$user = gateway('northstar')->asClient()->getUser('mobile', $mobile);
+        $user = gateway('northstar')->asClient()->getUser('mobile', $mobile);
 
     	// If there is no user, create one.
     	if (is_null($user)) {
@@ -117,20 +116,21 @@ class CallPowerController extends Controller
     {
     	$details = [];
 
-    	$keys = [
-    		'status_details',
-    		'call_timestamp',
-    		'call_duration',
-    		'campaign_target_name',
-    		'campaign_target_title',
-    		'campaign_target_district',
-    		'callpower_campaign_name',
-    		'number_dialed_into',
-    	];
+        $details['status_details'] = $call['status'];
 
-    	foreach ($keys as $key) {
-    		$details[$key] = $call[$key];
-    	}
+        $keys = [
+            'call_timestamp',
+            'call_duration',
+            'campaign_target_name',
+            'campaign_target_title',
+            'campaign_target_district',
+            'callpower_campaign_name',
+            'number_dialed_into',
+        ];
+
+        foreach ($keys as $key) {
+            $details[$key] = $call[$key];
+        }
 
     	return json_encode($details);
     }
