@@ -268,11 +268,11 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             $userData[$key] = $record->{$key};
         }
     
-        if (!empty($record->email_subscription_status)) {
+        if (isset($record->email_subscription_status)) {
             $userData['email_subscription_status'] = $record->email_subscription_status;
         }
 
-        if (!empty($record->sms_status)) {
+        if (isset($record->sms_status)) {
             $userData['sms_status'] = $record->sms_status;
         }
 
