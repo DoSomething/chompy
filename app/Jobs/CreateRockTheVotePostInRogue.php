@@ -192,10 +192,12 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         $user = $this->getUser($this->record);
         if ($user && $user->id) {
-            $this->updateUser($user, ['voter_registration_status' => $this->record->voter_registration_status]);
+            $this->updateUser($user, [
+                'voter_registration_status' => $this->record->voter_registration_status,
+            ]);
         } else {
             $user = $this->createUser($this->record);
-            $this->sendUserPasswordReset($user);
+            $this->sendUserPasswordResetIfSubscribed($user);
         }
 
         $existingPosts = $rogue->getPost([
@@ -326,8 +328,13 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      *
      * @param Object $user
      */
-    private function sendUserPasswordReset($user)
+    private function sendUserPasswordResetIfSubscribed($user)
     {
+        if (!$user->email_subscription_status) {
+            info('Did not send email to unsubscribed user', ['user' => $user->id]);
+            return;
+        }
+
         $type = config('import.rock_the_vote.reset.type');
         gateway('northstar')->asClient()->sendUserPasswordReset($user->id, $type);
         info('Sent email', ['user' => $user->id, 'type' => $type]);

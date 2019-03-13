@@ -4,6 +4,7 @@ use Illuminate\Support\Str;
 
 /**
  * Returns whether email is a test email.
+ * TODO: This isn't used anywhere, although deprecated jobs could use it to DRY. Remove it all?
  *
  * @param string $email
  * @return boolean
