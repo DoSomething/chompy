@@ -5,6 +5,7 @@ use Illuminate\Support\Str;
 /**
  * Returns whether email is a test email.
  * TODO: This isn't used anywhere, although deprecated jobs could use it to DRY. Remove it all?
+ * @see https://www.pivotaltracker.com/story/show/164114650
  *
  * @param string $email
  * @return boolean
