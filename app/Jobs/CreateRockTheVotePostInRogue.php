@@ -188,11 +188,6 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-        if (is_test_email($this->record->email)) {
-            info('progress_log: Skipping test: ' . $this->record->email);
-            return;
-        }
-
         info('progress_log: Processing: ' . $this->record->email);
 
         $user = $this->getUser($this->record);
@@ -200,6 +195,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             $this->updateUser($user, ['voter_registration_status' => $this->record->voter_registration_status]);
         } else {
             $user = $this->createUser($this->record);
+            $this->sendUserPasswordReset($user);
         }
 
         $existingPosts = $rogue->getPost([
@@ -323,5 +319,17 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     {
         gateway('northstar')->asClient()->updateUser($user->id, $data);
         info('Updated user', ['user' => $user->id]);
+    }
+
+    /**
+     * Send Northstar user a password reset email.
+     *
+     * @param Object $user
+     */
+    private function sendUserPasswordReset($user)
+    {
+        $type = config('import.rock_the_vote.reset.type');
+        gateway('northstar')->asClient()->sendUserPasswordReset($user->id, $type);
+        info('Sent email', ['user' => $user->id, 'type' => $type]);
     }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ad2a657a3c03af4f6feb7af42ac0c8a3",
+    "content-hash": "4eed7f556077c4f168660524c04dfd04",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -508,16 +508,16 @@
         },
         {
             "name": "dosomething/gateway",
-            "version": "v1.14.9",
+            "version": "v1.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DoSomething/gateway.git",
-                "reference": "15d3201b904d34d4220193938c0d4dce067f32dc"
+                "reference": "5a50114aadb40d00bc57885a66ec136091d85833"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DoSomething/gateway/zipball/15d3201b904d34d4220193938c0d4dce067f32dc",
-                "reference": "15d3201b904d34d4220193938c0d4dce067f32dc",
+                "url": "https://api.github.com/repos/DoSomething/gateway/zipball/5a50114aadb40d00bc57885a66ec136091d85833",
+                "reference": "5a50114aadb40d00bc57885a66ec136091d85833",
                 "shasum": ""
             },
             "require": {
@@ -565,7 +565,7 @@
                 }
             ],
             "description": "Standard PHP API client for DoSomething.org services.",
-            "time": "2018-05-30T16:15:17+00:00"
+            "time": "2019-03-13T16:42:17+00:00"
         },
         {
             "name": "dragonmantank/cron-expression",
