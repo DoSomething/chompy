@@ -17,7 +17,6 @@ class CallPowerController extends Controller
      */
     public function __construct(Rogue $rogue)
     {
-      // @TODO: add role middleware?
     	$this->rogue = $rogue;
 
     }
