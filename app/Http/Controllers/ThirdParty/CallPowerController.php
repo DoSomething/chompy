@@ -28,11 +28,9 @@ class CallPowerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            // QUESTION - We shouldn't have to validate phone number because this will come from Twilio and phone numbers are validated in NS?
             'mobile' => 'required',
             'callpower_campaign_id' => 'required|integer',
-            // QUESTION: do we want to make it this rigid? What if CallPower statuses change?
-            'status' => 'required|string|in:completed,busy,failed,no answer,cancelled, unknown',
+            'status' => 'required|string',
             'call_timestamp' => 'required|date',
             'call_duration' => 'required|integer',
             'campaign_target_name' => 'required|string',
