@@ -508,7 +508,6 @@
         },
         {
             "name": "dosomething/gateway",
-<<<<<<< HEAD
             "version": "v1.17.0",
             "source": {
                 "type": "git",
@@ -519,18 +518,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/DoSomething/gateway/zipball/5a50114aadb40d00bc57885a66ec136091d85833",
                 "reference": "5a50114aadb40d00bc57885a66ec136091d85833",
-=======
-            "version": "v1.16.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/DoSomething/gateway.git",
-                "reference": "204e42fbc091aa45f8b3caeb63e32cd43b8daa94"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/DoSomething/gateway/zipball/204e42fbc091aa45f8b3caeb63e32cd43b8daa94",
-                "reference": "204e42fbc091aa45f8b3caeb63e32cd43b8daa94",
->>>>>>> successfully created post in Rogue
                 "shasum": ""
             },
             "require": {
@@ -578,11 +565,7 @@
                 }
             ],
             "description": "Standard PHP API client for DoSomething.org services.",
-<<<<<<< HEAD
             "time": "2019-03-13T16:42:17+00:00"
-=======
-            "time": "2019-03-07T19:20:34+00:00"
->>>>>>> successfully created post in Rogue
         },
         {
             "name": "dragonmantank/cron-expression",
