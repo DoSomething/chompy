@@ -188,18 +188,16 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-        if (is_test_email($this->record->email)) {
-            info('progress_log: Skipping test: ' . $this->record->email);
-            return;
-        }
-
         info('progress_log: Processing: ' . $this->record->email);
 
         $user = $this->getUser($this->record);
         if ($user && $user->id) {
-            $this->updateUser($user, ['voter_registration_status' => $this->record->voter_registration_status]);
+            $this->updateUser($user, [
+                'voter_registration_status' => $this->record->voter_registration_status,
+            ]);
         } else {
             $user = $this->createUser($this->record);
+            $this->sendUserPasswordResetIfSubscribed($user);
         }
 
         $existingPosts = $rogue->getPost([
@@ -272,11 +270,11 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             $userData[$key] = $record->{$key};
         }
     
-        if (!empty($record->email_subscription_status)) {
+        if (isset($record->email_subscription_status)) {
             $userData['email_subscription_status'] = $record->email_subscription_status;
         }
 
-        if (!empty($record->sms_status)) {
+        if (isset($record->sms_status)) {
             $userData['sms_status'] = $record->sms_status;
         }
 
@@ -323,5 +321,22 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     {
         gateway('northstar')->asClient()->updateUser($user->id, $data);
         info('Updated user', ['user' => $user->id]);
+    }
+
+    /**
+     * Send Northstar user a password reset email.
+     *
+     * @param Object $user
+     */
+    private function sendUserPasswordResetIfSubscribed($user)
+    {
+        if (!$user->email_subscription_status) {
+            info('Did not send email to unsubscribed user', ['user' => $user->id]);
+            return;
+        }
+
+        $type = config('import.rock_the_vote.reset.type');
+        gateway('northstar')->asClient()->sendUserPasswordReset($user->id, $type);
+        info('Sent email', ['user' => $user->id, 'type' => $type]);
     }
 }

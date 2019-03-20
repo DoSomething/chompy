@@ -9,7 +9,7 @@
         "aws/aws-sdk-php": "~3.0",
         "dfurnes/environmentalist": "0.0.2",
         "doctrine/dbal": "^2.6",
-        "dosomething/gateway": "^1.1.6",
+        "dosomething/gateway": "^1.17",
         "fideloper/proxy": "^4.0",
         "itsgoingd/clockwork": "^3.0",
         "laravel/framework": "5.6.*",
