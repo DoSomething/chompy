@@ -91,7 +91,6 @@ class CallPowerController extends Controller
         if (is_null($user)) {
           $user = gateway('northstar')->asClient()->createUser([
             'mobile' => $mobile,
-            'source' => env('NORTHSTAR_CLIENT_ID'),
         ]);
       }
 
