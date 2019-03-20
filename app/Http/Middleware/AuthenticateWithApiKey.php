@@ -18,11 +18,6 @@ class AuthenticateWithApiKey
      */
     public function handle($request, Closure $next)
     {
-        // Only protected POST, PUT, PATCH, and DELETE routes
-        if (! in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
-            return $next($request);
-        }
-
         // Check the `X-DS-Importer-API-Key` header for authorization.
         if ($request->header('X-DS-Importer-API-Key') !== config('app.api_key')) {
             throw new AuthenticationException;
