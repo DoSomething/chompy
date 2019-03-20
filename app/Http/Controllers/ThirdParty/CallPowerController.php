@@ -111,24 +111,15 @@ class CallPowerController extends Controller
      */
     private function extractDetails($call)
     {
-    	$details = [];
-
-        $details['status_details'] = $call['status'];
-
-        $keys = [
-            'call_timestamp',
-            'call_duration',
-            'campaign_target_name',
-            'campaign_target_title',
-            'campaign_target_district',
-            'callpower_campaign_name',
-            'number_dialed_into',
-        ];
-
-        foreach ($keys as $key) {
-            $details[$key] = $call[$key];
-        }
-
-        return json_encode($details);
+        return json_encode([
+            'status_details' => $call['status'],
+            'call_timestamp' => $call['call_timestamp'],
+            'call_duration' => $call['call_duration'],
+            'campaign_target_name' => $call['campaign_target_name'],
+            'campaign_target_title' => $call['campaign_target_title'],
+            'campaign_target_district' => $call['campaign_target_district'],
+            'callpower_campaign_name' => $call['callpower_campaign_name'],
+            'number_dialed_into' => $call['number_dialed_into'],
+        ]);
     }
 }
