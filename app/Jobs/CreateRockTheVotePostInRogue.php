@@ -330,13 +330,25 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      */
     private function sendUserPasswordResetIfSubscribed($user)
     {
+        /**
+         * Our Customer.io event triggered campaign that sends these RTV password resets should be
+         * configured to not send the email to an unsubscribed user, but let's sanity check anyway.
+         */
         if (!$user->email_subscription_status) {
             info('Did not send email to unsubscribed user', ['user' => $user->id]);
             return;
         }
 
-        $type = config('import.rock_the_vote.reset.type');
-        gateway('northstar')->asClient()->sendUserPasswordReset($user->id, $type);
-        info('Sent email', ['user' => $user->id, 'type' => $type]);
+        $resetConfig = config('import.rock_the_vote.reset');
+        $resetType = $resetConfig['type'];
+        $logParams = ['user' => $user->id, 'type' => $resetType];
+
+        if ($resetConfig['enabled'] !== 'true') {
+            info('Reset email is disabled. Would have sent reset email', $logParams);
+            return;
+        }
+
+        gateway('northstar')->asClient()->sendUserPasswordReset($user->id, $resetType);
+        info('Sent reset email', $logParams);
     }
 }
