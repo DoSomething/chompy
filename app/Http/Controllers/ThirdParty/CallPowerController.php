@@ -47,27 +47,28 @@ class CallPowerController extends Controller
         $action = $this->rogue->getActionFromCallPowerCampaignId($request['callpower_campaign_id']);
 
         // Check if the post exists in Rogue. If not, create the post.
-       	$existingPost = $this->rogue->getPost([
+        $existingPost = $this->rogue->getPost([
             'action_id' => $action['data'][0]['id'],
             'northstar_id' => $user->id,
         ]);
+
         if (! $existingPost['data']) {
             info('creating post in rogue for northstar user: ' . $user->id);
 
             $details = $this->extractDetails($request);
 
         	// Determine source details.
-        	$post = $this->rogue->createPost([
-        		'northstar_id' => $user->id,
-        		'action_id' => $action['data'][0]['id'],
-        		'type' => 'phone-call',
-        		'status' => $request['status'] === 'completed' ? 'accepted' : 'incomplete',
-        		'quantity' => 1,
-        		'source' => 'CallPower',
-        		'details' => $details,
-        	]);
+            $post = $this->rogue->createPost([
+              'northstar_id' => $user->id,
+              'action_id' => $action['data'][0]['id'],
+              'type' => 'phone-call',
+              'status' => $request['status'] === 'completed' ? 'accepted' : 'incomplete',
+              'quantity' => 1,
+              'source' => 'CallPower',
+              'details' => $details,
+          ]);
 
-        	if ($post['data']) {
+            if ($post['data']) {
                 info('post created in rogue for northstar user: ' . $user->id);
             }
         }
@@ -87,22 +88,22 @@ class CallPowerController extends Controller
         $user = gateway('northstar')->asClient()->getUser('mobile', $mobile);
 
     	// If there is no user, create one.
-    	if (is_null($user)) {
-    		$user = gateway('northstar')->asClient()->createUser([
-                'mobile' => $mobile,
-                'source' => env('NORTHSTAR_CLIENT_ID'),
-            ]);
-    	}
+        if (is_null($user)) {
+          $user = gateway('northstar')->asClient()->createUser([
+            'mobile' => $mobile,
+            'source' => env('NORTHSTAR_CLIENT_ID'),
+        ]);
+      }
 
     	// Log if the user was successfully created.
-            if ($user->id) {
-                info('created user', ['user' => $user->id]);
-            } else {
-                throw new Exception(500, 'Unable to create user with mobile: ' . $mobile);
-            }
-
-        return $user;
+      if ($user->id) {
+        info('created user', ['user' => $user->id]);
+    } else {
+        throw new Exception(500, 'Unable to create user with mobile: ' . $mobile);
     }
+
+    return $user;
+}
 
     /**
      * Parse the call and return details we want to store in Rogue as a JSON object.
@@ -129,6 +130,6 @@ class CallPowerController extends Controller
             $details[$key] = $call[$key];
         }
 
-    	return json_encode($details);
+        return json_encode($details);
     }
 }
