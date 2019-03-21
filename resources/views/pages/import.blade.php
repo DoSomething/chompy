@@ -4,13 +4,18 @@
 
 @if (in_array(request()->input('type'), \Chompy\ImportType::all()))
     <div>
+        @if (request()->input('type') === \Chompy\ImportType::$rockTheVote)
+          <p>
+            Send Activate Account email: <strong>{{ config('import.rock_the_vote.reset.enabled') ? 'Enabled' : 'Disabled' }}</strong>
+          </p>
+        @endif
         <form action={{url('/import')}} method="post" enctype="multipart/form-data">
             {{ csrf_field() }}
             <div class="form-group">
                 <div class="input-group">
                     <label class="input-group-btn">
                         <span class="btn btn-default">
-                            Browse <input type="file" name="upload-file" style="display: none;" multiple>
+                            Select CSV <input type="file" name="upload-file" style="display: none;" multiple>
                         </span>
                     </label>
                     <input type="hidden" name="import-type" value={{ app('request')->input('type') }}>
@@ -18,7 +23,7 @@
                 </div>
             </div>
             <div>
-                <input type="submit" class="btn btn-primary" value="Submit CSV">
+                <input type="submit" class="btn btn-primary" value="Import">
             </div>
         </form>
     </div>
