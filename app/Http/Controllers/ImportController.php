@@ -29,7 +29,11 @@ class ImportController extends Controller
      */
     public function show()
     {
-        return view('pages.import');
+        return view('pages.import', [
+            'type' => request()->input('type'),
+            'postConfig' => config('import.rock_the_vote.post'),
+            'resetConfig' => config('import.rock_the_vote.reset'),
+        ]);
     }
 
     /**

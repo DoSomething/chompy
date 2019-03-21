@@ -2,15 +2,29 @@
 
 @section('main_content')
 
-@if (in_array(request()->input('type'), \Chompy\ImportType::all()))
+@if ($type === \Chompy\ImportType::$rockTheVote)
     <div>
+        <h1>Rock The Vote</h1>
+        <p>Creates or updates users and posts from CSV.</p>
+        <h4>Users</h4>
+        <dl>
+            <dt>Source:</dt><dd>{{ config('services.northstar.client_credentials.client_id') }}</dd>
+            <dt>Reset email enabled</dt><dd>{{ $resetConfig['enabled'] ? 'true' : 'false'}}</dd>
+            <dt>Reset email type</dt><dd>{{ $resetConfig['type'] }}</dd>
+        </dl>
+        <h4>Posts</h4>
+        <dl>
+            <dt>Action ID</dt><dd>{{ $postConfig['action_id'] }}</dd>
+            <dt>Type</dt><dd>{{ $postConfig['type'] }}</dd>
+            <dt>Source</dt><dd>{{ $postConfig['source'] }}</dd>
+        </dl>
         <form action={{url('/import')}} method="post" enctype="multipart/form-data">
             {{ csrf_field() }}
             <div class="form-group">
                 <div class="input-group">
                     <label class="input-group-btn">
                         <span class="btn btn-default">
-                            Browse <input type="file" name="upload-file" style="display: none;" multiple>
+                            Select CSV <input type="file" name="upload-file" style="display: none;" multiple>
                         </span>
                     </label>
                     <input type="hidden" name="import-type" value={{ app('request')->input('type') }}>
@@ -18,7 +32,7 @@
                 </div>
             </div>
             <div>
-                <input type="submit" class="btn btn-primary" value="Submit CSV">
+                <input type="submit" class="btn btn-primary" value="Import">
             </div>
         </form>
     </div>
