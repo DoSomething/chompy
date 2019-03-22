@@ -14,7 +14,7 @@ class CreateCallPowerPostInRogue implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
-     * The call parameters send from CallPower.
+     * The call parameters sent from CallPower.
      *
      * @var array
      */
