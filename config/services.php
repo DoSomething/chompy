@@ -68,6 +68,6 @@ return [
             'client_secret' => env('NORTHSTAR_CLIENT_SECRET'),
             'scope' => ['admin', 'user', 'activity', 'write'],
         ],
-    ]
+    ],
 
 ];

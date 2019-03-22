@@ -2,17 +2,13 @@
 
 namespace Chompy\Jobs;
 
-use Carbon\Carbon;
-use League\Csv\Reader;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Chompy\Events\LogProgress;
 use Chompy\Traits\ImportToRogue;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Chompy\Jobs\CreateRockTheVotePostInRogue;
 
 class ImportRockTheVotePosts implements ShouldQueue
 {
@@ -63,8 +59,7 @@ class ImportRockTheVotePosts implements ShouldQueue
 
         $records = $this->getCSVRecords($this->filepath);
 
-        foreach ($records as $offset => $record)
-        {
+        foreach ($records as $offset => $record) {
             CreateRockTheVotePostInRogue::dispatch($record);
 
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));

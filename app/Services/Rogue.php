@@ -7,7 +7,6 @@ use DoSomething\Gateway\AuthorizesWithOAuth2;
 use DoSomething\Gateway\Common\RestApiClient;
 use DoSomething\Gateway\Exceptions\ValidationException;
 
-
 class Rogue extends RestApiClient
 {
     use AuthorizesWithOAuth2;
@@ -75,7 +74,6 @@ class Rogue extends RestApiClient
         })->values()->toArray();
 
         $post = $this->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
-
         if (! $post['data']) {
             throw new Exception(500, 'Unable to create post for user: ' . $data['northstar_id']);
         }
@@ -98,5 +96,24 @@ class Rogue extends RestApiClient
         }
 
         return $post;
+    }
+
+    /**
+     * Get an action id from Rogue based on CallPower campaign id.
+     *
+     * @param int $callpowerCampaignId
+     * @return array $action
+     */
+    public function getActionIdFromCallPowerCampaignId($callpowerCampaignId)
+    {
+        $action = $this->asClient()->get('v3/actions', [
+            'filter' => ['callpower_campaign_id' => $callpowerCampaignId],
+        ]);
+
+        if (! $action['data'][0]['id']) {
+            throw new Exception(500, 'Unable to get action data for CallPower campaign id : ' . $callpowerCampaignId);
+        }
+
+        return $action['data'][0]['id'];
     }
 }

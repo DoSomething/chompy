@@ -8,26 +8,26 @@ use Illuminate\Support\Facades\Storage;
 
 trait ImportToRogue
 {
-	/**
-	 * Initiate the stat counters to use with imports to Rogue.
-	 *
-	 * @return array
-	 */
-	public function statsInit()
-	{
-	    return [
-	        'totalRecords' => 0,
-	        'countScrubbed' => 0,
-	        'countProcessed' => 0,
-	        'countPostCreated' => 0,
-	        'countUserAccountsCreated' => 0,
-	    ];
-	}
+    /**
+     * Initiate the stat counters to use with imports to Rogue.
+     *
+     * @return array
+     */
+    public function statsInit()
+    {
+        return [
+            'totalRecords' => 0,
+            'countScrubbed' => 0,
+            'countProcessed' => 0,
+            'countPostCreated' => 0,
+            'countUserAccountsCreated' => 0,
+        ];
+    }
 
     public function getCSVRecords($filepath)
     {
         $file = Storage::get($filepath);
-        $file = str_replace("\r","\n", $file);
+        $file = str_replace("\r", "\n", $file);
 
         $csv = Reader::createFromString($file);
         $csv->setHeaderOffset(0);

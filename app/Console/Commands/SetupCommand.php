@@ -50,12 +50,11 @@ class SetupCommand extends Command
             $this->setEnvironmentVariable('NORTHSTAR_CLIENT_SECRET', 'Enter the OAuth Client Secret for machine requests');
         });
 
-
         $this->section('Set Rogue environment variables', function () {
             $environments = [
                 'http://rogue.test',
                 'https://rogue-qa.dosomething.org',
-                'https://rogue-thor.dosomething.org'
+                'https://rogue-thor.dosomething.org',
             ];
 
             $this->chooseEnvironmentVariable('ROGUE_URL', 'Choose a Rogue environment', $environments);
@@ -66,7 +65,7 @@ class SetupCommand extends Command
             $this->setEnvironmentVariable('PUSHER_APP_KEY', 'Enter the Pusher App Key');
             $this->setEnvironmentVariable('PUSHER_APP_SECRET', 'Enter the Pusher App Secret');
         });
-        
+
         $this->runCommand('key:generate', 'Creating application key');
 
         $this->runCommand('gateway:key', 'Fetching public key from Northstar');

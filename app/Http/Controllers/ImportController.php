@@ -3,13 +3,13 @@
 namespace Chompy\Http\Controllers;
 
 use Carbon\Carbon;
+use Chompy\ImportType;
 use League\Csv\Reader;
 use Illuminate\Http\Request;
 use Chompy\Jobs\ImportTurboVotePosts;
-use Chompy\Jobs\ImportFacebookSharePosts;
-use Illuminate\Support\Facades\Storage;
 use Chompy\Jobs\ImportRockTheVotePosts;
-use Chompy\ImportType;
+use Illuminate\Support\Facades\Storage;
+use Chompy\Jobs\ImportFacebookSharePosts;
 
 class ImportController extends Controller
 {
@@ -44,7 +44,6 @@ class ImportController extends Controller
      */
     public function store(Request $request)
     {
-
         $request->validate([
             'upload-file' => 'required|mimes:csv,txt',
             'import-type' => 'required',
@@ -55,17 +54,16 @@ class ImportController extends Controller
 
         $path = 'uploads/' . $request->input('import-type') . '-importer' . Carbon::now() . '.csv';
         $csv = Reader::createFromPath($upload->getRealPath());
-        $success = Storage::put($path, (string)$csv);
+        $success = Storage::put($path, (string) $csv);
 
-
-        if (!$success) {
+        if (! $success) {
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
         $type = $request->input('import-type');
 
         if ($type === ImportType::$turbovote) {
-            info("turbo vote import happening");
+            info('turbo vote import happening');
             ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
@@ -75,7 +73,7 @@ class ImportController extends Controller
         }
 
         if ($type === ImportType::$facebook) {
-            info("Facebook share import happening");
+            info('Facebook share import happening');
             ImportFacebookSharePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 

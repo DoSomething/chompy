@@ -4,14 +4,15 @@ namespace Chompy\Jobs;
 
 use Exception;
 use Chompy\Services\Rogue;
+use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
 use Chompy\Traits\ImportToRogue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Support\Str;
 
-class RockTheVoteRecord {
+class RockTheVoteRecord
+{
     public function __construct($record)
     {
         $this->addr_street1 = $record['Home address'];
@@ -36,21 +37,19 @@ class RockTheVoteRecord {
         if ($smsOptIn && $this->mobile) {
             $this->sms_status = str_to_boolean($smsOptIn) ? 'active' : 'stop';
         }
-
         $rtvStatus = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
-       
+
         $this->voter_registration_status = Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
 
         $this->user_id = $this->parseUserId($record['Tracking Source']);
 
         $postConfig = config('import.rock_the_vote.post');
-       
         $this->post_source = $postConfig['source'];
         $this->post_source_details = null;
         $this->post_details = $this->parsePostDetails($record);
         $this->post_status = $rtvStatus;
         $this->post_type = $postConfig['type'];
-        $this->post_action_id =  $postConfig['action_id'];
+        $this->post_action_id = $postConfig['action_id'];
     }
 
     /**
@@ -81,8 +80,7 @@ class RockTheVoteRecord {
             // See if we are dealing with ":" or "="
             if (str_contains($value, ':')) {
                 $value = explode(':', $value);
-            }
-            elseif (str_contains($value, '=')) {
+            } elseif (str_contains($value, '=')) {
                 $value = explode('=', $value);
             }
 
@@ -95,7 +93,7 @@ class RockTheVoteRecord {
             /**
              * If referral parameter is set to true, the user parameter belongs to the referring
              * user, not the user that should be associated with this voter registration record.
-             */ 
+             */
             // We expect 'referral', but check for any typos in any manually entered URLs.
             if (($key === 'referral' || $key === 'refferal') && str_to_boolean($value[1])) {
                 /**
@@ -151,7 +149,7 @@ class RockTheVoteRecord {
             'Finish with State',
             'Status',
             'Email address',
-            'Home zip code'
+            'Home zip code',
         ];
 
         foreach ($importantKeys as $key) {
@@ -207,7 +205,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             'northstar_id' => $user->id,
         ]);
 
-        if (!$existingPosts['data']) {
+        if (! $existingPosts['data']) {
             $post = $rogue->createPost([
                 'action_id' => $this->record->post_action_id,
                 'northstar_id' => $user->id,
@@ -218,6 +216,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                 'details' => $this->record->post_details,
             ]);
             info('Created post', ['user' => $user->id]);
+
             return;
         }
 
@@ -250,9 +249,10 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
                 return $user;
             }
         }
-        if (!$record->mobile) {
+        if (! $record->mobile) {
             return null;
         }
+
         return gateway('northstar')->asClient()->getUser('mobile', $record->mobile);
     }
 
@@ -271,7 +271,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
         foreach ($userFields as $key) {
             $userData[$key] = $record->{$key};
         }
-    
+
         if (isset($record->email_subscription_status)) {
             $userData['email_subscription_status'] = $record->email_subscription_status;
         }
@@ -286,7 +286,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         $user = gateway('northstar')->asClient()->createUser($userData);
 
-        if (!$user->id) {
+        if (! $user->id) {
             throw new Exception(500, 'Unable to create user: ' . $record->email);
         }
         info('Created user', ['user' => $user->id]);
@@ -320,8 +320,8 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     /**
      * Update Northstar user with given data.
      *
-     * @param Object $user
-     * @param Array $data
+     * @param object $user
+     * @param array $data
      */
     private function updateUser($user, $data)
     {
@@ -332,7 +332,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     /**
      * Send Northstar user a password reset email.
      *
-     * @param Object $user
+     * @param object $user
      */
     private function sendUserPasswordResetIfSubscribed($user)
     {
@@ -340,8 +340,9 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
          * Our Customer.io event triggered campaign that sends these RTV password resets should be
          * configured to not send the email to an unsubscribed user, but let's sanity check anyway.
          */
-        if (!$user->email_subscription_status) {
+        if (! $user->email_subscription_status) {
             info('Did not send email to unsubscribed user', ['user' => $user->id]);
+
             return;
         }
 
@@ -351,6 +352,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         if ($resetConfig['enabled'] !== 'true') {
             info('Reset email is disabled. Would have sent reset email', $logParams);
+
             return;
         }
 
