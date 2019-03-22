@@ -11,5 +11,8 @@ return [
             'enabled' => env('ROCK_THE_VOTE_RESET_ENABLED', 'true'),
             'type' => env('ROCK_THE_VOTE_RESET_TYPE', 'rock-the-vote-activate-account'),
         ],
+        'user' => [
+            'email_subscription_topics' => env('ROCK_THE_VOTE_EMAIL_SUBSCRIPTION_TOPICS', 'community'),
+        ],
     ],
 ];

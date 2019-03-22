@@ -31,3 +31,12 @@ function str_to_boolean($text)
 
     return filter_var($sanitized, FILTER_VALIDATE_BOOLEAN);
 }
+
+/**
+ * Returns source of a user created by import.
+ *
+ * @return string
+ */
+function get_user_source(){
+  return config('services.northstar.client_credentials.client_id');
+}
