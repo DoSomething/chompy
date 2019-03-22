@@ -23,7 +23,6 @@ class RockTheVoteRecord {
         $this->first_name = $record['First name'];
         $this->last_name = $record['Last name'];
         $this->mobile = $record['Phone'];
-        $this->source = get_user_source();
 
         $emailOptIn = $record['Opt-in to Partner email?'];
         if ($emailOptIn) {
@@ -267,7 +266,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     {
         $userData = [];
 
-        $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name', 'source', 'voter_registration_status'];
+        $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name', 'voter_registration_status'];
 
         foreach ($userFields as $key) {
             $userData[$key] = $record->{$key};

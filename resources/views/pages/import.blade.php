@@ -8,7 +8,6 @@
         <p>Creates/updates users and their voter registration post via CSV from Rock The Vote.</p>
         <h4>Users</h4>
         <dl class="dl-horizontal">
-            <dt>Source</dt><dd>{{ get_user_source() }}</dd>
             <dt>Email subscriptions</dt><dd>{{ $userConfig['email_subscription_topics'] }}</dd>
             <dt>Reset email enabled</dt><dd>{{ $resetConfig['enabled'] ? 'true' : 'false'}}</dd>
             <dt>Reset email type</dt><dd>{{ $resetConfig['type'] }}</dd>
