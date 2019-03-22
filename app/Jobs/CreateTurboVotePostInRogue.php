@@ -265,7 +265,7 @@ class CreateTurboVotePostInRogue implements ShouldQueue
     {
         $translatedStatus = '';
 
-        switch($tvStatus) {
+        switch ($tvStatus) {
             case 'initiated':
                 $translatedStatus = 'register-form';
                 break;

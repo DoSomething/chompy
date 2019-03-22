@@ -352,6 +352,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
 
         if ($resetConfig['enabled'] !== 'true') {
             info('Reset email is disabled. Would have sent reset email', $logParams);
+
             return;
         }
 

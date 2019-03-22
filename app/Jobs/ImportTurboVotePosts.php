@@ -8,7 +8,6 @@ use Chompy\Traits\ImportToRogue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Chompy\Jobs\CreateTurboVotePostInRogue;
 
 class ImportTurboVotePosts implements ShouldQueue
 {
@@ -37,7 +36,6 @@ class ImportTurboVotePosts implements ShouldQueue
     {
         $this->filepath = $filepath;
     }
-
 
     /**
      * Get the tags that should be assigned to the job.

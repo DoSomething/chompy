@@ -54,8 +54,7 @@ class ImportController extends Controller
 
         $path = 'uploads/' . $request->input('import-type') . '-importer' . Carbon::now() . '.csv';
         $csv = Reader::createFromPath($upload->getRealPath());
-        $success = Storage::put($path, (string)$csv);
-
+        $success = Storage::put($path, (string) $csv);
 
         if (! $success) {
             throw new HttpException(500, 'Unable read and store file to S3.');
