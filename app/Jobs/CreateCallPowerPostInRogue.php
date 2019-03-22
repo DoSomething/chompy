@@ -96,7 +96,7 @@ class CreateCallPowerPostInRogue implements ShouldQueue
         if ($user->id) {
             info('created user', ['user' => $user->id]);
         } else {
-            throw new Exception(500, 'Unable to create user with mobile: ' . $mobile);
+            throw new Exception('Unable to create user with mobile: ' . $mobile);
         }
 
         return $user;
