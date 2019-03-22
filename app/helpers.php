@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
  * @see https://www.pivotaltracker.com/story/show/164114650
  *
  * @param string $email
- * @return boolean
+ * @return bool
  */
 function is_test_email($email)
 {
@@ -19,7 +19,7 @@ function is_test_email($email)
  * Parse a string as boolean.
  *
  * @param string $text
- * @return boolean
+ * @return bool
  */
 function str_to_boolean($text)
 {

@@ -30,7 +30,8 @@ class ImportType
      *
      * @return array
      */
-    public static function all() {
+    public static function all()
+    {
         return [self::$facebook, self::$rockTheVote, self::$turbovote];
     }
 }

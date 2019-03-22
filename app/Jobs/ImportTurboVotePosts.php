@@ -2,11 +2,9 @@
 
 namespace Chompy\Jobs;
 
-use League\Csv\Reader;
 use Illuminate\Bus\Queueable;
 use Chompy\Events\LogProgress;
 use Chompy\Traits\ImportToRogue;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -64,10 +62,9 @@ class ImportTurboVotePosts implements ShouldQueue
 
         $records = $this->getCSVRecords($this->filepath);
 
-        info("records received");
+        info('records received');
 
-        foreach ($records as $offset => $record)
-        {
+        foreach ($records as $offset => $record) {
             CreateTurboVotePostInRogue::dispatch($record);
 
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));

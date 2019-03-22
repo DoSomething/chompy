@@ -29,7 +29,7 @@ class CreateTurboVotePostInRogue implements ShouldQueue
      */
     public function __construct($record)
     {
-    	$this->record = $record;
+        $this->record = $record;
     }
 
     /**
@@ -98,7 +98,7 @@ class CreateTurboVotePostInRogue implements ShouldQueue
      *
      * @param array $record
      * @return bool
-    */
+     */
     private function scrubRecord($record)
     {
         $isNotValidEmail = strrpos($record['email'], 'thing.org') !== false || strrpos($record['email'] !== false, '@dosome') || strrpos($record['email'], 'turbovote') !== false;
@@ -151,7 +151,7 @@ class CreateTurboVotePostInRogue implements ShouldQueue
         }
 
         // Make sure we have all the values we need, otherwise, use the defaults.
-        if (empty($values) || !array_has($values, ['northstar_id', 'campaign_id', 'campaign_run_id'])) {
+        if (empty($values) || ! array_has($values, ['northstar_id', 'campaign_id', 'campaign_run_id'])) {
             $values = [
                 'northstar_id' => null, // set the user to null so we force account creation when the code is not present.
                 'campaign_id' => 8017,
@@ -178,13 +178,12 @@ class CreateTurboVotePostInRogue implements ShouldQueue
         $user = null;
 
         $userFieldsToLookFor = [
-            'id' => isset($values['northstar_id']) && !empty($values['northstar_id']) ? $values['northstar_id'] : null,
-            'email' => isset($record['email']) && !empty($record['email']) ? $record['email'] : null,
-            'mobile' => isset($record['phone']) && !empty($record['phone']) ? $record['phone'] : null,
+            'id' => isset($values['northstar_id']) && ! empty($values['northstar_id']) ? $values['northstar_id'] : null,
+            'email' => isset($record['email']) && ! empty($record['email']) ? $record['email'] : null,
+            'mobile' => isset($record['phone']) && ! empty($record['phone']) ? $record['phone'] : null,
         ];
 
-        foreach ($userFieldsToLookFor as $field => $value)
-        {
+        foreach ($userFieldsToLookFor as $field => $value) {
             if ($value) {
                 info('getting user with the '.$field.' field', [$field => $value]);
                 $user = gateway('northstar')->asClient()->getUser($field, $value);
@@ -266,8 +265,7 @@ class CreateTurboVotePostInRogue implements ShouldQueue
     {
         $translatedStatus = '';
 
-        switch($tvStatus)
-        {
+        switch($tvStatus) {
             case 'initiated':
                 $translatedStatus = 'register-form';
                 break;

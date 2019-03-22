@@ -3,9 +3,9 @@
 namespace Chompy;
 
 use Illuminate\Notifications\Notifiable;
+use DoSomething\Gateway\Laravel\HasNorthstarToken;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use DoSomething\Gateway\Contracts\NorthstarUserContract;
-use DoSomething\Gateway\Laravel\HasNorthstarToken;
 
 class User extends Authenticatable implements NorthstarUserContract
 {
@@ -37,11 +37,11 @@ class User extends Authenticatable implements NorthstarUserContract
      */
     public function hasRole($roles)
     {
-      // Prepare an array of roles to check.
-      // e.g. $user->hasRole('admin') => ['admin']
-      //      $user->hasRole('admin, 'staff') => ['admin', 'staff']
-      $roles = is_array($roles) ? $roles : func_get_args();
+        // Prepare an array of roles to check.
+        // e.g. $user->hasRole('admin') => ['admin']
+        //      $user->hasRole('admin, 'staff') => ['admin', 'staff']
+        $roles = is_array($roles) ? $roles : func_get_args();
 
-      return in_array($this->role, $roles);
+        return in_array($this->role, $roles);
     }
 }

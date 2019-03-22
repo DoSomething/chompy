@@ -4,13 +4,11 @@ namespace Chompy\Jobs;
 
 use Chompy\Stat;
 use Carbon\Carbon;
-use League\Csv\Reader;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Chompy\Events\LogProgress;
 use Chompy\Traits\ImportToRogue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -105,7 +103,6 @@ class ImportFacebookSharePosts implements ShouldQueue
                     ]);
                 }
             }
-
 
             $this->stats['countProcessed']++;
 

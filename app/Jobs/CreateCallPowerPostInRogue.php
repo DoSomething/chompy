@@ -37,8 +37,8 @@ class CreateCallPowerPostInRogue implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-    	// Using the mobile number, get or create a northstar_id.
-    	$user = $this->getOrCreateUser($this->parameters['mobile']);
+        // Using the mobile number, get or create a northstar_id.
+        $user = $this->getOrCreateUser($this->parameters['mobile']);
 
         // Using the callpower_campaign_id, get the action id from Rogue.
         $actionId = $rogue->getActionIdFromCallPowerCampaignId($this->parameters['callpower_campaign_id']);
@@ -54,17 +54,17 @@ class CreateCallPowerPostInRogue implements ShouldQueue
 
             $details = $this->extractDetails($this->parameters);
 
-        	// Determine source details.
+            // Determine source details.
             $post = $rogue->createPost([
-             'northstar_id' => $user->id,
-             'action_id' => $actionId,
-             'type' => 'phone-call',
-             'status' => $this->parameters['status'] === 'completed' ? 'accepted' : 'incomplete',
-             'quantity' => 1,
-             'source_details' => 'CallPower',
-             'details' => $details,
-             'dont_send_to_blink' => true,
-         ]);
+                'northstar_id' => $user->id,
+                'action_id' => $actionId,
+                'type' => 'phone-call',
+                'status' => $this->parameters['status'] === 'completed' ? 'accepted' : 'incomplete',
+                'quantity' => 1,
+                'source_details' => 'CallPower',
+                'details' => $details,
+                'dont_send_to_blink' => true,
+            ]);
 
             if ($post['data']) {
                 info('post created in rogue for northstar user: ' . $user->id);
@@ -81,25 +81,25 @@ class CreateCallPowerPostInRogue implements ShouldQueue
      */
     private function getOrCreateUser($mobile)
     {
-    	// Get the user by mobile number.
-    	info('getting user with the mobile: ' . $mobile);
-    	$user = gateway('northstar')->asClient()->getUser('mobile', $mobile);
+        // Get the user by mobile number.
+        info('getting user with the mobile: ' . $mobile);
+        $user = gateway('northstar')->asClient()->getUser('mobile', $mobile);
 
-    	// If there is no user, create one.
-    	if (is_null($user)) {
-    		$user = gateway('northstar')->asClient()->createUser([
-    			'mobile' => $mobile,
-    		]);
-    	}
+        // If there is no user, create one.
+        if (is_null($user)) {
+            $user = gateway('northstar')->asClient()->createUser([
+                'mobile' => $mobile,
+            ]);
+        }
 
-    	// Log if the user was successfully created.
-    	if ($user->id) {
-    		info('created user', ['user' => $user->id]);
-    	} else {
-    		throw new Exception(500, 'Unable to create user with mobile: ' . $mobile);
-    	}
+        // Log if the user was successfully created.
+        if ($user->id) {
+            info('created user', ['user' => $user->id]);
+        } else {
+            throw new Exception(500, 'Unable to create user with mobile: ' . $mobile);
+        }
 
-    	return $user;
+        return $user;
     }
 
     /**
@@ -109,15 +109,15 @@ class CreateCallPowerPostInRogue implements ShouldQueue
      */
     private function extractDetails($call)
     {
-    	return json_encode([
-    		'status_details' => $call['status'],
-    		'call_timestamp' => $call['call_timestamp'],
-    		'call_duration' => $call['call_duration'],
-    		'campaign_target_name' => $call['campaign_target_name'],
-    		'campaign_target_title' => $call['campaign_target_title'],
-    		'campaign_target_district' => $call['campaign_target_district'],
-    		'callpower_campaign_name' => $call['callpower_campaign_name'],
-    		'number_dialed_into' => $call['number_dialed_into'],
-    	]);
+        return json_encode([
+            'status_details' => $call['status'],
+            'call_timestamp' => $call['call_timestamp'],
+            'call_duration' => $call['call_duration'],
+            'campaign_target_name' => $call['campaign_target_name'],
+            'campaign_target_title' => $call['campaign_target_title'],
+            'campaign_target_district' => $call['campaign_target_district'],
+            'callpower_campaign_name' => $call['callpower_campaign_name'],
+            'number_dialed_into' => $call['number_dialed_into'],
+        ]);
     }
 }
