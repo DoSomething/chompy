@@ -54,7 +54,7 @@ class CreateCallPowerPostInRogue implements ShouldQueue
              'type' => 'phone-call',
              'status' => $request['status'] === 'completed' ? 'accepted' : 'incomplete',
              'quantity' => 1,
-             'source' => 'CallPower',
+             'source_details' => 'CallPower',
              'details' => $details,
              'dont_send_to_blink' => true,
          ]);
