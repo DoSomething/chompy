@@ -40,11 +40,12 @@ class CreateCallPowerPostInRogue implements ShouldQueue
     	// Using the mobile number, get or create a northstar_id.
     	$user = $this->getOrCreateUser($this->parameters['mobile']);
 
-        // Using the callpower_campaign_id, get the action_id from Rogue.
-        $action = $rogue->getActionFromCallPowerCampaignId($this->parameters['callpower_campaign_id']);
+        // Using the callpower_campaign_id, get the action id from Rogue.
+        $actionId = $rogue->getActionIdFromCallPowerCampaignId($this->parameters['callpower_campaign_id']);
+
         // Check if the post exists in Rogue. If not, create the post.
         $existingPost = $rogue->getPost([
-          'action_id' => $action['data'][0]['id'],
+          'action_id' => $actionId,
           'northstar_id' => $user->id,
         ]);
 
@@ -56,7 +57,7 @@ class CreateCallPowerPostInRogue implements ShouldQueue
         	// Determine source details.
             $post = $rogue->createPost([
              'northstar_id' => $user->id,
-             'action_id' => $action['data'][0]['id'],
+             'action_id' => $actionId,
              'type' => 'phone-call',
              'status' => $this->parameters['status'] === 'completed' ? 'accepted' : 'incomplete',
              'quantity' => 1,
