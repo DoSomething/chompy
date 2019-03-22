@@ -18,7 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 // Third Party Integration
-$router->group(['prefix' => 'v1', 'middleware' => ['third-party-api-token-auth']], function() {
-	// CallPower
-	$this->post('callpower/call', 'ThirdParty\CallPowerController@store');
+$router->group(['prefix' => 'v1', 'middleware' => ['third-party-api-token-auth']], function () {
+    // CallPower
+    $this->post('callpower/call', 'ThirdParty\CallPowerController@store');
 });

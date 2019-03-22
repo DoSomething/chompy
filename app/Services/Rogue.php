@@ -102,7 +102,7 @@ class Rogue extends RestApiClient
     /**
      * Get an action from Rogue based on CallPower campaign id.
      *
-     * @param integer $callpowerCampaignId
+     * @param int $callpowerCampaignId
      * @return array $action
      */
     public function getActionFromCallPowerCampaignId($callpowerCampaignId)

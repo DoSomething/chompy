@@ -21,4 +21,3 @@ Route::get('/', function () {
 // Authentication
 $router->get('login', 'Auth\LoginController@getLogin')->name('login');
 $router->get('logout', 'Auth\LoginController@getLogout')->name('logout');
-

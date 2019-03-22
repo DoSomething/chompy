@@ -8,7 +8,6 @@ use Chompy\Jobs\CreateCallPowerPostInRogue;
 
 class CallPowerController extends Controller
 {
-
     /**
      * Create a controller instance.
      *
@@ -19,7 +18,6 @@ class CallPowerController extends Controller
     }
 
     /**
-     *
      * @param Request $request
      */
     public function store(Request $request)
