@@ -33,6 +33,7 @@ class ImportController extends Controller
             'type' => request()->input('type'),
             'postConfig' => config('import.rock_the_vote.post'),
             'resetConfig' => config('import.rock_the_vote.reset'),
+            'userConfig' => config('import.rock_the_vote.user'),
         ]);
     }
 

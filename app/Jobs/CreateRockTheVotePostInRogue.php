@@ -23,11 +23,13 @@ class RockTheVoteRecord {
         $this->first_name = $record['First name'];
         $this->last_name = $record['Last name'];
         $this->mobile = $record['Phone'];
-        $this->source = config('services.northstar.client_credentials.client_id');
 
         $emailOptIn = $record['Opt-in to Partner email?'];
         if ($emailOptIn) {
             $this->email_subscription_status = str_to_boolean($emailOptIn);
+            if ($this->email_subscription_status) {
+                $this->email_subscription_topics = explode(',', config('import.rock_the_vote.user.email_subscription_topics'));
+            }
         }
         // Note: Not a typo, this column name does not have the trailing question mark.
         $smsOptIn = $record['Opt-in to Partner SMS/robocall'];
@@ -264,7 +266,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     {
         $userData = [];
 
-        $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name', 'source', 'voter_registration_status'];
+        $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name', 'voter_registration_status'];
 
         foreach ($userFields as $key) {
             $userData[$key] = $record->{$key};
@@ -272,6 +274,10 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
     
         if (isset($record->email_subscription_status)) {
             $userData['email_subscription_status'] = $record->email_subscription_status;
+        }
+
+        if (isset($record->email_subscription_topics)) {
+            $userData['email_subscription_topics'] = $record->email_subscription_topics;
         }
 
         if (isset($record->sms_status)) {

@@ -5,15 +5,15 @@
 @if ($type === \Chompy\ImportType::$rockTheVote)
     <div>
         <h1>Rock The Vote</h1>
-        <p>Creates or updates users and posts from CSV.</p>
+        <p>Creates/updates users and their voter registration post via CSV from Rock The Vote.</p>
         <h4>Users</h4>
-        <dl>
-            <dt>Source:</dt><dd>{{ config('services.northstar.client_credentials.client_id') }}</dd>
+        <dl class="dl-horizontal">
+            <dt>Email subscriptions</dt><dd>{{ $userConfig['email_subscription_topics'] }}</dd>
             <dt>Reset email enabled</dt><dd>{{ $resetConfig['enabled'] ? 'true' : 'false'}}</dd>
             <dt>Reset email type</dt><dd>{{ $resetConfig['type'] }}</dd>
         </dl>
         <h4>Posts</h4>
-        <dl>
+        <dl class="dl-horizontal">
             <dt>Action ID</dt><dd>{{ $postConfig['action_id'] }}</dd>
             <dt>Type</dt><dd>{{ $postConfig['type'] }}</dd>
             <dt>Source</dt><dd>{{ $postConfig['source'] }}</dd>
