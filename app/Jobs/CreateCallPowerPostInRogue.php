@@ -4,7 +4,6 @@ namespace Chompy\Jobs;
 
 use Exception;
 use Chompy\Services\Rogue;
-use Illuminate\Http\Request;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,12 +14,20 @@ class CreateCallPowerPostInRogue implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
+     * The call parameters send from CallPower.
+     *
+     * @var array
+     */
+    protected $parameters;
+
+    /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($parameters)
     {
+        $this->parameters = $parameters;
     }
 
     /**
@@ -28,31 +35,30 @@ class CreateCallPowerPostInRogue implements ShouldQueue
      *
      * @return array
      */
-    public function handle(Rogue $rogue, Request $request)
+    public function handle(Rogue $rogue)
     {
     	// Using the mobile number, get or create a northstar_id.
-    	$user = $this->getOrCreateUser($request['mobile']);
+    	$user = $this->getOrCreateUser($this->parameters['mobile']);
 
         // Using the callpower_campaign_id, get the action_id from Rogue.
-        $action = $rogue->getActionFromCallPowerCampaignId($request['callpower_campaign_id']);
-
+        $action = $rogue->getActionFromCallPowerCampaignId($this->parameters['callpower_campaign_id']);
         // Check if the post exists in Rogue. If not, create the post.
         $existingPost = $rogue->getPost([
           'action_id' => $action['data'][0]['id'],
           'northstar_id' => $user->id,
-      ]);
+        ]);
 
         if (! $existingPost['data']) {
             info('creating post in rogue for northstar user: ' . $user->id);
 
-            $details = $this->extractDetails($request);
+            $details = $this->extractDetails($this->parameters);
 
         	// Determine source details.
             $post = $rogue->createPost([
              'northstar_id' => $user->id,
              'action_id' => $action['data'][0]['id'],
              'type' => 'phone-call',
-             'status' => $request['status'] === 'completed' ? 'accepted' : 'incomplete',
+             'status' => $this->parameters['status'] === 'completed' ? 'accepted' : 'incomplete',
              'quantity' => 1,
              'source_details' => 'CallPower',
              'details' => $details,
@@ -62,8 +68,8 @@ class CreateCallPowerPostInRogue implements ShouldQueue
             if ($post['data']) {
                 info('post created in rogue for northstar user: ' . $user->id);
             }
-     }
- }
+        }
+    }
 
     /**
      * For a given mobile number, first check if we have a northstar ID, then grab the user using that.

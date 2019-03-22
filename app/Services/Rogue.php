@@ -74,7 +74,6 @@ class Rogue extends RestApiClient
         })->values()->toArray();
 
         $post = $this->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
-
         if (! $post['data']) {
             throw new Exception(500, 'Unable to create post for user: ' . $data['northstar_id']);
         }

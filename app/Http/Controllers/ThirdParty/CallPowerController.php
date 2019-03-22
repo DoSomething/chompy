@@ -22,7 +22,7 @@ class CallPowerController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $parameters = $request->validate([
             'mobile' => 'required',
             'callpower_campaign_id' => 'required|integer',
             'status' => 'required|string',
@@ -36,6 +36,6 @@ class CallPowerController extends Controller
         ]);
 
         // Send to queued job.
-        CreateCallPowerPostInRogue::dispatch($request);
+        CreateCallPowerPostInRogue::dispatch($parameters);
     }
 }
