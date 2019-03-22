@@ -110,7 +110,7 @@ class Rogue extends RestApiClient
             'filter' => ['callpower_campaign_id' => $callpowerCampaignId],
         ]);
 
-        if (! $action['data']) {
+        if (! $action['data'][0]['id']) {
             throw new Exception(500, 'Unable to get action data for CallPower campaign id : ' . $callpowerCampaignId);
         }
 
