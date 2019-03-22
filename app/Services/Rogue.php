@@ -112,7 +112,7 @@ class Rogue extends RestApiClient
         ]);
 
         if (! $action['data']) {
-            throw ValidationException::withMessages('Unable to get action data for CallPower campaign id : ' . $callpowerCampaignId);
+            throw new Exception(500, 'Unable to get action data for CallPower campaign id : ' . $callpowerCampaignId);
         }
 
         return $action;
