@@ -1,20 +1,5 @@
 <?php
 
-use Illuminate\Support\Str;
-
-/**
- * Returns whether email is a test email.
- * TODO: This isn't used anywhere, although deprecated jobs could use it to DRY. Remove it all?
- * @see https://www.pivotaltracker.com/story/show/164114650
- *
- * @param string $email
- * @return bool
- */
-function is_test_email($email)
-{
-    return Str::contains($email, ['@dosomething.org', '@example']);
-}
-
 /**
  * Parse a string as boolean.
  *
