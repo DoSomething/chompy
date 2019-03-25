@@ -43,32 +43,24 @@ class CreateCallPowerPostInRogue implements ShouldQueue
         // Using the callpower_campaign_id, get the action id from Rogue.
         $actionId = $rogue->getActionIdFromCallPowerCampaignId($this->parameters['callpower_campaign_id']);
 
-        // Check if the post exists in Rogue. If not, create the post.
-        $existingPost = $rogue->getPost([
-          'action_id' => $actionId,
-          'northstar_id' => $user->id,
+        info('creating post in rogue for northstar user: ' . $user->id);
+
+        $details = $this->extractDetails($this->parameters);
+
+        // Determine source details.
+        $post = $rogue->createPost([
+            'northstar_id' => $user->id,
+            'action_id' => $actionId,
+            'type' => 'phone-call',
+            'status' => $this->parameters['status'] === 'completed' ? 'accepted' : 'incomplete',
+            'quantity' => 1,
+            'source_details' => 'CallPower',
+            'details' => $details,
+            'dont_send_to_blink' => true,
         ]);
 
-        if (! $existingPost['data']) {
-            info('creating post in rogue for northstar user: ' . $user->id);
-
-            $details = $this->extractDetails($this->parameters);
-
-            // Determine source details.
-            $post = $rogue->createPost([
-                'northstar_id' => $user->id,
-                'action_id' => $actionId,
-                'type' => 'phone-call',
-                'status' => $this->parameters['status'] === 'completed' ? 'accepted' : 'incomplete',
-                'quantity' => 1,
-                'source_details' => 'CallPower',
-                'details' => $details,
-                'dont_send_to_blink' => true,
-            ]);
-
-            if ($post['data']) {
-                info('post created in rogue for northstar user: ' . $user->id);
-            }
+        if ($post['data']) {
+            info('post created in rogue for northstar user: ' . $user->id);
         }
     }
 
