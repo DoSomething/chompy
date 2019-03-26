@@ -29,7 +29,9 @@
             </div>
         @endif
         <div class="container">
-            @include('components.nav')
+            @include('components.nav', [
+                'rockTheVote' => '/import/'.\Chompy\ImportType::$rockTheVote,
+            ])
         </div>
 
         <div class="container">

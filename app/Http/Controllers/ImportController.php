@@ -26,33 +26,33 @@ class ImportController extends Controller
 
     /*
      * Show the upload form.
+     *
+     * @param string $importType
      */
-    public function show()
+    public function show($importType)
     {
         return view('pages.import', [
-            'type' => request()->input('type'),
-            'postConfig' => config('import.rock_the_vote.post'),
-            'resetConfig' => config('import.rock_the_vote.reset'),
-            'userConfig' => config('import.rock_the_vote.user'),
+            'type' => $importType,
+            'config' => ImportType::getConfig($importType),
         ]);
     }
 
     /**
      * Import the uploaded file.
      *
-     * @param  Request $request
+     * @param Request $request
+     * @param string $importType
      */
-    public function store(Request $request)
+    public function store(Request $request, $importType)
     {
         $request->validate([
             'upload-file' => 'required|mimes:csv,txt',
-            'import-type' => 'required',
         ]);
 
         // Push file to S3.
         $upload = $request->file('upload-file');
 
-        $path = 'uploads/' . $request->input('import-type') . '-importer' . Carbon::now() . '.csv';
+        $path = 'uploads/' . $importType . '-importer' . Carbon::now() . '.csv';
         $csv = Reader::createFromPath($upload->getRealPath());
         $success = Storage::put($path, (string) $csv);
 
@@ -60,23 +60,22 @@ class ImportController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        $type = $request->input('import-type');
-
-        if ($type === ImportType::$turbovote) {
+        if ($importType === ImportType::$turbovote) {
             info('turbo vote import happening');
             ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        if ($type === ImportType::$rockTheVote) {
+        if ($importType === ImportType::$rockTheVote) {
             info('rock the vote import happening');
             ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        if ($type === ImportType::$facebook) {
+        if ($importType === ImportType::$facebook) {
             info('Facebook share import happening');
             ImportFacebookSharePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        return redirect()->route('import.show', ['type' => $type])->with('status', 'Your CSV was added to the queue to be processed.');
+        return redirect('import/'.$importType)
+            ->with('status', 'Your CSV was added to the queue to be processed.');
     }
 }

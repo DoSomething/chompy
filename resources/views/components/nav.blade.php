@@ -8,13 +8,13 @@
                 <span class="icon-bar"></span>
             </button>
 
-            <a class="navbar-brand" href="/">Chompy</a>
+            <a class="navbar-brand">Chompy</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
-                    <li class="{{ request()->input('type') === \Chompy\ImportType::$rockTheVote ? 'active' : '' }}">
-                        <a class="nav-item nav-link" href="/import?type={{ \Chompy\ImportType::$rockTheVote }}">
+                    <li class="{{ str_contains(request()->url(), $rockTheVote) ? 'active' : '' }}">
+                        <a class="nav-item nav-link" href="{{ $rockTheVote  }}">
                             Rock The Vote
                         </a>
                     </li>
