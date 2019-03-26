@@ -34,4 +34,21 @@ class ImportType
     {
         return [self::$facebook, self::$rockTheVote, self::$turbovote];
     }
+
+    /**
+     * Returns config array of given import type.
+     *
+     * @return array
+     */
+    public static function getVars($type)
+    {
+        if ($type === self::$rockTheVote) {
+            return [
+                'title' => 'Rock The Vote',
+                'config' => config('import.rock_the_vote'),
+            ];
+        }
+
+        throw new HttpException(500, 'Config not found for type '.$type.'.');
+    }
 }

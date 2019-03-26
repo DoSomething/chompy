@@ -13,7 +13,7 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
-                    <li class="{{ request()->input('type') === \Chompy\ImportType::$rockTheVote ? 'active' : '' }}">
+                    <li class="{{ request()->url('') === 'import/'.\Chompy\ImportType::$rockTheVote ? 'active' : '' }}">
                         <a class="nav-item nav-link" href="/import?type={{ \Chompy\ImportType::$rockTheVote }}">
                             Rock The Vote
                         </a>

@@ -26,21 +26,25 @@ class ImportController extends Controller
 
     /*
      * Show the upload form.
+     *
+     * @param string $importType
      */
     public function show($importType)
     {
+        $vars = ImportType::getVars($importType);
+
         return view('pages.import', [
+            'title' => $vars['title'],
             'type' => $importType,
-            'postConfig' => config('import.rock_the_vote.post'),
-            'resetConfig' => config('import.rock_the_vote.reset'),
-            'userConfig' => config('import.rock_the_vote.user'),
+            'config' => $vars['config'],
         ]);
     }
 
     /**
      * Import the uploaded file.
      *
-     * @param  Request $request
+     * @param Request $request
+     * @param string $importType
      */
     public function store(Request $request, $importType)
     {
@@ -74,7 +78,7 @@ class ImportController extends Controller
             ImportFacebookSharePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
-        return redirect()->route('import/'.$importType)
+        return redirect('import/'.$importType)
             ->with('status', 'Your CSV was added to the queue to be processed.');
     }
 }
