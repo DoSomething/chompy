@@ -11,8 +11,8 @@
 |
 */
 
-$router->get('/import', 'ImportController@show')->name('import.show');
-$router->post('import', 'ImportController@store')->name('import.store');
+$router->get('import/{importType}', 'ImportController@show')->name('import.show');
+$router->post('import/{importType}', 'ImportController@store')->name('import.store');
 
 Route::get('/', function () {
     return view('pages.home');

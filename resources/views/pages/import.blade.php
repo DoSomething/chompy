@@ -18,7 +18,7 @@
             <dt>Type</dt><dd>{{ $postConfig['type'] }}</dd>
             <dt>Source</dt><dd>{{ $postConfig['source'] }}</dd>
         </dl>
-        <form action={{url('/import')}} method="post" enctype="multipart/form-data">
+        <form action={{ app('request')->url() }} method="post" enctype="multipart/form-data">
             {{ csrf_field() }}
             <div class="form-group">
                 <div class="input-group">
@@ -27,7 +27,6 @@
                             Select CSV <input type="file" name="upload-file" style="display: none;" multiple>
                         </span>
                     </label>
-                    <input type="hidden" name="import-type" value={{ app('request')->input('type') }}>
                     <input type="text" class="form-control" readonly>
                 </div>
             </div>
