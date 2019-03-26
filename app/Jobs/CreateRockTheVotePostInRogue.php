@@ -3,6 +3,7 @@
 namespace Chompy\Jobs;
 
 use Exception;
+use Chompy\ImportType;
 use Chompy\Services\Rogue;
 use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
@@ -13,7 +14,13 @@ use Illuminate\Foundation\Bus\Dispatchable;
 
 class RockTheVoteRecord
 {
-    public function __construct($record)
+    /**
+     * Parses values to send to DS API from given CSV record, using given config.
+     *
+     * @param array $record
+     * @param array $config
+     */
+    public function __construct($record, $config)
     {
         $this->addr_street1 = $record['Home address'];
         $this->addr_street2 = $record['Home unit'];
@@ -29,7 +36,7 @@ class RockTheVoteRecord
         if ($emailOptIn) {
             $this->email_subscription_status = str_to_boolean($emailOptIn);
             if ($this->email_subscription_status) {
-                $this->email_subscription_topics = explode(',', config('import.rock_the_vote.user.email_subscription_topics'));
+                $this->email_subscription_topics = explode(',', $config['user']['email_subscription_topics']);
             }
         }
         // Note: Not a typo, this column name does not have the trailing question mark.
@@ -43,7 +50,7 @@ class RockTheVoteRecord
 
         $this->user_id = $this->parseUserId($record['Tracking Source']);
 
-        $postConfig = config('import.rock_the_vote.post');
+        $postConfig = $config['post'];
         $this->post_source = $postConfig['source'];
         $this->post_source_details = null;
         $this->post_details = $this->parsePostDetails($record);
@@ -178,7 +185,8 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
      */
     public function __construct($record)
     {
-        $this->record = new RockTheVoteRecord($record);
+        $this->config = ImportType::getConfig(ImportType::$rockTheVote);
+        $this->record = new RockTheVoteRecord($record, $this->config);
     }
 
     /**
@@ -346,7 +354,7 @@ class CreateRockTheVotePostInRogue implements ShouldQueue
             return;
         }
 
-        $resetConfig = config('import.rock_the_vote.reset');
+        $resetConfig = $this->config['reset'];
         $resetType = $resetConfig['type'];
         $logParams = ['user' => $user->id, 'type' => $resetType];
 
