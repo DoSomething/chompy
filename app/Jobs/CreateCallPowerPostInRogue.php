@@ -43,9 +43,9 @@ class CreateCallPowerPostInRogue implements ShouldQueue
         // Using the callpower_campaign_id, get the action id from Rogue.
         $actionId = $rogue->getActionIdFromCallPowerCampaignId($this->parameters['callpower_campaign_id']);
 
-        info('creating post in rogue for northstar user: ' . $user->id);
-
         $details = $this->extractDetails($this->parameters);
+
+        info('creating post in rogue for northstar user: ' . $user->id . ' and details: ' . $details);
 
         // Determine source details.
         $post = $rogue->createPost([
