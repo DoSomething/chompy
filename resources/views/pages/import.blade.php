@@ -3,10 +3,10 @@
 @section('main_content')
 
 <div>
-    @if ($type === \Chompy\ImportType::$rockTheVote)
+    @if ($importType === \Chompy\ImportType::$rockTheVote)
     @include('pages.partials.rock-the-vote', ['config' => $config])
     @endif
-    <form action={{ app('request')->url() }} method="post" enctype="multipart/form-data">
+    <form action={{ route('import.store', ['importType' => $importType]) }} method="post" enctype="multipart/form-data">
         {{ csrf_field() }}
         <div class="form-group">
             <div class="input-group">

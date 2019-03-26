@@ -32,7 +32,7 @@ class ImportController extends Controller
     public function show($importType)
     {
         return view('pages.import', [
-            'type' => $importType,
+            'importType' => $importType,
             'config' => ImportType::getConfig($importType),
         ]);
     }
