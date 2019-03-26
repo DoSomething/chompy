@@ -40,13 +40,10 @@ class ImportType
      *
      * @return array
      */
-    public static function getVars($type)
+    public static function getConfig($type)
     {
         if ($type === self::$rockTheVote) {
-            return [
-                'title' => 'Rock The Vote',
-                'config' => config('import.rock_the_vote'),
-            ];
+            return config('import.rock_the_vote');
         }
 
         throw new HttpException(500, 'Config not found for type '.$type.'.');

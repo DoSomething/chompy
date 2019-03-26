@@ -27,7 +27,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/';
+    protected $redirectTo = '/import/rock-the-vote';
 
     /**
      * Where to redirect users after logout.

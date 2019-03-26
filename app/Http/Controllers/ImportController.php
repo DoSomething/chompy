@@ -31,12 +31,9 @@ class ImportController extends Controller
      */
     public function show($importType)
     {
-        $vars = ImportType::getVars($importType);
-
         return view('pages.import', [
-            'title' => $vars['title'],
             'type' => $importType,
-            'config' => $vars['config'],
+            'config' => ImportType::getConfig($importType),
         ]);
     }
 

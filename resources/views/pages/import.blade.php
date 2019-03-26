@@ -3,7 +3,6 @@
 @section('main_content')
 
 <div>
-    <h1>{{ $title }}</h1>
     @if ($type === \Chompy\ImportType::$rockTheVote)
     @include('pages.partials.rock-the-vote', ['config' => $config])
     @endif

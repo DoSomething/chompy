@@ -1,4 +1,5 @@
 <div>
+    <h1>Rock The Vote</h1>
     <p>Creates/updates users and their voter registration post via CSV from Rock The Vote.</p>
     <h4>Users</h4>
     <dl class="dl-horizontal">
