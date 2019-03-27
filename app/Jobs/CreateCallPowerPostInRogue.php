@@ -81,6 +81,7 @@ class CreateCallPowerPostInRogue implements ShouldQueue
         if (is_null($user)) {
             $user = gateway('northstar')->asClient()->createUser([
                 'mobile' => $mobile,
+                'sms_status' => 'stop',
             ]);
         }
 
