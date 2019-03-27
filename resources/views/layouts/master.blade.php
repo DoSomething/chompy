@@ -30,7 +30,7 @@
         @endif
         <div class="container">
             @include('components.nav', [
-                'rockTheVote' => '/import/'.\Chompy\ImportType::$rockTheVote,
+                'rockTheVotePath' => 'import/'.\Chompy\ImportType::$rockTheVote,
             ])
         </div>
 

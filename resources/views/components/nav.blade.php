@@ -13,8 +13,8 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
-                    <li class="{{ request()->is('import/' . $rockTheVote) ? 'active' : '' }}">
-                        <a class="nav-item nav-link" href="{{ $rockTheVote  }}">
+                    <li class="{{ Request::path() === $rockTheVotePath ? 'active' : '' }}">
+                        <a class="nav-item nav-link" href="{{  '/'.$rockTheVotePath }}">
                             Rock The Vote
                         </a>
                     </li>
