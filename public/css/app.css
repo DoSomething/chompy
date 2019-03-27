@@ -2037,8 +2037,6 @@ pre code {
 .container-fluid {
   margin-right: auto;
   margin-left: auto;
-  padding-left: 15px;
-  padding-right: 15px;
 }
 
 .container-fluid:before,
@@ -5281,12 +5279,6 @@ tbody.collapse.in {
   clear: both;
 }
 
-@media (min-width: 768px) {
-  .navbar {
-    border-radius: 4px;
-  }
-}
-
 .navbar-header:before,
 .navbar-header:after {
   content: " ";
@@ -5364,14 +5356,6 @@ tbody.collapse.in {
   .navbar-fixed-bottom .navbar-collapse {
     max-height: 200px;
   }
-}
-
-.container > .navbar-header,
-.container > .navbar-collapse,
-.container-fluid > .navbar-header,
-.container-fluid > .navbar-collapse {
-  margin-right: -15px;
-  margin-left: -15px;
 }
 
 @media (min-width: 768px) {

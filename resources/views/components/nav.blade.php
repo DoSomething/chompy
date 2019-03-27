@@ -1,5 +1,5 @@
 <nav class="navbar navbar-default">
-    <div class="container-fluid">
+    <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
@@ -13,8 +13,8 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
-                    <li class="{{ str_contains(request()->url(), $rockTheVote) ? 'active' : '' }}">
-                        <a class="nav-item nav-link" href="{{ $rockTheVote  }}">
+                    <li class="{{ Request::path() === $rockTheVotePath ? 'active' : '' }}">
+                        <a class="nav-item nav-link" href="{{  '/'.$rockTheVotePath }}">
                             Rock The Vote
                         </a>
                     </li>
