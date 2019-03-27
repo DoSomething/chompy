@@ -82,13 +82,13 @@ class CreateCallPowerPostInRogue implements ShouldQueue
             $user = gateway('northstar')->asClient()->createUser([
                 'mobile' => $mobile,
             ]);
-        }
 
-        // Log if the user was successfully created.
-        if ($user->id) {
-            info('created user', ['user' => $user->id]);
-        } else {
-            throw new Exception('Unable to create user with mobile: ' . $mobile);
+            // Log if the user was successfully created.
+            if ($user->id) {
+                info('created user', ['user' => $user->id]);
+            } else {
+                throw new Exception('Unable to create user with mobile: ' . $mobile);
+            }
         }
 
         return $user;
