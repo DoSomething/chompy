@@ -30,7 +30,7 @@ class CallPowerController extends Controller
             'call_duration' => 'required|integer',
             'campaign_target_name' => 'required|string',
             'campaign_target_title' => 'required|string',
-            'campaign_target_district' => 'required|string',
+            'campaign_target_district' => 'string',
             'callpower_campaign_name' => 'required|string',
             'number_dialed_into' => 'required',
         ]);
