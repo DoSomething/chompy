@@ -20,7 +20,7 @@ POST /api/v1/callpower/call
   The name of the target the user called.
 - **campaign_target_title** (string) required.
   The title of the target the user called.
-- **campaign_target_district** (string) required.
+- **campaign_target_district** (string)
   The district of the target the user called.
 - **callpower_campaign_name** (string) required.
   The CallPower campaign name given in CallPower.
