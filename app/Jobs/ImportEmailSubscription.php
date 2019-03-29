@@ -14,7 +14,7 @@ class ImportEmailSubscription implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
-     * The email to subscribe
+     * The email to subscribe.
      *
      * @var array
      */
@@ -62,7 +62,7 @@ class ImportEmailSubscription implements ShouldQueue
     }
 
     /**
-     * Check if user exists for emaill.
+     * Check if user exists by email.
      *
      * @return NorthstarUser
      */
@@ -75,7 +75,7 @@ class ImportEmailSubscription implements ShouldQueue
     }
 
     /**
-     * Creates new user from record.
+     * Creates new user by email.
      *
      * @param array $record
      * @return NorthstarUser
@@ -106,8 +106,7 @@ class ImportEmailSubscription implements ShouldQueue
     {
         gateway('northstar')->asClient()->updateUser($user->id, [
             'email_subscription_status' => true,
-            // TODO: Merge arrays, this is overwriting.
-            'email_subscription_topics'  => $this->email_subscription_topics,
+            'email_subscription_topics'  => array_merge($user->email_subscription_topics, $this->email_subscription_topics),
         ]);
         info('Subscribed existing user', ['user' => $user->id]);
     }
