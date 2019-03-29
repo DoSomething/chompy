@@ -5,14 +5,14 @@ namespace Chompy;
 class ImportType
 {
     /**
-     * A Breakdown import type.
+     * An email import.
      *
      * @var string
      */
-    public static $breakdown = 'breakdown';
+    public static $email = 'email';
 
     /**
-     * A Rock The Vote import type.
+     * A Rock The Vote import.
      *
      * @var string
      */

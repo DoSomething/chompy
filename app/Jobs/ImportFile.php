@@ -23,6 +23,13 @@ class ImportFile implements ShouldQueue
     protected $filepath;
 
     /**
+     * The import type.
+     *
+     * @var string
+     */
+    protected $importType;
+
+    /**
      * The count of the total records in the stored csv.
      *
      * @var array
@@ -34,19 +41,21 @@ class ImportFile implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($filepath)
+    public function __construct($filepath, $importType)
     {
         $this->filepath = $filepath;
+        $this->importType = $importType;
     }
 
     /**
      * Get the tags that should be assigned to the job.
+     * TODO: Is this used anywhere?
      *
      * @return array
      */
     public function tags()
     {
-        return [ImportType::$rockTheVote];
+        return [$this->importType];
     }
 
     /**
@@ -56,13 +65,14 @@ class ImportFile implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-        info('STARTING RTV IMPORT');
+        info('STARTING '.$this->importType.' IMPORT');
 
         $records = $this->getCSVRecords($this->filepath);
 
         foreach ($records as $offset => $record) {
-            ImportRockTheVoteRecord::dispatch($record);
-
+            if ($this->importType === ImportType::$rockTheVote) {
+                ImportRockTheVoteRecord::dispatch($record);
+            }
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
         }
 

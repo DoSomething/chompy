@@ -5,8 +5,8 @@ namespace Chompy\Http\Controllers;
 use Carbon\Carbon;
 use Chompy\ImportType;
 use League\Csv\Reader;
-use Illuminate\Http\Request;
 use Chompy\Jobs\ImportFile;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ImportController extends Controller
@@ -58,12 +58,9 @@ class ImportController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        if ($importType === ImportType::$rockTheVote) {
-            info('rock the vote import happening');
-            ImportFile::dispatch($path)->delay(now()->addSeconds(3));
-        }
+        ImportFile::dispatch($path, $importType)->delay(now()->addSeconds(3));
 
         return redirect('import/'.$importType)
-            ->with('status', 'Your CSV was added to the queue to be processed.');
+            ->with('status', 'Queued '.$path.'.');
     }
 }
