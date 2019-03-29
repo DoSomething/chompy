@@ -2,6 +2,7 @@
 
 namespace Chompy\Jobs;
 
+use Chompy\ImportType;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Chompy\Events\LogProgress;
@@ -45,7 +46,7 @@ class ImportRockTheVotePosts implements ShouldQueue
      */
     public function tags()
     {
-        return ['rock-the-vote'];
+        return [ImportType::$rockTheVote];
     }
 
     /**

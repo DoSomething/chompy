@@ -5,21 +5,18 @@ namespace Chompy;
 class ImportType
 {
     /**
+     * A Breakdown import type.
+     *
+     * @var string
+     */
+    public static $breakdown = 'breakdown';
+
+    /**
      * A Rock The Vote import type.
      *
      * @var string
      */
     public static $rockTheVote = 'rock-the-vote';
-
-    /**
-     * Returns list of all valid import types.
-     *
-     * @return array
-     */
-    public static function all()
-    {
-        return [self::$rockTheVote];
-    }
 
     /**
      * Returns config array of given import type.
