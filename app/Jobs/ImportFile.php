@@ -3,17 +3,18 @@
 namespace Chompy\Jobs;
 
 use Chompy\ImportType;
+use League\Csv\Reader;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Chompy\Events\LogProgress;
-use Chompy\Traits\ImportFromFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
 class ImportFile implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, ImportFromFile;
+    use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
      * The path to the stored csv.
@@ -56,6 +57,27 @@ class ImportFile implements ShouldQueue
     public function tags()
     {
         return [$this->importType];
+    }
+
+    /**
+     * Fetch records from the filepath.
+     *
+     * @return array
+     */
+    public function getRecords()
+    {
+        $file = Storage::get($this->filepath);
+        $file = str_replace("\r", "\n", $file);
+
+        $csv = Reader::createFromString($file);
+        $csv->setHeaderOffset(0);
+        $records = $csv->getRecords();
+        $this->totalRecords = count($csv);
+
+        event(new LogProgress('Total rows to chomp: ' . $this->totalRecords, 'general'));
+        event(new LogProgress('', 'progress', 0));
+
+        return $records;
     }
 
     /**

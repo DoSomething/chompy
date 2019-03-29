@@ -5,14 +5,13 @@ namespace Chompy\Jobs;
 use Exception;
 use Chompy\ImportType;
 use Illuminate\Bus\Queueable;
-use Chompy\Traits\ImportFromFile;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
 class ImportEmailSubscription implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, ImportFromFile;
+    use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
      * The email to subscribe

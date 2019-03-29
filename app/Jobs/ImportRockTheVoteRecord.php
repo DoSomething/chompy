@@ -7,7 +7,6 @@ use Chompy\ImportType;
 use Chompy\Services\Rogue;
 use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
-use Chompy\Traits\ImportToRogue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -169,7 +168,7 @@ class RockTheVoteRecord
 
 class ImportRockTheVoteRecord implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
+    use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
      * The record parsed from a Rock the Vote csv.
