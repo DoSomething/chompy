@@ -5,11 +5,11 @@ namespace Chompy;
 class ImportType
 {
     /**
-     * An email import.
+     * An email subscription import.
      *
      * @var string
      */
-    public static $email = 'email';
+    public static $emailSubscription = 'email-subscription';
 
     /**
      * A Rock The Vote import.
@@ -28,7 +28,9 @@ class ImportType
         if ($type === self::$rockTheVote) {
             return config('import.rock_the_vote');
         }
-
-        throw new HttpException(500, 'Config not found for type '.$type.'.');
+        if ($type === self::$emailSubscription) {
+            return config('import.email_subscription');
+        }
+        return [];
     }
 }

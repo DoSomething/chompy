@@ -4,7 +4,7 @@
     <h4>Users</h4>
     <dl class="dl-horizontal">
         <dt>Email subscriptions</dt><dd>{{ $config['user']['email_subscription_topics'] }}</dd>
-        <dt>Reset email enabled</dt><dd>{{ $config['reset']['enabled'] ? 'true' : 'false'}}</dd>
+        <dt>Reset email enabled</dt><dd>{{ $config['reset']['enabled'] ? 'true' : 'false' }}</dd>
         <dt>Reset email type</dt><dd>{{ $config['reset']['type'] }}</dd>
     </dl>
     <h4>Posts</h4>

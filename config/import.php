@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'email_subscription' => [
+        // TODO: Use input values from the import form instead of hardcoding.
+        'user' => [
+            'email_subscription_topics' => 'news',
+            'source_detail' => 'breakdown_opt_in',
+        ],
+    ],
     'rock_the_vote' => [
         'post' => [
             'action_id' => env('ROCK_THE_VOTE_POST_ACTION_ID', 850),
