@@ -31,6 +31,13 @@ class ImportFile implements ShouldQueue
     protected $importType;
 
     /**
+     * The import options.
+     *
+     * @var array
+     */
+    protected $importOptions;
+
+    /**
      * The count of the total records in the stored csv.
      *
      * @var array
@@ -40,12 +47,16 @@ class ImportFile implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param string $filepath
+     * @param string $importType
+     * @param array $importOptions
      * @return void
      */
-    public function __construct($filepath, $importType)
+    public function __construct($filepath, $importType, $importOptions)
     {
         $this->filepath = $filepath;
         $this->importType = $importType;
+        $this->importOptions = $importOptions;
     }
 
     /**
@@ -96,7 +107,7 @@ class ImportFile implements ShouldQueue
                 ImportRockTheVoteRecord::dispatch($record);
             }
             if ($this->importType === ImportType::$emailSubscription) {
-                ImportEmailSubscription::dispatch($record['email']);
+                ImportEmailSubscription::dispatch($record['email'], $this->importOptions);
             }
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
         }

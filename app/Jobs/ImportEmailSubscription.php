@@ -3,7 +3,6 @@
 namespace Chompy\Jobs;
 
 use Exception;
-use Chompy\ImportType;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -35,14 +34,15 @@ class ImportEmailSubscription implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param string $email
+     * @param array $options
      * @return void
      */
-    public function __construct($email)
+    public function __construct($email, $options)
     {
-        $config = ImportType::getConfig(ImportType::$emailSubscription);
         $this->email = $email;
-        $this->source_detail = $config['user']['source_detail'];
-        $this->email_subscription_topics = [$config['user']['email_subscription_topics']];
+        $this->source_detail = $options['source_detail'];
+        $this->email_subscription_topics = $options['email_subscription_topics'];
     }
 
     /**
@@ -84,6 +84,8 @@ class ImportEmailSubscription implements ShouldQueue
     {
         $user = gateway('northstar')->asClient()->createUser([
             'email' => $this->email,
+            // We need to pass a source in order to save through the source_detail.
+            'source' => config('services.northstar.client_credentials.client_id'),
             'source_detail' => $this->source_detail,
             'email_subscription_status' => true,
             'email_subscription_topics' => $this->email_subscription_topics,
