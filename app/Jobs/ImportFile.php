@@ -11,7 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
-class ImportRockTheVotePosts implements ShouldQueue
+class ImportFile implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
 

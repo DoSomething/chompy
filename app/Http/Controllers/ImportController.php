@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Chompy\ImportType;
 use League\Csv\Reader;
 use Illuminate\Http\Request;
-use Chompy\Jobs\ImportRockTheVotePosts;
+use Chompy\Jobs\ImportFile;
 use Illuminate\Support\Facades\Storage;
 
 class ImportController extends Controller
@@ -60,7 +60,7 @@ class ImportController extends Controller
 
         if ($importType === ImportType::$rockTheVote) {
             info('rock the vote import happening');
-            ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
+            ImportFile::dispatch($path)->delay(now()->addSeconds(3));
         }
 
         return redirect('import/'.$importType)
