@@ -6,10 +6,8 @@ use Carbon\Carbon;
 use Chompy\ImportType;
 use League\Csv\Reader;
 use Illuminate\Http\Request;
-use Chompy\Jobs\ImportTurboVotePosts;
 use Chompy\Jobs\ImportRockTheVotePosts;
 use Illuminate\Support\Facades\Storage;
-use Chompy\Jobs\ImportFacebookSharePosts;
 
 class ImportController extends Controller
 {
@@ -60,19 +58,9 @@ class ImportController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        if ($importType === ImportType::$turbovote) {
-            info('turbo vote import happening');
-            ImportTurboVotePosts::dispatch($path)->delay(now()->addSeconds(3));
-        }
-
         if ($importType === ImportType::$rockTheVote) {
             info('rock the vote import happening');
             ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
-        }
-
-        if ($importType === ImportType::$facebook) {
-            info('Facebook share import happening');
-            ImportFacebookSharePosts::dispatch($path)->delay(now()->addSeconds(3));
         }
 
         return redirect('import/'.$importType)
