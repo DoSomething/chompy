@@ -61,7 +61,7 @@ class ImportRockTheVotePosts implements ShouldQueue
         $records = $this->getCSVRecords($this->filepath);
 
         foreach ($records as $offset => $record) {
-            CreateRockTheVotePostInRogue::dispatch($record);
+            ImportRockTheVoteRecord::dispatch($record);
 
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
         }

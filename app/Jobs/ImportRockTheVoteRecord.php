@@ -167,7 +167,7 @@ class RockTheVoteRecord
     }
 }
 
-class CreateRockTheVotePostInRogue implements ShouldQueue
+class ImportRockTheVoteRecord implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
 
