@@ -6,14 +6,14 @@ use Chompy\ImportType;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Chompy\Events\LogProgress;
-use Chompy\Traits\ImportToRogue;
+use Chompy\Traits\ImportFromFile;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
 class ImportFile implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
+    use Dispatchable, InteractsWithQueue, Queueable, ImportFromFile;
 
     /**
      * The path to the stored csv.
@@ -67,7 +67,7 @@ class ImportFile implements ShouldQueue
     {
         info('STARTING '.$this->importType.' IMPORT');
 
-        $records = $this->getCSVRecords($this->filepath);
+        $records = $this->getRecords($this->filepath);
 
         foreach ($records as $offset => $record) {
             if ($this->importType === ImportType::$rockTheVote) {

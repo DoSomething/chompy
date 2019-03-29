@@ -4,17 +4,15 @@ namespace Chompy\Jobs;
 
 use Exception;
 use Chompy\ImportType;
-use Chompy\Services\Rogue;
-use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
-use Chompy\Traits\ImportToRogue;
+use Chompy\Traits\ImportFromFile;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
 class ImportEmailSubscription implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, ImportToRogue;
+    use Dispatchable, InteractsWithQueue, Queueable, ImportFromFile;
 
     /**
      * The email to subscribe
@@ -34,6 +32,7 @@ class ImportEmailSubscription implements ShouldQueue
      * @var array
      */
     protected $email_subscription_topics;
+
     /**
      * Create a new job instance.
      *
@@ -48,18 +47,18 @@ class ImportEmailSubscription implements ShouldQueue
     }
 
     /**
-     * Execute the job to create or update users by email and set subscription topics. 
+     * Execute the job to create or update users by email and set subscription topics.
      *
      * @return array
      */
-    public function handle(Rogue $rogue)
+    public function handle()
     {
         info('progress_log: Processing: ' . $this->email);
 
         if ($user = $this->getUser()) {
             $this->updateUser($user);
         } else {
-           $this->createUser();
+            $this->createUser();
         }
     }
 

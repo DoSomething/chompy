@@ -28,9 +28,11 @@ class ImportType
         if ($type === self::$rockTheVote) {
             return config('import.rock_the_vote');
         }
+
         if ($type === self::$emailSubscription) {
             return config('import.email_subscription');
         }
+
         return [];
     }
 }

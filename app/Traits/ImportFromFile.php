@@ -6,7 +6,7 @@ use League\Csv\Reader;
 use Chompy\Events\LogProgress;
 use Illuminate\Support\Facades\Storage;
 
-trait ImportToRogue
+trait ImportFromFile
 {
     /**
      * Initiate the stat counters to use with imports to Rogue.
@@ -24,7 +24,7 @@ trait ImportToRogue
         ];
     }
 
-    public function getCSVRecords($filepath)
+    public function getRecords($filepath)
     {
         $file = Storage::get($filepath);
         $file = str_replace("\r", "\n", $file);
