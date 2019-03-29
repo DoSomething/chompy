@@ -52,7 +52,7 @@ class ImportController extends Controller
             $rules['topic'] = 'required';
             $importOptions = [
                 'email_subscription_topics' => [$request->input('topic')],
-                'source_detail' => [$request->input('source-detail')],
+                'source_detail' => $request->input('source-detail'),
             ];
         }
         $request->validate($rules);
