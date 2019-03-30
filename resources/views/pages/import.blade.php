@@ -6,9 +6,9 @@
     <form action={{ route('import.store', ['importType' => $importType]) }} method="post" enctype="multipart/form-data">
         {{ csrf_field() }}
         @if ($importType === \Chompy\ImportType::$rockTheVote)
-        @include('pages.partials.rock-the-vote', ['config' => $config])
+            @include('pages.partials.rock-the-vote', ['config' => $config])
         @elseif ($importType === \Chompy\ImportType::$emailSubscription)
-        @include('pages.partials.email-subscription')
+            @include('pages.partials.email-subscription')
         @endif
         <div class="form-group">
             <div class="input-group">

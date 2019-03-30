@@ -35,14 +35,15 @@ class ImportEmailSubscription implements ShouldQueue
      * Create a new job instance.
      *
      * @param string $email
-     * @param array $options
+     * @param string $sourceDetail
+     * @param array $emailSubscriptionTopics
      * @return void
      */
-    public function __construct($email, $options)
+    public function __construct($email, $sourceDetail, $emailSubscriptionTopics)
     {
         $this->email = $email;
-        $this->source_detail = $options['source_detail'];
-        $this->email_subscription_topics = $options['email_subscription_topics'];
+        $this->source_detail = $sourceDetail;
+        $this->email_subscription_topics =  $emailSubscriptionTopics;
     }
 
     /**
