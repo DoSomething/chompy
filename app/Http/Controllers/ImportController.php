@@ -71,6 +71,6 @@ class ImportController extends Controller
         ImportFile::dispatch($path, $importType, $importOptions)->delay(now()->addSeconds(3));
 
         return redirect('import/'.$importType)
-            ->with('status', 'Queued '.$path.'.');
+            ->with('status', 'Queued '.$path.' for import.');
     }
 }

@@ -43,7 +43,7 @@ class ImportEmailSubscription implements ShouldQueue
     {
         $this->email = $email;
         $this->source_detail = $sourceDetail;
-        $this->email_subscription_topics =  $emailSubscriptionTopics;
+        $this->email_subscription_topics = $emailSubscriptionTopics;
     }
 
     /**

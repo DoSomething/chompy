@@ -15,7 +15,7 @@
                 @if (Auth::user())
                     <li @if (Request::path() === $emailSubscriptionPath) class="active" @endif>
                         <a class="nav-item nav-link" href="{{  '/'.$emailSubscriptionPath }}">
-                            Email Subscription
+                            Email subscription
                         </a>
                     </li>
                     <li @if (Request::path() === $rockTheVotePath) class="active" @endif>

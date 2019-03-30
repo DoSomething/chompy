@@ -11,6 +11,7 @@
             @include('pages.partials.email-subscription')
         @endif
         <div class="form-group">
+            <h3>Upload</h3>
             <div class="input-group">
                 <label class="input-group-btn">
                     <span class="btn btn-default">

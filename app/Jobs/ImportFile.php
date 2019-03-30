@@ -98,7 +98,7 @@ class ImportFile implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-        info('STARTING '.$this->importType.' IMPORT');
+        info('STARTING '.$this->importType.' IMPORT', ['options' => print_r($this->importOptions, true)]);
 
         $records = $this->getRecords($this->filepath);
 
