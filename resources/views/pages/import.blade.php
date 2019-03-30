@@ -22,7 +22,7 @@
             </div>
         </div>
         <div>
-            <input type="submit" class="btn btn-primary" value="Import">
+            <input type="submit" class="btn btn-primary btn-lg" value="Import">
         </div>
     </form>
 </div>
