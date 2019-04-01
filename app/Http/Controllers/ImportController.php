@@ -5,8 +5,8 @@ namespace Chompy\Http\Controllers;
 use Carbon\Carbon;
 use Chompy\ImportType;
 use League\Csv\Reader;
+use Chompy\Jobs\ImportFile;
 use Illuminate\Http\Request;
-use Chompy\Jobs\ImportRockTheVotePosts;
 use Illuminate\Support\Facades\Storage;
 
 class ImportController extends Controller
@@ -43,9 +43,19 @@ class ImportController extends Controller
      */
     public function store(Request $request, $importType)
     {
-        $request->validate([
+        $importOptions = [];
+        $rules = [
             'upload-file' => 'required|mimes:csv,txt',
-        ]);
+        ];
+        if ($importType === ImportType::$emailSubscription) {
+            $rules['source-detail'] = 'required';
+            $rules['topic'] = 'required';
+            $importOptions = [
+                'email_subscription_topics' => [$request->input('topic')],
+                'source_detail' => $request->input('source-detail'),
+            ];
+        }
+        $request->validate($rules);
 
         // Push file to S3.
         $upload = $request->file('upload-file');
@@ -58,12 +68,9 @@ class ImportController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        if ($importType === ImportType::$rockTheVote) {
-            info('rock the vote import happening');
-            ImportRockTheVotePosts::dispatch($path)->delay(now()->addSeconds(3));
-        }
+        ImportFile::dispatch($path, $importType, $importOptions)->delay(now()->addSeconds(3));
 
         return redirect('import/'.$importType)
-            ->with('status', 'Your CSV was added to the queue to be processed.');
+            ->with('status', 'Queued '.$path.' for import.');
     }
 }

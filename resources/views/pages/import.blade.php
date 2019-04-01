@@ -3,12 +3,15 @@
 @section('main_content')
 
 <div>
-    @if ($importType === \Chompy\ImportType::$rockTheVote)
-    @include('pages.partials.rock-the-vote', ['config' => $config])
-    @endif
     <form action={{ route('import.store', ['importType' => $importType]) }} method="post" enctype="multipart/form-data">
         {{ csrf_field() }}
+        @if ($importType === \Chompy\ImportType::$rockTheVote)
+            @include('pages.partials.rock-the-vote', ['config' => $config])
+        @elseif ($importType === \Chompy\ImportType::$emailSubscription)
+            @include('pages.partials.email-subscription')
+        @endif
         <div class="form-group">
+            <h3>Upload</h3>
             <div class="input-group">
                 <label class="input-group-btn">
                     <span class="btn btn-default">
@@ -19,7 +22,7 @@
             </div>
         </div>
         <div>
-            <input type="submit" class="btn btn-primary" value="Import">
+            <input type="submit" class="btn btn-primary btn-lg" value="Import">
         </div>
     </form>
 </div>

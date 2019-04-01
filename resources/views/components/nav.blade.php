@@ -13,7 +13,12 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
-                    <li class="{{ Request::path() === $rockTheVotePath ? 'active' : '' }}">
+                    <li @if (Request::path() === $emailSubscriptionPath) class="active" @endif>
+                        <a class="nav-item nav-link" href="{{  '/'.$emailSubscriptionPath }}">
+                            Email subscription
+                        </a>
+                    </li>
+                    <li @if (Request::path() === $rockTheVotePath) class="active" @endif>
                         <a class="nav-item nav-link" href="{{  '/'.$rockTheVotePath }}">
                             Rock The Vote
                         </a>

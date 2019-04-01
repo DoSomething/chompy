@@ -5,21 +5,18 @@ namespace Chompy;
 class ImportType
 {
     /**
-     * A Rock The Vote import type.
+     * An email subscription import.
+     *
+     * @var string
+     */
+    public static $emailSubscription = 'email-subscription';
+
+    /**
+     * A Rock The Vote import.
      *
      * @var string
      */
     public static $rockTheVote = 'rock-the-vote';
-
-    /**
-     * Returns list of all valid import types.
-     *
-     * @return array
-     */
-    public static function all()
-    {
-        return [self::$rockTheVote];
-    }
 
     /**
      * Returns config array of given import type.
@@ -32,6 +29,6 @@ class ImportType
             return config('import.rock_the_vote');
         }
 
-        throw new HttpException(500, 'Config not found for type '.$type.'.');
+        return [];
     }
 }
