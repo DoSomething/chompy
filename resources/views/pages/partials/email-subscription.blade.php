@@ -20,7 +20,7 @@
     <select class="form-control" name="topic">
       <option value="">-- Select --</option>
       <option value="community">community</option>
-      <option value="lifesetyle">lifestyle</option>
+      <option value="lifestyle">lifestyle</option>
       <option value="news">news</option>
       <option value="scholarships">scholarships</option>
     </select>
