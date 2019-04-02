@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Migrations\Migration;
 
-class RemovePasswordResetsAndStatsTables extends Migration
+class DropPasswordResetsAndStatsTables extends Migration
 {
     /**
      * Run the migrations.
