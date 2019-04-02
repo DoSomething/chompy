@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'email_subscription' => [
+        'topics' => ['community', 'lifestyle', 'news', 'scholarships'],
+    ],
     'rock_the_vote' => [
         'post' => [
             'action_id' => env('ROCK_THE_VOTE_POST_ACTION_ID', 850),
