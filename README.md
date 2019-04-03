@@ -8,7 +8,7 @@ Check out the [documentation](https://github.com/DoSomething/chompy/blob/master/
 
 ### Contributing
 
-To get started with development, you'll first need local instances of [Northstar](https://github.com/DoSomething/northstar) and [Rogue](https://github.com/DoSomething/rogue) setup to use for running Chompy imports on your localhost.
+To get started with development, you'll first need local instances of [Northstar](https://github.com/DoSomething/northstar) and [Rogue](https://github.com/DoSomething/rogue) setup to use for running Chompy imports on your localhost. 
 
 Next, fork and clone this repository, and [add it to your Homestead](https://github.com/DoSomething/communal-docs/blob/master/Homestead/readme.md).
 
@@ -26,7 +26,7 @@ $ php artisan chompy:setup
 $ npm run dev
 ```
 
-When running `php artisan chompy:setup`, add your local instances of Northstar and Rogue, along with your local Northstar auth credentials.
+When running `php artisan chompy:setup`, add your local instances of Northstar and Rogue, along with your local Northstar auth credentials. The [Pusher setup]((https://github.com/DoSomething/chompy/blob/master/documentation/README.md#pusher)) is safe to ignore, as it is not required to run imports locally.
 
 We follow [Laravel's code style](http://laravel.com/docs/5.6/contributions#coding-style) and automatically
 lint all pull requests with [StyleCI](https://github.styleci.io/repos/125392958). Be sure to configure
@@ -34,7 +34,6 @@ lint all pull requests with [StyleCI](https://github.styleci.io/repos/125392958)
 
 ### Testing
 Performance & debug information is available at [`/__clockwork`](http://chompy.test/__clockwork), or using the [Chrome Extension](https://chrome.google.com/webstore/detail/clockwork/dmggabnehkmmfmdffgajcflpdjlnoemp).
-
 
 ### Security Vulnerabilities
 
