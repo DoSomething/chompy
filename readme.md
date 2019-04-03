@@ -17,7 +17,7 @@ and will be promptly addressed. Thank you for taking the time to responsibly dis
 
 ### License
 
-&copy;2018 DoSomething.org. Chompy is free software, and may be redistributed under the terms specified
-in the [LICENSE](https://github.com/DoSomething/rogue/blob/master/LICENSE) file. The name and logo for
+&copy;2019 DoSomething.org. Chompy is free software, and may be redistributed under the terms specified
+in the [LICENSE](https://github.com/DoSomething/chompy/blob/master/LICENSE) file. The name and logo for
 DoSomething.org are trademarks of Do Something, Inc and may not be used without permission.
 
