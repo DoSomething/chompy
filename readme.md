@@ -26,7 +26,7 @@ $ php artisan chompy:setup
 $ npm run dev
 ```
 
-When running `php artisan chompy:setup`, select your local instances of Northstar and Chompy, as well as your local Northstar auth credentials.
+When running `php artisan chompy:setup`, add your local instances of Northstar and Rogue, along with your local Northstar auth credentials.
 
 We follow [Laravel's code style](http://laravel.com/docs/5.6/contributions#coding-style) and automatically
 lint all pull requests with [StyleCI](https://github.styleci.io/repos/125392958). Be sure to configure

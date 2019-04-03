@@ -1,32 +1,27 @@
-# How to contribute
+# Chompy
 
-Follow the [installation instructions](https://github.com/DoSomething/chompy/blob/master/docs/installation.md) to set up your local environment. 
+Chompy imports users and activity into the DoSomething API from third-party source data, which is ingested via API request or a staffer manually uploading a CSV.
 
-## How it works
+## API
 
-Chompy is built in Laravel 5.6 on the backend and a frontend built with JQuery and Bootstrap 3.
+Third-parties with authorized access can post data to the Chompy API. See [API documentation](https://github.com/DoSomething/chompy/tree/master/docs/endpoints).
 
-Staff members can login and upload a CSV for two types of imports:
+## CSV
+
+Chompy supports imports of two types of CSV:
 
 * Rock The Vote voter registrations
 
 * Email subscriptions to newsletters
 
-We store the uploaded file on s3, and then push a [queue job](https://laravel.com/docs/5.6/queues) onto the redis queue that does the work of processing the records in the CSV as defined by the business rules. 
+A staffer can login to Chompy with their Northstar credentials, and select a CSV to import. The file is stored on S3, and then a [queue job](https://laravel.com/docs/5.6/queues) is pushed onto the Redis queue to import records from the CSV as users and/or activity.
 
+### Pusher
 
-## Logging
-
-In order to see progress of the import, there is a progress bar that gets updated in real time using [Pusher](https://pusher.com/) as a [broadcast driver](https://laravel.com/docs/5.6/broadcasting). There is also logging that happens on the backend.
-
-[Pusher](https://pusher.com/) is a third-party service that lets you create real-time apps. In the case of this app, it is used to just show job progress. 
+For CSV uploads, there is a progress bar that gets updated in real time using [Pusher](https://pusher.com/) as a [broadcast driver](https://laravel.com/docs/5.6/broadcasting).
 
 Log in to the Pusher Dashboard by going to https://pusher.com/ and signing in with the credentials in LastPass. 
 
 There are three different pusher app environments and the credentials for connecting to them can be found in `Channel Apps -> {select app name} -> app keys` (ex. https://cl.ly/2o2G3F1v3X2v)
 
 The [Debug Console](https://dashboard.pusher.com/apps/550921/console/realtime_messages) in the Pusher Dashboard will let you see events coming in and going out of each pusher app. 
-
-### How to send/subscribe to a pusher event
-
-Pusher is used as the "Broadcast Driver" that is supported in Laravel. Follow the [Laravel Documentation](https://laravel.com/docs/5.6/broadcasting) on Broadcasts to see how it is implemented.
