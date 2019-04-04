@@ -26,7 +26,7 @@ $ php artisan chompy:setup
 $ npm run dev
 ```
 
-When running `php artisan chompy:setup`, add your local instances of Northstar and Rogue, along with your local Northstar auth credentials. The [Pusher setup]((https://github.com/DoSomething/chompy/blob/master/documentation/README.md#pusher)) is safe to ignore, as it is not required to run imports locally.
+When running `php artisan chompy:setup`, add your local instances of Northstar and Rogue, along with your local Northstar auth credentials. The step for setting up [Pusher](https://github.com/DoSomething/chompy/blob/master/docs#pusher) is safe to ignore, as it is not required to run imports locally.
 
 We follow [Laravel's code style](http://laravel.com/docs/5.6/contributions#coding-style) and automatically
 lint all pull requests with [StyleCI](https://github.styleci.io/repos/125392958). Be sure to configure
