@@ -1,6 +1,6 @@
 # Chompy
 
-Chompy imports users and activity into the DoSomething API from third-party source data, which is ingested via API request or a staffer manually uploading a CSV.
+Chompy imports DoSomething users and activity from third-party source data, which is ingested via API request or a staff member manually uploading a CSV.
 
 ## API
 
@@ -14,7 +14,7 @@ Chompy supports imports of two types of CSV:
 
 * Email subscriptions to newsletters
 
-A staffer can login to Chompy with their Northstar credentials, and select a CSV to import. The file is stored on S3, and then a [queue job](https://laravel.com/docs/5.6/queues) is pushed onto a Redis queue to import records from the CSV as users and/or activity.
+Staff members may login to Chompy with their Northstar credentials, and select a CSV to import. The uploaded file is stored on S3, and then a [queue job](https://laravel.com/docs/5.6/queues) is pushed onto a Redis queue to import records from the CSV as users and/or activity.
 
 ### Pusher
 
