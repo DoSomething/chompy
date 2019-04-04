@@ -12,7 +12,6 @@ To get started with development, you'll first need local instances of [Northstar
 
 Next, fork and clone this repository, and [add it to your Homestead](https://github.com/DoSomething/communal-docs/blob/master/Homestead/readme.md). SSH into your VirtualBox, navigate to your Chompy directory, and run the installation steps:
 
-
 ```sh
 # First, switch to PHP 7.1
 $ php71
@@ -34,6 +33,7 @@ lint all pull requests with [StyleCI](https://github.styleci.io/repos/125392958)
 [EditorConfig](http://editorconfig.org) to ensure you have proper indentation settings.
 
 ### Testing
+
 Performance & debug information is available at [`/__clockwork`](http://chompy.test/__clockwork), or using the [Chrome Extension](https://chrome.google.com/webstore/detail/clockwork/dmggabnehkmmfmdffgajcflpdjlnoemp).
 
 ### Security Vulnerabilities
