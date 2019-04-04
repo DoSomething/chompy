@@ -4,7 +4,7 @@ This is **Chompy**, the DoSomething.org importer app. Chompy is built using [Lar
 
 ### Getting Started
 
-Check out the [documentation](https://github.com/DoSomething/chompy/blob/master/documentation/README.md) for details about Chompy imports. :frog:
+Check out the [documentation](https://github.com/DoSomething/chompy/blob/master/docs) for details about Chompy imports. :frog:
 
 ### Contributing
 
