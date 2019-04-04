@@ -10,7 +10,8 @@ Check out the [documentation](https://github.com/DoSomething/chompy/blob/master/
 
 To get started with development, you'll first need local instances of [Northstar](https://github.com/DoSomething/northstar) and [Rogue](https://github.com/DoSomething/rogue) setup to use for running Chompy imports on your localhost. 
 
-Next, fork and clone this repository, and [add it to your Homestead](https://github.com/DoSomething/communal-docs/blob/master/Homestead/readme.md).
+Next, fork and clone this repository, and [add it to your Homestead](https://github.com/DoSomething/communal-docs/blob/master/Homestead/readme.md). SSH into your VirtualBox, navigate to your Chompy directory, and run the installation steps:
+
 
 ```sh
 # First, switch to PHP 7.1
