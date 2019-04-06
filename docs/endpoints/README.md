@@ -6,7 +6,7 @@ This endpoint is secured behind a static third party API Key. To use, please rea
 
 ## Endpoints
 
-### v2
+### v1
 
 #### CallPower Third Party Integration
 
