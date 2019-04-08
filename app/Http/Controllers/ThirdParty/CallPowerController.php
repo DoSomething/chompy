@@ -3,6 +3,7 @@
 namespace Chompy\Http\Controllers\ThirdParty;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Chompy\Http\Controllers\Controller;
 use Chompy\Jobs\CreateCallPowerPostInRogue;
 
