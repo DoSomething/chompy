@@ -35,6 +35,13 @@ class CallPowerController extends Controller
             'number_dialed_into' => 'required',
         ]);
 
+        Log::debug('sending job to create post with details: ' . json_encode([
+                'mobile' => $request['mobile'],
+                'callpower_campaign_id' => $request['callpower_campaign_id'],
+                'status' => $request['status'],
+            ])
+        );
+
         // Send to queued job.
         CreateCallPowerPostInRogue::dispatch($parameters);
     }
