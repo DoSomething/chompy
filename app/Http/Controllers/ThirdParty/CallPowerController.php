@@ -44,12 +44,5 @@ class CallPowerController extends Controller
 
         // Send to queued job.
         CreateCallPowerPostInRogue::dispatch($parameters);
-
-        Log::debug('sent job to create post with details: ' . json_encode([
-                'mobile' => $request['mobile'],
-                'callpower_campaign_id' => $request['callpower_campaign_id'],
-                'status' => $request['status'],
-            ])
-        );
     }
 }
