@@ -3,6 +3,7 @@
 namespace Chompy\Http\Controllers\ThirdParty;
 
 use Illuminate\Http\Request;
+use Illuminate\Log\LogManager;
 use Chompy\Http\Controllers\Controller;
 use Chompy\Jobs\CreateCallPowerPostInRogue;
 
@@ -35,7 +36,21 @@ class CallPowerController extends Controller
             'number_dialed_into' => 'required',
         ]);
 
+        Log::debug('sending job to create post with details: ' . json_encode([
+                'mobile' => $request['mobile'],
+                'callpower_campaign_id' => $request['callpower_campaign_id'],
+                'status' => $request['status'],
+            ])
+        );
+
         // Send to queued job.
         CreateCallPowerPostInRogue::dispatch($parameters);
+
+        Log::debug('sent job to create post with details: ' . json_encode([
+                'mobile' => $request['mobile'],
+                'callpower_campaign_id' => $request['callpower_campaign_id'],
+                'status' => $request['status'],
+            ])
+        );
     }
 }
