@@ -56,7 +56,6 @@ class CreateCallPowerPostInRogue implements ShouldQueue
             'quantity' => 1,
             'source_details' => 'CallPower',
             'details' => $details,
-            'dont_send_to_blink' => true,
         ]);
 
         if ($post['data']) {
