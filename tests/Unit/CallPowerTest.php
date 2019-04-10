@@ -11,25 +11,6 @@ use DoSomething\Gateway\Resources\NorthstarUser;
 class CallPowerTest extends TestCase
 {
     /**
-     * Mock the getUser Northstar Call.
-     *
-     * @return user
-     */
-    public function mockGetUserNSCall()
-    {
-        $this->northstarMock->shouldReceive('getUser')->andReturnUsing(function ($type, $id) {
-            return new NorthstarUser([
-                    'id' => $type === 'id' ? $id : $this->faker->northstar_id,
-                    'first_name' => $this->faker->firstName,
-                    'last_name' => $this->faker->lastName,
-                    'birthdate' => $this->faker->date,
-                    'email' => $this->faker->email,
-                    'mobile' => $this->faker->phoneNumber,
-                ]);
-        });
-    }
-
-    /**
      * Test that a post with a completed status successfully sends to Rogue.
      *
      * @return void
@@ -95,7 +76,7 @@ class CallPowerTest extends TestCase
     public function testFailedPostWithInvalidCallPowerCampaignId()
     {
         // Mock the Northstar call.
-        $this->mockGetUserNSCall();
+        $this->mockGetNorthstarUser();
 
         // If the provided Action ID doesn't exist in Rogue, this method throws:
         $this->rogueMock->shouldReceive('getActionIdFromCallPowerCampaignId')->andThrow(new Exception(500));
@@ -127,7 +108,7 @@ class CallPowerTest extends TestCase
     public function testFailedPostCreationInRogue()
     {
         // Mock the Northstar call.
-        $this->mockGetUserNSCall();
+        $this->mockGetNorthstarUser();
 
         // Mock the call to Rogue to get the action id.
         $this->rogueMock->shouldReceive('getActionIdFromCallPowerCampaignId');
