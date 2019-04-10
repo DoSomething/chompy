@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Chompy\Services\Rogue;
 use DoSomething\Gateway\Northstar;
 use Illuminate\Support\Facades\Storage;
+use DoSomething\Gateway\Resources\NorthstarUser;
 
 trait WithMocks
 {
