@@ -7,16 +7,23 @@ use Illuminate\Contracts\Console\Kernel;
 trait CreatesApplication
 {
     /**
+     * The Faker generator, for creating test data.
+     *
+     * @var \Faker\Generator
+     */
+    protected $faker;
+
+    /**
      * Creates the application.
      *
      * @return \Illuminate\Foundation\Application
      */
     public function createApplication()
     {
-        $app = require __DIR__.'/../bootstrap/app.php';
+        $this->app = require __DIR__.'/../bootstrap/app.php';
 
-        $app->make(Kernel::class)->bootstrap();
+        $this->app->make(Kernel::class)->bootstrap();
 
-        return $app;
+        return $this->app;
     }
 }
