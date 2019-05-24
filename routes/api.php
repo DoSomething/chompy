@@ -21,4 +21,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 $router->group(['prefix' => 'v1', 'middleware' => ['third-party-api-token-auth']], function () {
     // CallPower
     $this->post('callpower/call', 'ThirdParty\CallPowerController@store');
+    // SoftEdge
+    $this->post('softedge/email', 'ThirdParty\SoftEdgeController@store');
 });
