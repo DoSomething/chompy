@@ -14,4 +14,10 @@ This endpoint is secured behind a static third party API Key. To use, please rea
 | ---------------------- | ------------------------------------------------------------------------------------------ |
 | `POST /api/v1/callpower/call`   | [Create a post](endpoints/callpower.md#create-a-callpower-post) |
 
+#### SoftEdge Third Party Integration
+
+| Endpoint               | Functionality                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| `POST /api/v1/softedge/email`   | [Create a post](endpoints/softedge.md#create-a-softedge-post) |
+
 
