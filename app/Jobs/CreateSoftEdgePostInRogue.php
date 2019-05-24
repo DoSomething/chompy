@@ -1,6 +1,7 @@
 <?php
 
 namespace Chompy\Jobs;
+
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
