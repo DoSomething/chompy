@@ -36,7 +36,7 @@ return [
     |
     */
     'callpower_key' => env('CALLPOWER_API_KEY'),
-    'softedge_key' => env('SOFTEDGE_API_KEY')
+    'softedge_key' => env('SOFTEDGE_API_KEY'),
 
     /*
     |--------------------------------------------------------------------------
