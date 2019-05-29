@@ -7,11 +7,11 @@ use Illuminate\Auth\AuthenticationException;
 
 class AuthenticateWithApiKey
 {
-    protected $headers;
+    protected $keys;
 
     public function __construct()
     {
-      $this->headers = [
+      $this->keys = [
         'X-DS-Importer-API-Key' => config('app.callpower_key'),
         'X-DS-CallPower-API-Key' => config('app.callpower_key'),
         'X-DS-SoftEdge-API-Key' => config('app.softedge_key'),
@@ -28,11 +28,10 @@ class AuthenticateWithApiKey
      *
      * @throws \Illuminate\Auth\AuthenticationException
      */
-    public function handle($request, Closure $next, $headers)
+    public function handle($request, Closure $next, ...$headers)
     {
-      dd($headers);
       // Check the header for authorization.
-      foreach ($headers as $header => $key) {
+      foreach ($this->keys as $header => $key) {
         if ($request->header($header) == $key) {
             return $next($request);
         }
