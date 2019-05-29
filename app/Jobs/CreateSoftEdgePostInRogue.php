@@ -13,7 +13,7 @@ class CreateSoftEdgePostInRogue implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
-     * The call parameters sent from CallPower.
+     * The call parameters sent from SoftEdge.
      *
      * @var array
      */
