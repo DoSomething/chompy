@@ -39,5 +39,6 @@ class SoftEdgeController extends Controller
 
         // Send to queued job.
         CreateSoftEdgePostInRogue::dispatch($parameters);
+        return response()->json(['success' => true]);
     }
 }
