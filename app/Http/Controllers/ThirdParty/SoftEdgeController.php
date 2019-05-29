@@ -32,11 +32,10 @@ class SoftEdgeController extends Controller
             'campaign_target_district' => 'nullable|string',
         ]);
 
-        Log::debug('sending job to create post with details: ' . json_encode([
-                'northstar_id' => $request['northstar_id'],
-                'action_id' => $request['action_id'],
-            ])
-        );
+        Log::debug('sending job to create post with details', [
+            'northstar_id' => $request['northstar_id'],
+            'action_id' => $request['action_id'],
+        ]);
 
         // Send to queued job.
         CreateSoftEdgePostInRogue::dispatch($parameters);
