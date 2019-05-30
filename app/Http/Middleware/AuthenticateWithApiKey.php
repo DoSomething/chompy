@@ -31,10 +31,10 @@ class AuthenticateWithApiKey
   public function handle($request, Closure $next, ...$headers)
   {
     // Check the header for authorization.
-    foreach ($this->keys as $header => $key) {
-      if ($request->header($header) == $key) {
-        return $next($request);
-      }
+    foreach ($headers as $header) {
+        if ($request->header($header) === $this->keys[$header]) {
+            return $next($request);
+        }
     }
 
     throw new AuthenticationException;
