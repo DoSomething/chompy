@@ -12,10 +12,10 @@ class AuthenticateWithApiKey
     public function __construct()
     {
         $this->keys = [
-      'X-DS-Importer-API-Key' => config('app.callpower_key'),
-      'X-DS-CallPower-API-Key' => config('app.callpower_key'),
-      'X-DS-SoftEdge-API-Key' => config('app.softedge_key'),
-    ];
+          'X-DS-Importer-API-Key' => config('app.callpower_key'),
+          'X-DS-CallPower-API-Key' => config('app.callpower_key'),
+          'X-DS-SoftEdge-API-Key' => config('app.softedge_key'),
+        ];
     }
 
     /**

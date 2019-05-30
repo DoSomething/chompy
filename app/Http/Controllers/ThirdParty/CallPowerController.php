@@ -16,6 +16,7 @@ class CallPowerController extends Controller
      */
     public function __construct()
     {
+        $this->middleware('token:X-DS-Importer-API-Key,X-DS-CallPower-API-Key');
     }
 
     /**

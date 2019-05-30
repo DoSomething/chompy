@@ -16,6 +16,7 @@ class SoftEdgeController extends Controller
      */
     public function __construct()
     {
+        $this->middleware('token:X-DS-SoftEdge-API-Key');
     }
 
     /**

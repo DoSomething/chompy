@@ -18,7 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 // Third Party Integration
-$router->group(['prefix' => 'v1', 'middleware' => 'token:X-DS-Importer-API-Key,X-DS-CallPower-API-Key,X-DS-SoftEdge-API-Key'], function () {
+$router->group(['prefix' => 'v1'], function () {
     // CallPower
     $this->post('callpower/call', 'ThirdParty\CallPowerController@store');
     // SoftEdge
