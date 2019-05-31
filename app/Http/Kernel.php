@@ -58,6 +58,6 @@ class Kernel extends HttpKernel
         'guest' => \Chompy\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'role' => \Chompy\Http\Middleware\CheckRole::class,
-        'third-party-api-token-auth' => \Chompy\Http\Middleware\AuthenticateWithApiKey::class,
+        'token' => \Chompy\Http\Middleware\AuthenticateWithApiKey::class,
     ];
 }

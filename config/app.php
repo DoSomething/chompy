@@ -29,13 +29,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | API Key
+    | Third Party API Keys
     |--------------------------------------------------------------------------
     |
-    | This determines the accepted `X-DS-Importer-API-Key` header.
+    | This determines the accepted `X-DS-Importer-API-Key`, `X-DS-CallPower-API-Key`, and `X-DS-SoftEdge-API-Key` headers.
     |
     */
-    'api_key' => env('IMPORTER_API_KEY'),
+    'callpower_key' => env('CALLPOWER_API_KEY'),
+    'softedge_key' => env('SOFTEDGE_API_KEY'),
 
     /*
     |--------------------------------------------------------------------------
