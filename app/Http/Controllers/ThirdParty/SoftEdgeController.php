@@ -29,8 +29,8 @@ class SoftEdgeController extends Controller
             'action_id' => 'required|integer',
             'email_timestamp' => 'required|date',
             'campaign_target_name' => 'required|string',
-            'campaign_target_title' => 'required|string',
-            'campaign_target_district' => 'nullable|string',
+            'campaign_target_title' => 'string',
+            'campaign_target_district' => 'string',
         ]);
 
         Log::debug('sending job to create post with details', [
