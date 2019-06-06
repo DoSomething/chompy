@@ -70,8 +70,8 @@ class CreateSoftEdgePostInRogue implements ShouldQueue
         return json_encode([
             'email_timestamp' => $email['email_timestamp'],
             'campaign_target_name' => $email['campaign_target_name'],
-            'campaign_target_title' => $email['campaign_target_title'],
-            'campaign_target_district' => $email['campaign_target_district'],
+            'campaign_target_title' => $email['campaign_target_title'] ? $email['campaign_target_title'] : null,
+            'campaign_target_district' => $email['campaign_target_district'] ? $email['campaign_target_district'] : null,
         ]);
     }
 }
