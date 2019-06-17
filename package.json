@@ -10,12 +10,24 @@
     "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "heroku-postbuild": "npm run production"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
   "devDependencies": {
     "bootstrap-sass": "^3.3.7",
     "cross-env": "^5.2.0",
+    "husky": "^2.4.1",
     "jquery": "^3.1.1",
     "laravel-mix": "^4.0.16",
     "lodash": "^4.17.10",
+    "prettier": "^1.18.2",
+    "pretty-quick": "^1.11.1",
     "resolve-url-loader": "^2.3.2",
     "sass": "^1.21.0",
     "sass-loader": "^7.1.0",

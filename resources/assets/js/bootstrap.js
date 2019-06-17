@@ -5,17 +5,17 @@
  */
 
 try {
-  window.$ = window.jQuery = require("jquery");
+  window.$ = window.jQuery = require('jquery');
 } catch (e) {}
 
-import Echo from "laravel-echo";
+import Echo from 'laravel-echo';
 
-window.Pusher = require("pusher-js");
+window.Pusher = require('pusher-js');
 
 window.Echo = new Echo({
-  broadcaster: "pusher",
+  broadcaster: 'pusher',
   key: window.PusherAppKey,
-  cluster: "us2",
+  cluster: 'us2',
   encrypted: true,
-  namespace: "Chompy.Events"
+  namespace: 'Chompy.Events',
 });
