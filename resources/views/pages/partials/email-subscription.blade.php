@@ -1,7 +1,7 @@
 <div class="form-group">
     <h1>Email subscription</h1>
     <p class="lead">
-      Creates/updates users from uploaded CSV, expecting an <code>email</code> column header.
+      Creates/updates users from uploaded CSV, expecting <code>email</code> and <code>first_name</code> column headers.
     </p>
 </div>
 <h3>Users</h3>
@@ -10,7 +10,7 @@
   <div class="col-sm-9">
     <input type="text" class="form-control" name="source-detail" placeholder="breakdown_opt_in" value="{{ old('source-detail') }}">
     <small class="form-text text-muted">
-      Specify the <code>source_detail</code> for new users that will be created from this upload. 
+      Specify the <code>source_detail</code> for new users that will be created from this upload.
     </small>
   </div>
 </div>
