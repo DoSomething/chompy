@@ -45,7 +45,7 @@ class ImportEmailSubscription implements ShouldQueue
      * @param array $emailSubscriptionTopics
      * @return void
      */
-    public function __construct($email, $firstName $sourceDetail, $emailSubscriptionTopics)
+    public function __construct($email, $firstName, $sourceDetail, $emailSubscriptionTopics)
     {
         $this->email = $email;
         $this->first_name = $firstName;
