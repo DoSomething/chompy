@@ -19,6 +19,12 @@ class ImportEmailSubscription implements ShouldQueue
      */
     protected $email;
     /**
+     * The first name of the user to subscribe.
+     *
+     * @var array
+     */
+    protected $first_name;
+    /**
      * The source detail if new user.
      *
      * @var string
@@ -39,9 +45,10 @@ class ImportEmailSubscription implements ShouldQueue
      * @param array $emailSubscriptionTopics
      * @return void
      */
-    public function __construct($email, $sourceDetail, $emailSubscriptionTopics)
+    public function __construct($email, $firstName, $sourceDetail, $emailSubscriptionTopics)
     {
         $this->email = $email;
+        $this->first_name = $firstName;
         $this->source_detail = $sourceDetail;
         $this->email_subscription_topics = $emailSubscriptionTopics;
     }
@@ -85,6 +92,7 @@ class ImportEmailSubscription implements ShouldQueue
     {
         $user = gateway('northstar')->asClient()->createUser([
             'email' => $this->email,
+            'first_name' => $this->first_name,
             // We need to pass a source in order to save through the source_detail.
             'source' => config('services.northstar.client_credentials.client_id'),
             'source_detail' => $this->source_detail,
@@ -111,6 +119,7 @@ class ImportEmailSubscription implements ShouldQueue
         $newTopics = array_unique(array_merge($existingTopics, $this->email_subscription_topics));
 
         gateway('northstar')->asClient()->updateUser($user->id, [
+            'first_name' => $this->first_name,
             'email_subscription_status' => true,
             'email_subscription_topics'  => $newTopics,
         ]);
