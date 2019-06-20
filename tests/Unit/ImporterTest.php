@@ -1,19 +1,36 @@
 <?php
 
 namespace Tests\Unit;
-use Illuminate\Http\UploadedFile;
 
 use Tests\TestCase;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Chompy\Http\Controllers\ImportController;
+
 
 class ImporterTest extends TestCase
 {
     /**
-     * A basic test example.
+     * Test that an email subscription import creates/updates users with first name and email address.
      *
      * @return void
      */
-    public function testExample()
+    public function testFirstNameAndEmailSavedForEmailSubscriptionImport()
     {
-        $this->assertTrue(true);
+        $request = new Request;
+        $file = UploadedFile::fake()->create('importer_test.csv');
+
+        $request->replace([
+            'source-detail' => 'test_opt_in',
+            'topics' => [
+                'community',
+            ],
+            'upload-file' => $file,
+        ]);
+
+        $controller = new ImportController();
+
+        $response = $controller->store($request, 'email-subscription');
+
     }
 }
