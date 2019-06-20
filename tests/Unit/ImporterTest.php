@@ -5,9 +5,8 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Validation\ValidationException;
 use Chompy\Http\Controllers\ImportController;
-
+use Illuminate\Validation\ValidationException;
 
 class ImporterTest extends TestCase
 {
