@@ -43,7 +43,6 @@ class ImportController extends Controller
      */
     public function store(Request $request, $importType)
     {
-        dd($request->all());
         $importOptions = [];
         $rules = [
             'upload-file' => 'required|mimes:csv,txt',
