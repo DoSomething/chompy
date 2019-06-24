@@ -11,11 +11,11 @@ use Illuminate\Validation\ValidationException;
 class ImporterTest extends TestCase
 {
     /**
-     * Test validation rules for email subscription import.
+     * Test validation error thrown without upload-file for email subscription import.
      *
      * @return void
      */
-    public function testValidationRulesForEmailSubscriptionImport()
+    public function testUploadFileValidationRuleForEmailSubscriptionImport()
     {
         $request = new Request;
         $file = UploadedFile::fake()->create('importer_test.csv');
@@ -31,14 +31,38 @@ class ImporterTest extends TestCase
 
         $this->expectException(ValidationException::class);
         $controller->store($request, 'email-subscription');
+    }
+
+    /**
+     * Test validation error thrown without topics for email subscription import.
+     *
+     * @return void
+     */
+    public function testTopicsValidationRuleForEmailSubscriptionImport()
+    {
+        $request = new Request;
+        $file = UploadedFile::fake()->create('importer_test.csv');
 
         $request->replace([
             'source-detail' => 'test_opt_in',
             'upload-file' => $file,
         ]);
 
+        $controller = new ImportController();
+
         $this->expectException(ValidationException::class);
         $controller->store($request, 'email-subscription');
+    }
+
+    /**
+     * Test validation error thrown without source-detail for email subscription import.
+     *
+     * @return void
+     */
+    public function testSourceDetailValidationRuleForEmailSubscriptionImport()
+    {
+        $request = new Request;
+        $file = UploadedFile::fake()->create('importer_test.csv');
 
         $request->replace([
             'topics' => [
@@ -46,6 +70,8 @@ class ImporterTest extends TestCase
             ],
             'upload-file' => $file,
         ]);
+
+        $controller = new ImportController();
 
         $this->expectException(ValidationException::class);
         $controller->store($request, 'email-subscription');
