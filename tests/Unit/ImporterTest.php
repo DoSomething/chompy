@@ -3,10 +3,7 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Chompy\Http\Controllers\ImportController;
-use Illuminate\Validation\ValidationException;
 
 class ImporterTest extends TestCase
 {
@@ -17,20 +14,14 @@ class ImporterTest extends TestCase
      */
     public function testUploadFileValidationRuleForEmailSubscriptionImport()
     {
-        $request = new Request;
-        $file = UploadedFile::fake()->create('importer_test.csv');
-
-        $request->replace([
+        $user = \Chompy\User::forceCreate(['role' => 'admin']);
+        $response = $this->be($user)->postJson('import/email-subscription', [
             'source-detail' => 'test_opt_in',
             'topics' => [
                 'community',
             ],
         ]);
-
-        $controller = new ImportController();
-
-        $this->expectException(ValidationException::class);
-        $controller->store($request, 'email-subscription');
+        $response->assertStatus(422);
     }
 
     /**
@@ -40,18 +31,15 @@ class ImporterTest extends TestCase
      */
     public function testTopicsValidationRuleForEmailSubscriptionImport()
     {
-        $request = new Request;
         $file = UploadedFile::fake()->create('importer_test.csv');
 
-        $request->replace([
+        $user = \Chompy\User::forceCreate(['role' => 'admin']);
+        $response = $this->be($user)->postJson('import/email-subscription', [
             'source-detail' => 'test_opt_in',
             'upload-file' => $file,
         ]);
 
-        $controller = new ImportController();
-
-        $this->expectException(ValidationException::class);
-        $controller->store($request, 'email-subscription');
+        $response->assertStatus(422);
     }
 
     /**
@@ -61,19 +49,16 @@ class ImporterTest extends TestCase
      */
     public function testSourceDetailValidationRuleForEmailSubscriptionImport()
     {
-        $request = new Request;
         $file = UploadedFile::fake()->create('importer_test.csv');
 
-        $request->replace([
+        $user = \Chompy\User::forceCreate(['role' => 'admin']);
+        $response = $this->be($user)->postJson('import/email-subscription', [
             'topics' => [
                 'community',
             ],
             'upload-file' => $file,
         ]);
 
-        $controller = new ImportController();
-
-        $this->expectException(ValidationException::class);
-        $controller->store($request, 'email-subscription');
+        $response->assertStatus(422);
     }
 }
