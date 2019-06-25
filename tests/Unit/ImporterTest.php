@@ -16,10 +16,9 @@ class ImporterTest extends TestCase
     {
         $user = \Chompy\User::forceCreate(['role' => 'admin']);
         $response = $this->be($user)->postJson('import/email-subscription', [
+            '_token' => csrf_token(),
             'source-detail' => 'test_opt_in',
-            'topics' => [
-                'community',
-            ],
+            'topics' => ['community'],
         ]);
         $response->assertStatus(422);
     }
@@ -35,6 +34,7 @@ class ImporterTest extends TestCase
 
         $user = \Chompy\User::forceCreate(['role' => 'admin']);
         $response = $this->be($user)->postJson('import/email-subscription', [
+            '_token' => csrf_token(),
             'source-detail' => 'test_opt_in',
             'upload-file' => $file,
         ]);
@@ -53,9 +53,8 @@ class ImporterTest extends TestCase
 
         $user = \Chompy\User::forceCreate(['role' => 'admin']);
         $response = $this->be($user)->postJson('import/email-subscription', [
-            'topics' => [
-                'community',
-            ],
+            '_token' => csrf_token(),
+            'topics' => ['community'],
             'upload-file' => $file,
         ]);
 
