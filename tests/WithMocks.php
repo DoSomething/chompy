@@ -2,7 +2,6 @@
 
 namespace Tests;
 
-use Mockery;
 use Carbon\Carbon;
 use Chompy\Services\Rogue;
 use DoSomething\Gateway\Northstar;
@@ -40,21 +39,6 @@ trait WithMocks
 
         // Rogue Mock
         $this->rogueMock = $this->mock(Rogue::class);
-    }
-
-    /**
-     * Mock Container dependencies.
-     *
-     * @param string $class - Class to be mocked.
-     *
-     * @return \Mockery\MockInterface
-     */
-    public function mock($class)
-    {
-        $mock = Mockery::mock($class);
-        $this->app->instance($class, $mock);
-
-        return $mock;
     }
 
     /**
