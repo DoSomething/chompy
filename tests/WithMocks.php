@@ -2,7 +2,6 @@
 
 namespace Tests;
 
-use Mockery;
 use Carbon\Carbon;
 use Chompy\Services\Rogue;
 use DoSomething\Gateway\Northstar;
