@@ -43,21 +43,6 @@ trait WithMocks
     }
 
     /**
-     * Mock Container dependencies.
-     *
-     * @param string $class - Class to be mocked.
-     *
-     * @return \Mockery\MockInterface
-     */
-    public function mock($class)
-    {
-        $mock = Mockery::mock($class);
-        $this->app->instance($class, $mock);
-
-        return $mock;
-    }
-
-    /**
      * Mock the getUser Northstar Call.
      *
      * @return user
