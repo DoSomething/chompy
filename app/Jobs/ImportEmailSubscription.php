@@ -135,18 +135,23 @@ class ImportEmailSubscription implements ShouldQueue
      */
     private function sendUserPasswordReset($user)
     {
+        $logParams = ['user' => $user->id];
         $newsTopic = 'news';
+
         if (! in_array($newsTopic, $user->email_subscription_topics)) {
+            info('New user is not subscribed to news, no email sent.', $logParams);
+
             return;
         }
 
         $config = ImportType::getConfig(ImportType::$emailSubscription);
         $newsTopicResetConfig = $config['topics'][$newsTopic]['reset'];
         $resetType = $newsTopicResetConfig['type'];
-        $logParams = ['user' => $user->id, 'type' => $resetType];
+        $logParams['type'] = $resetType;
 
         if ($newsTopicResetConfig['enabled'] !== 'true') {
             info('Reset email is disabled. Would have sent reset email', $logParams);
+
             return;
         }
 
