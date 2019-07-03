@@ -3,6 +3,7 @@
 namespace Chompy\Jobs;
 
 use Exception;
+use Chompy\ImportType;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -65,7 +66,8 @@ class ImportEmailSubscription implements ShouldQueue
         if ($user = $this->getUser()) {
             $this->updateUser($user);
         } else {
-            $this->createUser();
+            $user = $this->createUser();
+            $this->sendUserPasswordReset($user);
         }
     }
 
@@ -124,5 +126,31 @@ class ImportEmailSubscription implements ShouldQueue
             'email_subscription_topics'  => $newTopics,
         ]);
         info('Subscribed existing user', ['user' => $user->id]);
+    }
+
+    /**
+     * Send Northstar user a password reset email.
+     *
+     * @param object $user
+     */
+    private function sendUserPasswordReset($user)
+    {
+        $newsTopic = 'news';
+        if (! in_array($newsTopic, $user->email_subscription_topics)) {
+            return;
+        }
+
+        $config = ImportType::getConfig(ImportType::$emailSubscription);
+        $newsTopicResetConfig = $config['topics'][$newsTopic]['reset'];
+        $resetType = $newsTopicResetConfig['type'];
+        $logParams = ['user' => $user->id, 'type' => $resetType];
+
+        if ($newsTopicResetConfig['enabled'] !== 'true') {
+            info('Reset email is disabled. Would have sent reset email', $logParams);
+            return;
+        }
+
+        gateway('northstar')->asClient()->sendUserPasswordReset($user->id, $resetType);
+        info('Sent reset email', $logParams);
     }
 }

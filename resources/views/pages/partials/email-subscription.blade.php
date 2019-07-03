@@ -17,11 +17,14 @@
 <div class="form-group row">
   <label for="source-detail" class="col-sm-3 col-form-label" required>Subscription topics</label>
   <div class="col-sm-9">
-    @foreach ($config['topics'] as $topic)
+    @foreach ($config['topics'] as $topic => $config)
       <div class="form-check">
         <input class="form-check-input" name="topics[]" type="checkbox" value="{{ $topic }}" id="community">
         <label class="form-check-label" for="{{ $topic }}">
           {{ $topic }}
+          @isset($config['reset'])
+            <small class="form-text text-muted"> - Sending <code>{{$config['reset']['type']}}</code> email is {{$config['reset']['enabled'] ? 'ON' : 'OFF'}} for new users.</small>
+          @endif
         </label>
       </div>
     @endforeach
