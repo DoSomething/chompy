@@ -2,7 +2,17 @@
 
 return [
     'email_subscription' => [
-        'topics' => ['community', 'lifestyle', 'news', 'scholarships'],
+        'topics' => [
+            'community' => [],
+            'lifestyle' => [],
+            'news' => [
+                'reset' =>  [
+                  'enabled' => env('NEWS_SUBSCRIPTION_RESET_ENABLED', 'true'),
+                  'type' => env('NEWS_SUBSCRIPTION_RESET_TYPE', 'breakdown-activate-account'),
+                ],
+            ],
+            'scholarships' => [],
+        ],
     ],
     'rock_the_vote' => [
         'post' => [
