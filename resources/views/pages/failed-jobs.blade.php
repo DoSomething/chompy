@@ -6,10 +6,9 @@
   {{$data->links()}}
     <table class="table">
     @foreach($data as $key => $row)
-      {{info($row->id)}}
         <tr class="row">
           <td class="col-md-2">
-            <a href="failed-jobs/{{   $row->id  }}">{{$row->failed_at}}</a>
+            {{$row->failed_at}}
           </td>
           <td class="col-md-4">
             <strong>{{$row->commandName}}</strong>
