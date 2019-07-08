@@ -11,9 +11,12 @@ class FailedJobController extends Controller
      */
     public function index()
     {
-        $data = \DB::table('failed_jobs')->paginate(5);;
+        $data = \DB::table('failed_jobs')->paginate(10);
+        foreach ($data as $row) {
+            $row->json = json_decode($row->payload);
+        }
 
-        return \View::make('pages.home')
+        return \View::make('pages.failed-jobs')
             ->with('data', $data);
     }
 }

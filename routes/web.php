@@ -16,7 +16,7 @@ $router->post('import/{importType}', 'ImportController@store')->name('import.sto
 Route::resource('failed-jobs', 'FailedJobController');
 
 Route::get('/', function () {
-    return view('pages.home', ['data' => []]);
+    return view('pages.home');
 });
 
 // Authentication

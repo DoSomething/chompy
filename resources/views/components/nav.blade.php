@@ -9,6 +9,15 @@
             </button>
 
             <a class="navbar-brand">Chompy</a>
+            <ul class="nav navbar-nav">
+                @if (Auth::user())
+                    <li @if (Request::path() === 'failed-jobs') class="active" @endif>
+                        <a class="nav-item nav-link" href="{{  '/failed-jobs'  }}">
+                            Failed jobs
+                        </a>
+                    </li>
+                @endif
+            </ul>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
