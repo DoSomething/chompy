@@ -13,7 +13,12 @@ class FailedJobController extends Controller
     {
         $data = \DB::table('failed_jobs')->paginate(10);
         foreach ($data as $row) {
-            $row->json = json_decode($row->payload);
+            $json = json_decode($row->payload);
+            $row->command = unserialize($json->data->command);
+            $row->commandName = $json->data->commandName;
+            if ($row->commandName === 'Chompy\Jobs\CreateCallPowerPostInRogue') {
+                $row->parameters = $row->command->getParameters();
+            }
         }
 
         return \View::make('pages.failed-jobs')
