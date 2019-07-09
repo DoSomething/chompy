@@ -21,7 +21,7 @@
             @endif
           </td>
           <td class="col-md-6">
-            {{substr($row->exception, 0, 255)}}...
+            {{$row->errorMessage}}
           </td>    
         </tr>
     @endforeach

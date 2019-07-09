@@ -2,6 +2,8 @@
 
 namespace Chompy\Http\Controllers;
 
+use Illuminate\Support\Str;
+
 class FailedJobController extends Controller
 {
     /**
@@ -23,16 +25,18 @@ class FailedJobController extends Controller
     public function index()
     {
         $data = \DB::table('failed_jobs')->paginate(10);
+
         foreach ($data as $row) {
             $json = json_decode($row->payload);
-            $row->command = unserialize($json->data->command);
             $row->commandName = $json->data->commandName;
+            $row->errorMessage = Str::limit($row->exception, 512);
+
             if ($row->commandName === 'Chompy\Jobs\CreateCallPowerPostInRogue') {
-                $row->parameters = $row->command->getParameters();
+                $command = unserialize($json->data->command);
+                $row->parameters = $command->getParameters();
             }
         }
 
-        return \View::make('pages.failed-jobs')
-            ->with('data', $data);
+        return view('pages.failed-jobs', ['data' =>  $data]);
     }
 }
