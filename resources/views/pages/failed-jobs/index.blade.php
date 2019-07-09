@@ -8,7 +8,7 @@
     @foreach($data as $key => $row)
         <tr class="row">
           <td class="col-md-2">
-            {{$row->failed_at}}
+            <a href="/failed-jobs/{{$row->id}}">{{$row->failed_at}}</a>
           </td>
           <td class="col-md-4">
             <strong>{{$row->commandName}}</strong>

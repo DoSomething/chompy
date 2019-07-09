@@ -11,7 +11,7 @@
             <a class="navbar-brand">Chompy</a>
             <ul class="nav navbar-nav">
                 @if (Auth::user())
-                    <li @if (Request::path() === 'failed-jobs') class="active" @endif>
+                    <li @if (Request::is('failed-jobs*')) class="active" @endif>
                         <a class="nav-item nav-link" href="{{  '/failed-jobs'  }}">
                             Failed jobs
                         </a>

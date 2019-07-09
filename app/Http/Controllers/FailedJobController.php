@@ -18,7 +18,26 @@ class FailedJobController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Adds parsed properties to given failed job class.
+     *
+     * @param stdClass $failedJob
+     *
+     * @return void
+     */
+    protected function addParsedPropertiesToFailedJob($failedJob)
+    {
+        $json = json_decode($failedJob->payload);
+        $failedJob->commandName = $json->data->commandName;
+        $failedJob->errorMessage = Str::limit($failedJob->exception, 255);
+
+        if ($failedJob->commandName === 'Chompy\Jobs\CreateCallPowerPostInRogue') {
+            $command = unserialize($json->data->command);
+            $failedJob->parameters = $command->getParameters();
+        }
+    }
+
+    /**
+     * Display a listing of failed jobs.
      *
      * @return Response
      */
@@ -26,17 +45,24 @@ class FailedJobController extends Controller
     {
         $data = \DB::table('failed_jobs')->paginate(10);
 
-        foreach ($data as $row) {
-            $json = json_decode($row->payload);
-            $row->commandName = $json->data->commandName;
-            $row->errorMessage = Str::limit($row->exception, 512);
-
-            if ($row->commandName === 'Chompy\Jobs\CreateCallPowerPostInRogue') {
-                $command = unserialize($json->data->command);
-                $row->parameters = $command->getParameters();
-            }
+        foreach ($data as $failedJob) {
+            $this->addParsedPropertiesToFailedJob($failedJob);
         }
 
-        return view('pages.failed-jobs', ['data' =>  $data]);
+        return view('pages.failed-jobs.index', ['data' => $data]);
+    }
+
+    /**
+     * Display a failed job.
+     *
+     * @return Response
+     */
+    public function show($id)
+    {
+        $data = \DB::table('failed_jobs')->where('id', '=', $id)->get();
+        $failedJob = $data[0];
+        $this->addParsedPropertiesToFailedJob($failedJob);
+
+        return view('pages.failed-jobs.show', ['data' => $failedJob]);
     }
 }
