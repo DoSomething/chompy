@@ -112,4 +112,14 @@ class CreateCallPowerPostInRogue implements ShouldQueue
             'number_dialed_into' => $call['number_dialed_into'],
         ]);
     }
+
+    /**
+     * Returns the parameters passed to this job.
+     *
+     * @return array
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
+    }
 }
