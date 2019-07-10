@@ -29,7 +29,7 @@
     </div>
      <div class="form-group row">
         <div class="col-sm-9 col-sm-offset-3">
-          <input type="submit" class="btn btn-danger" value="Delete">
+          <input type="submit" class="btn btn-danger" value="Delete" onclick="return confirm('Are you sure you want to delete this job? This cannot be undone.')">
         </div>   
     </div>
   </form>

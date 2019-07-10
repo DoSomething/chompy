@@ -84,6 +84,6 @@ class FailedJobController extends Controller
         info('Forgetting job:'.$id.' exitCode:'.$exitCode);
 
         return redirect('failed-jobs')
-            ->with('status', 'Deleted job '.$id.' with exit code '.$exitCode.'.');
+            ->with('status', 'Deleted job '.$id.' (exit code '.$exitCode.').');
     }
 }
