@@ -133,4 +133,29 @@ class CallPowerTest extends TestCase
             'number_dialed_into' => '+12028519273',
         ]);
     }
+
+    /**
+     * Test an anonymous mobile number is not processed.
+     *
+     * @return void
+     */
+    public function testAnonymousMobile()
+    {
+        // Mock a failed Northstar response.
+        $this->northstarMock->shouldNotReceive('getUser');
+        $this->northstarMock->shouldNotReceive('createUser');
+
+        CreateCallPowerPostInRogue::dispatch([
+            'mobile' => '+266696687',
+            'callpower_campaign_id' => 1,
+            'status' => 'busy',
+            'call_timestamp' => '2017-11-09 06:34:01.185035',
+            'call_duration' => 50,
+            'campaign_target_name' => 'Mickey Mouse',
+            'campaign_target_title' => 'Representative',
+            'campaign_target_district' => 'FL-7',
+            'callpower_campaign_name' => 'Test',
+            'number_dialed_into' => '+12028519273',
+        ]);
+    }
 }
