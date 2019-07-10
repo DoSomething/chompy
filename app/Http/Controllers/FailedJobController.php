@@ -62,7 +62,7 @@ class FailedJobController extends Controller
     public function show($id)
     {
         $data = \DB::table('failed_jobs')->where('id', '=', $id)->get();
-        if (!isset($data[0])) {
+        if (! isset($data[0])) {
             abort(404);
         }
 
@@ -80,11 +80,8 @@ class FailedJobController extends Controller
      */
     public function destroy($id)
     {
-        info('Deleting job '.$id);
-        $exitCode = Artisan::call('queue:forget', [
-            'id' => [$id]
-        ]);
-        info('exitCode '.$exitCode);
+        $exitCode = Artisan::call('queue:forget', ['id' => $id]);
+        info('Forgetting job:'.$id.' exitCode:'.$exitCode);
 
         return redirect('failed-jobs')
             ->with('status', 'Deleted job '.$id.' with exit code '.$exitCode.'.');
