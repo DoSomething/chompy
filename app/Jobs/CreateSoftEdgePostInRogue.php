@@ -74,4 +74,14 @@ class CreateSoftEdgePostInRogue implements ShouldQueue
             'campaign_target_district' => $email['campaign_target_district'],
         ]);
     }
+
+    /**
+     * Returns the parameters passed to this job.
+     *
+     * @return array
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
+    }
 }
