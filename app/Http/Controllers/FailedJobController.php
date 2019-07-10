@@ -3,6 +3,7 @@
 namespace Chompy\Http\Controllers;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Artisan;
 
 class FailedJobController extends Controller
 {
@@ -55,6 +56,7 @@ class FailedJobController extends Controller
     /**
      * Display a failed job.
      *
+     * @param int $id
      * @return Response
      */
     public function show($id)
@@ -64,5 +66,23 @@ class FailedJobController extends Controller
         $this->addParsedPropertiesToFailedJob($failedJob);
 
         return view('pages.failed-jobs.show', ['data' => $failedJob]);
+    }
+
+    /**
+     * Delete a failed job.
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function destroy($id)
+    {
+        info('Deleting job '.$id);
+        $exitCode = Artisan::call('queue:forget', [
+            'id' => [$id]
+        ]);
+        info('exitCode '.$exitCode);
+
+        return redirect('failed-jobs')
+            ->with('status', 'Deleted job '.$id.' with exit code '.$exitCode.'.');
     }
 }

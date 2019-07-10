@@ -3,7 +3,9 @@
 @section('main_content')
 
 <div>
-  <form>
+  <form action={{ url()->current() }} method="post">
+    {{csrf_field()}}
+    @method('delete')
     <div class="form-group row">
       <label class="col-sm-3 col-form-label">Failed at</label>
       <div class="col-sm-9">{{$data->failed_at}}</div>
@@ -24,6 +26,11 @@
     <div class="form-group row">
       <label class="col-sm-3 col-form-label">Exception</label>
       <div class="col-sm-9">{{$data->exception}}</div>
+    </div>
+     <div class="form-group row">
+        <div class="col-sm-9 col-sm-offset-3">
+          <input type="submit" class="btn btn-danger" value="Delete">
+        </div>   
     </div>
   </form>
 </div>
