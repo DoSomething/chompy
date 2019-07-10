@@ -62,6 +62,10 @@ class FailedJobController extends Controller
     public function show($id)
     {
         $data = \DB::table('failed_jobs')->where('id', '=', $id)->get();
+        if (!isset($data[0])) {
+            abort(404);
+        }
+
         $failedJob = $data[0];
         $this->addParsedPropertiesToFailedJob($failedJob);
 
