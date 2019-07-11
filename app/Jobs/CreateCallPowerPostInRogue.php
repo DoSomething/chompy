@@ -37,8 +37,16 @@ class CreateCallPowerPostInRogue implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
+        $mobile = $this->parameters['mobile'];
+
+        if (is_anonymous_mobile($mobile)) {
+            info('Cannot import phone call for anonymous mobile '.$mobile);
+
+            return;
+        }
+
         // Using the mobile number, get or create a northstar_id.
-        $user = $this->getOrCreateUser($this->parameters['mobile']);
+        $user = $this->getOrCreateUser($mobile);
 
         // Using the callpower_campaign_id, get the action id from Rogue.
         $actionId = $rogue->getActionIdFromCallPowerCampaignId($this->parameters['callpower_campaign_id']);
