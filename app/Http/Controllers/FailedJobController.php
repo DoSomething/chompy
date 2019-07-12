@@ -3,6 +3,7 @@
 namespace Chompy\Http\Controllers;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Artisan;
 
 class FailedJobController extends Controller
 {
@@ -30,7 +31,7 @@ class FailedJobController extends Controller
         $failedJob->commandName = $json->data->commandName;
         $failedJob->errorMessage = Str::limit($failedJob->exception, 255);
 
-        if ($failedJob->commandName === 'Chompy\Jobs\CreateCallPowerPostInRogue') {
+        if (Str::contains($failedJob->commandName, 'CallPower') || Str::contains($failedJob->commandName, 'SoftEdge')) {
             $command = unserialize($json->data->command);
             $failedJob->parameters = $command->getParameters();
         }
@@ -55,14 +56,34 @@ class FailedJobController extends Controller
     /**
      * Display a failed job.
      *
+     * @param int $id
      * @return Response
      */
     public function show($id)
     {
         $data = \DB::table('failed_jobs')->where('id', '=', $id)->get();
+        if (! isset($data[0])) {
+            abort(404);
+        }
+
         $failedJob = $data[0];
         $this->addParsedPropertiesToFailedJob($failedJob);
 
         return view('pages.failed-jobs.show', ['data' => $failedJob]);
+    }
+
+    /**
+     * Delete a failed job.
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function destroy($id)
+    {
+        $exitCode = Artisan::call('queue:forget', ['id' => $id]);
+        info('Forgetting job:'.$id.' exitCode:'.$exitCode);
+
+        return redirect('failed-jobs')
+            ->with('status', 'Deleted job '.$id.' (exit code '.$exitCode.').');
     }
 }
