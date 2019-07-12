@@ -60,17 +60,6 @@ class ImportFile implements ShouldQueue
     }
 
     /**
-     * Get the tags that should be assigned to the job.
-     * TODO: Is this used anywhere?
-     *
-     * @return array
-     */
-    public function tags()
-    {
-        return [$this->importType];
-    }
-
-    /**
      * Fetch records from the filepath.
      *
      * @return array
