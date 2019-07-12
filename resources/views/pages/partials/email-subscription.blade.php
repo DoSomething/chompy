@@ -1,8 +1,13 @@
 <div class="form-group">
     <h1>Email subscription</h1>
     <p class="lead">
-      Creates/updates users from uploaded CSV, expecting <code>email</code> and <code>first_name</code> column headers.
+      Creates or updates users and their email subscriptions per uploaded CSV.
     </p>
+    <p>Columns:</p>
+    <ul>
+      <li><code>email</code> - required</li>
+      <li><code>first_name</code> - optional</li>
+    </ul>
 </div>
 <h3>Users</h3>
 <div class="form-group row">

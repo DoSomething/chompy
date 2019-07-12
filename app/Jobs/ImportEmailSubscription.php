@@ -16,13 +16,13 @@ class ImportEmailSubscription implements ShouldQueue
     /**
      * The email to subscribe.
      *
-     * @var array
+     * @var string
      */
     protected $email;
     /**
      * The first name of the user to subscribe.
      *
-     * @var array
+     * @var string
      */
     protected $first_name;
     /**
@@ -41,15 +41,15 @@ class ImportEmailSubscription implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param string $email
+     * @param array $record
      * @param string $sourceDetail
      * @param array $emailSubscriptionTopics
      * @return void
      */
-    public function __construct($email, $firstName, $sourceDetail, $emailSubscriptionTopics)
+    public function __construct($record, $sourceDetail, $emailSubscriptionTopics)
     {
-        $this->email = $email;
-        $this->first_name = $firstName;
+        $this->email = $record['email'];
+        $this->first_name = isset($record['first_name']) ? $record['first_name'] : null;
         $this->source_detail = $sourceDetail;
         $this->email_subscription_topics = $emailSubscriptionTopics;
     }
