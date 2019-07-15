@@ -1,7 +1,7 @@
 <div class="form-group">
     <h1>Rock The Vote</h1>
     <p class="lead">
-      Creates/updates users and their voter registration post from uploaded Rock The Vote CSV.
+      Creates or updates users and their voter registration post per uploaded Rock The Vote CSV.
     </p>
     </p>
 </div>

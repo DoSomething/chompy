@@ -60,17 +60,6 @@ class ImportFile implements ShouldQueue
     }
 
     /**
-     * Get the tags that should be assigned to the job.
-     * TODO: Is this used anywhere?
-     *
-     * @return array
-     */
-    public function tags()
-    {
-        return [$this->importType];
-    }
-
-    /**
      * Fetch records from the filepath.
      *
      * @return array
@@ -107,7 +96,7 @@ class ImportFile implements ShouldQueue
                 ImportRockTheVoteRecord::dispatch($record);
             }
             if ($this->importType === ImportType::$emailSubscription) {
-                ImportEmailSubscription::dispatch($record['email'], $record['first_name'], $this->importOptions['source_detail'], $this->importOptions['email_subscription_topics']);
+                ImportEmailSubscription::dispatch($record, $this->importOptions['source_detail'], $this->importOptions['email_subscription_topics']);
             }
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
         }
