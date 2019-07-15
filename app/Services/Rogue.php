@@ -112,7 +112,7 @@ class Rogue extends RestApiClient
 
         if (empty($action['data'])) {
             info('action id not found for CallPower campaign id: ' . $callpowerCampaignId);
-            abort(500, 'Unable to get action data for CallPower campaign id: ' . $callpowerCampaignId);
+            throw new Exception('Unable to get action data for CallPower campaign id: ' . $callpowerCampaignId, 500);
         }
 
         return $action['data'][0]['id'];
