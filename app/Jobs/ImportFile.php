@@ -101,6 +101,9 @@ class ImportFile implements ShouldQueue
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
         }
 
+        // Now that we've chomped, delete the import file.
+        Storage::delete($this->filepath);
+
         event(new LogProgress('Done!', 'general'));
     }
 }
