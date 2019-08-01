@@ -177,11 +177,6 @@ return [
         /*
          * Package Service Providers...
          */
-        Laravel\Tinker\TinkerServiceProvider::class,
-
-        /*
-         * DoSomething Service Providers...
-         */
         DoSomething\Gateway\Laravel\GatewayServiceProvider::class,
 
         /*
