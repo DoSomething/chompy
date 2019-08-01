@@ -202,7 +202,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $newStatus = $this->getVoterRegistrationStatusChange($user->voter_registration_status, $this->record->voter_registration_status);
 
             if ($newStatus) {
-                $this->updateUser($user, [ 'voter_registration_status' => $newStatus ]);
+                $this->updateUser($user, ['voter_registration_status' => $newStatus]);
             }
         } else {
             $user = $this->createUser($this->record);
