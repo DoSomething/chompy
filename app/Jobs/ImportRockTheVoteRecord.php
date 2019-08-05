@@ -199,9 +199,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         $user = $this->getUser($this->record);
         if ($user && $user->id) {
-            $this->updateUser($user, [
-                'voter_registration_status' => $this->record->voter_registration_status,
-            ]);
+            $newStatus = $this->getVoterRegistrationStatusChange($user->voter_registration_status, $this->record->voter_registration_status);
+
+            if ($newStatus) {
+                $this->updateUser($user, ['voter_registration_status' => $newStatus]);
+            }
         } else {
             $user = $this->createUser($this->record);
             $this->sendUserPasswordResetIfSubscribed($user);
@@ -310,12 +312,16 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     private function getVoterRegistrationStatusChange($currentStatus, $newStatus)
     {
+        // List includes status values expected from RTV as well as
+        // values potentially assigned from within Northstar.
         $statusHierarchy = [
             'uncertain',
             'ineligible',
+            'unregistered',
             'confirmed',
             'register-OVR',
             'register-form',
+            'registration_complete',
         ];
 
         $indexOfCurrentStatus = array_search($currentStatus, $statusHierarchy);
