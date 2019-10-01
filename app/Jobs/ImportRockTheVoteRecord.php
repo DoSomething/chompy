@@ -154,7 +154,6 @@ class RockTheVoteRecord
             'Started registration',
             'Finish with State',
             'Status',
-            'Email address',
             'Home zip code',
         ];
 
