@@ -40,7 +40,7 @@ class RockTheVoteRecord
         }
 
         $this->user_source_detail = $config['user']['source_detail'];
-        
+
         // Note: Not a typo, this column name does not have the trailing question mark.
         $smsOptIn = $record['Opt-in to Partner SMS/robocall'];
         if ($smsOptIn && $this->mobile) {
