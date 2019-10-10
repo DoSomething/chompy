@@ -38,6 +38,9 @@ class RockTheVoteRecord
                 $this->email_subscription_topics = explode(',', $config['user']['email_subscription_topics']);
             }
         }
+
+        $this->user_source_detail = $config['user']['source_detail'];
+        
         // Note: Not a typo, this column name does not have the trailing question mark.
         $smsOptIn = $record['Opt-in to Partner SMS/robocall'];
         if ($smsOptIn && $this->mobile) {
@@ -290,6 +293,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         if (isset($record->sms_status)) {
             $userData['sms_status'] = $record->sms_status;
+        }
+
+        if (isset($record->user_source_detail)) {
+            $userData['source_detail'] = $record->user_source_detail;
+            $userData['source'] = config('services.northstar.client_credentials.client_id');
         }
 
         $user = gateway('northstar')->asClient()->createUser($userData);
