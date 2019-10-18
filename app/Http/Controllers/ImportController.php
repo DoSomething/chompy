@@ -49,9 +49,9 @@ class ImportController extends Controller
         ];
         if ($importType === ImportType::$emailSubscription) {
             $rules['source-detail'] = 'required';
-            $rules['topics'] = 'required';
+            $rules['topic'] = 'required';
             $importOptions = [
-                'email_subscription_topics' => $request->input('topics'),
+                'email_subscription_topic' => $request->input('topic'),
                 'source_detail' => $request->input('source-detail'),
             ];
         }

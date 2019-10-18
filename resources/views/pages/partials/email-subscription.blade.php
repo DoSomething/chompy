@@ -20,11 +20,11 @@
   </div>
 </div>
 <div class="form-group row">
-  <label for="source-detail" class="col-sm-3 col-form-label" required>Subscription topics</label>
+  <label for="source-detail" class="col-sm-3 col-form-label" required>Subscription topic</label>
   <div class="col-sm-9">
     @foreach ($config['topics'] as $topic => $config)
       <div class="form-check">
-        <input class="form-check-input" name="topics[]" type="checkbox" value="{{ $topic }}" id="community">
+        <input class="form-check-input" name="topic" type="radio" value="{{ $topic }}" id="community">
         <label class="form-check-label" for="{{ $topic }}">
           {{ $topic }}
           @isset($config['reset'])
