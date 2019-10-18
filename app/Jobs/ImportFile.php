@@ -96,7 +96,7 @@ class ImportFile implements ShouldQueue
                 ImportRockTheVoteRecord::dispatch($record);
             }
             if ($this->importType === ImportType::$emailSubscription) {
-                ImportEmailSubscription::dispatch($record, $this->importOptions['source_detail'], $this->importOptions['email_subscription_topics']);
+                ImportEmailSubscription::dispatch($record, $this->importOptions['source_detail'], $this->importOptions['email_subscription_topic']);
             }
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
         }

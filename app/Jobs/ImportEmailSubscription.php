@@ -32,11 +32,11 @@ class ImportEmailSubscription implements ShouldQueue
      */
     protected $source_detail;
     /**
-     * The email subscription topics to add.
+     * The email subscription topic to add.
      *
      * @var array
      */
-    protected $email_subscription_topics;
+    protected $email_subscription_topic;
 
     /**
      * Create a new job instance.
@@ -46,12 +46,12 @@ class ImportEmailSubscription implements ShouldQueue
      * @param array $emailSubscriptionTopics
      * @return void
      */
-    public function __construct($record, $sourceDetail, $emailSubscriptionTopics)
+    public function __construct($record, $sourceDetail, $emailSubscriptionTopic)
     {
         $this->email = $record['email'];
         $this->first_name = isset($record['first_name']) ? $record['first_name'] : null;
         $this->source_detail = $sourceDetail;
-        $this->email_subscription_topics = $emailSubscriptionTopics;
+        $this->email_subscription_topic = $emailSubscriptionTopic;
     }
 
     /**
@@ -99,7 +99,7 @@ class ImportEmailSubscription implements ShouldQueue
             'source' => config('services.northstar.client_credentials.client_id'),
             'source_detail' => $this->source_detail,
             'email_subscription_status' => true,
-            'email_subscription_topics' => $this->email_subscription_topics,
+            'email_subscription_topics' => [$this->email_subscription_topic],
         ]);
 
         if (! $user->id) {
@@ -118,7 +118,7 @@ class ImportEmailSubscription implements ShouldQueue
     private function updateUser($user)
     {
         $existingTopics = ! empty($user->email_subscription_topics) ? $user->email_subscription_topics : [];
-        $newTopics = array_unique(array_merge($existingTopics, $this->email_subscription_topics));
+        $newTopics = array_unique(array_merge($existingTopics, [$this->email_subscription_topic]));
 
         gateway('northstar')->asClient()->updateUser($user->id, [
             'first_name' => $this->first_name,
@@ -136,20 +136,14 @@ class ImportEmailSubscription implements ShouldQueue
     private function sendUserPasswordReset($user)
     {
         $logParams = ['user' => $user->id];
-        $newsTopic = 'news';
-
-        if (! in_array($newsTopic, $user->email_subscription_topics)) {
-            info('New user is not subscribed to news, no email sent.', $logParams);
-
-            return;
-        }
+        $selectedTopic = $this->email_subscription_topic;
 
         $config = ImportType::getConfig(ImportType::$emailSubscription);
-        $newsTopicResetConfig = $config['topics'][$newsTopic]['reset'];
-        $resetType = $newsTopicResetConfig['type'];
+        $selectedTopicResetConfig = $config['topics'][$selectedTopic]['reset'];
+        $resetType = $selectedTopicResetConfig['type'];
         $logParams['type'] = $resetType;
 
-        if ($newsTopicResetConfig['enabled'] !== 'true') {
+        if ($selectedTopicResetConfig['enabled'] !== 'true') {
             info('Reset email is disabled. Would have sent reset email', $logParams);
 
             return;

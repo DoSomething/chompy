@@ -3,15 +3,30 @@
 return [
     'email_subscription' => [
         'topics' => [
-            'community' => [],
-            'lifestyle' => [],
+            'community' => [
+                'reset' =>  [
+                  'enabled' => env('COMMUNITY_SUBSCRIPTION_RESET_ENABLED', 'true'),
+                  'type' => env('COMMUNITY_SUBSCRIPTION_RESET_TYPE', 'wyd-activate-account'),
+                ],
+            ],
+            'lifestyle' => [
+                'reset' =>  [
+                  'enabled' => env('LIFESTYLE_SUBSCRIPTION_RESET_ENABLED', 'true'),
+                  'type' => env('LIFESTYLE_SUBSCRIPTION_RESET_TYPE', 'boost-activate-account'),
+                ],
+            ],
             'news' => [
                 'reset' =>  [
                   'enabled' => env('NEWS_SUBSCRIPTION_RESET_ENABLED', 'true'),
                   'type' => env('NEWS_SUBSCRIPTION_RESET_TYPE', 'breakdown-activate-account'),
                 ],
             ],
-            'scholarships' => [],
+            'scholarships' => [
+                'reset' =>  [
+                  'enabled' => env('SCHOLARSHIPS_SUBSCRIPTION_RESET_ENABLED', 'true'),
+                  'type' => env('SCHOLARSHIPS_SUBSCRIPTION_RESET_TYPE', 'pays-to-do-good-activate-account'),
+                ],
+            ],
         ],
     ],
     'rock_the_vote' => [
