@@ -120,11 +120,13 @@ class ImportEmailSubscription implements ShouldQueue
         $existingTopics = ! empty($user->email_subscription_topics) ? $user->email_subscription_topics : [];
         $newTopics = array_unique(array_merge($existingTopics, [$this->email_subscription_topic]));
 
-        gateway('northstar')->asClient()->updateUser($user->id, [
+        // Update the user, filtering out null values so we don't unset an existing 'first_name'.
+        gateway('northstar')->asClient()->updateUser($user->id, array_filter([
             'first_name' => $this->first_name,
             'email_subscription_status' => true,
             'email_subscription_topics'  => $newTopics,
-        ]);
+        ]));
+
         info('Subscribed existing user', ['user' => $user->id]);
     }
 
