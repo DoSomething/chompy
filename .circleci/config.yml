@@ -42,7 +42,7 @@ jobs:
           paths:
             - node_modules
             - ~/.cache/Cypress
-      - run: npm run build
+      - run: npm run production
       - run: php artisan key:generate
       - run:
           name: run phpunit tests
