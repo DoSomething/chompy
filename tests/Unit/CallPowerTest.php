@@ -24,7 +24,7 @@ class CallPowerTest extends TestCase
         $this->rogueMock->shouldReceive('createPost');
 
         // Create a post with completed as the status.
-        $response = $this->withChompyApiKey()->json('POST', 'api/v1/callpower/call', [
+        $response = $this->withCallPowerApiKey()->json('POST', 'api/v1/callpower/call', [
             'mobile' => '1234567891',
             'callpower_campaign_id' => '1',
             'status' => 'completed',
@@ -55,7 +55,7 @@ class CallPowerTest extends TestCase
         $this->rogueMock->shouldReceive('createPost');
 
         // Create a post with completed as the status.
-        $response = $this->withChompyApiKey()->json('POST', 'api/v1/callpower/call', [
+        $response = $this->withCallPowerApiKey()->json('POST', 'api/v1/callpower/call', [
             'mobile' => '1234567891',
             'callpower_campaign_id' => '1',
             'status' => 'busy',
