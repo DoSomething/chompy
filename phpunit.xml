@@ -27,5 +27,8 @@
         <env name="CACHE_DRIVER" value="array"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="QUEUE_DRIVER" value="sync"/>
+        <env name="DB_DATABASE" value="chompy_test"/>
+        <env name="CALLPOWER_API_KEY" value="secret1"/>
+        <env name="SOFTEDGE_API_KEY" value="secret1"/>
     </php>
 </phpunit>
