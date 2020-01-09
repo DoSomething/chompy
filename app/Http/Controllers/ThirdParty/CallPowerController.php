@@ -38,10 +38,10 @@ class CallPowerController extends Controller
         ]);
 
         Log::debug('sending job to create post with details: ' . json_encode([
-                'mobile' => $request['mobile'],
-                'callpower_campaign_id' => $request['callpower_campaign_id'],
-                'status' => $request['status'],
-            ])
+            'mobile' => $request['mobile'],
+            'callpower_campaign_id' => $request['callpower_campaign_id'],
+            'status' => $request['status'],
+        ])
         );
 
         // Send to queued job.
