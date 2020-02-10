@@ -4,7 +4,7 @@ We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` po
 
 See [VR Technical Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
 
-## Status Translation Rules
+## Voter Registration Status
 
 Ultimately, there are 4 `post` statuses we want to capture for `voter-reg` posts for Rock the Vote (**Note** RTV doesn't have a `confirmed` status like TurboVote did):
 
@@ -34,7 +34,7 @@ Because we're pulling some of the columns into the post details, data will then 
 
 For example: If a user has a `confirmed` status already from a TV import, and the RTV file suggests that it should be `uncertain`, do not update.
 
-We’ve established this hierarchy because each time a user interacts with the RTV form a new row is created in the CSV. There are the edge cases when a user is chased to finish their registration that they would be interacting with the same row (thus the "steps"). The hierarchy is the simplest approach to dealing with varying statuses, but we anticipate some edge cases that we may need to deal with as they come up.
+We’ve established this hierarchy because each time a user interacts with the RTV form, a new row is created in the CSV. There are the edge cases when a user is chased to finish their registration that they would be interacting with the same row (thus the "steps"). The hierarchy is the simplest approach to dealing with varying statuses, but we anticipate some edge cases that we may need to deal with as they come up.
 
 Here’s one example:
 
@@ -143,15 +143,14 @@ Signup Example:
 }
 ```
 
-## Other Important Information
+## Notes
 
 - The `details` on the post will have the row of information available for data to use.
 - The `submission_created_at` date is when the importer ran. Details about when the registration was created/updated are in the `source_details`.
 - All of these signups will have a `source` of `importer-client` (this is how messaging is suppressed in C.io)
 - All of these posts have a `type` = `voter-reg`
 - The month that the registration came in is what informs the `action` column (e.g., february-2018-rockthevote)
-- For now, if not available in the referral, we will attribute every`voter-reg` post to the Grab the Mic campaign to maintain a 1:1 relationship. This is what we have done with TurboVote.
-- Quasar will be pushed these posts from Rogue but if Data needs to do a deeper analysis, they will use the raw RTV CSV to do that work.
+- All posts are created for a single Action ID, which is set via config variable. We previously would pass Campaign/Run IDs as query parameters to upsert a  `voter-reg` post for.
 - If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants:
   See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
 
