@@ -1,31 +1,10 @@
 # Rock The Vote
 
-## Context
+We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` posts. We use the `Tracking Code` column provided to determine whether a voter registration (VR) was from a member's online VR drive page.
 
-For our voter registration efforts, we've been using two platforms -- TurboVote (TV) and Rock the Vote (RTV). We've already [documented](https://github.com/DoSomething/chompy/wiki/TurboVote-Imports) and [done the work to import the TV file](https://github.com/DoSomething/chompy/pull/10) and now we need to do the same with the RTV file.
+See [VR Technical Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
 
-Here's what the referral code looks like in the RTV file (NS ID hidden) -- a major difference from the TV referral code is that it some also includes `iframe?r=`:
-
-![screen shot 2018-06-07 at 10 47 55 am](https://user-images.githubusercontent.com/2658867/41107619-b4133186-6a40-11e8-8439-7c7b8df780d0.png)
-
-Similar to the TV file, the referral code:
-
-- Might be populated
-- Might have NS ID
-- Might have a campaign ID, but no Run, vice versa, or have both
-- Might be a duplicate if a user returns again
-
-We want to import this CSV into Rogue as signups and posts so that these users can be served experiences based on their registration status, they can be messaged, and we can accurately report this information in Looker (and do deeper data analysis when needed).
-
-## Problem
-
-RTV records and Rogue posts do not have the same schema! We want to figure out how to store RTV records in Rogue so that other DoSomething Apps can get this information via the Rogue API and be able to serve this data to internal teams and serve customized user experiences based on a user’s registration status.
-
-## Solution
-
-[Use Chompy, our importer app](http://ds-importer-prod.herokuapp.com/import)!
-
-### Status Translation Rules
+## Status Translation Rules
 
 Ultimately, there are 4 `post` statuses we want to capture for `voter-reg` posts for Rock the Vote (**Note** RTV doesn't have a `confirmed` status like TurboVote did):
 
