@@ -155,13 +155,6 @@ Signup Example:
 - If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants:
   See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
 
-## Next Steps
-
-1.  Create this logic for RTV
-2.  Start importing!
-3.  Move post voter reg status onto NS profile
-4.  Coordinate w/ Marketing for email (weeklydo only) and sms suppression (no status filled)
-
 ## Open Questions
 
 1. How can we distinguish between TV and RTV import? Do we need to?
