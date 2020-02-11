@@ -1,8 +1,14 @@
 # Rock The Vote
 
-We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` posts. We use the `Tracking Code` column provided to determine whether a voter registration (VR) was from a member's online VR drive page.
+We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` posts. We use the `Tracking Code` column provided to store referring source information of a voter registration (VR). See [VR Technical Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
 
-See [VR Technical Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
+## Overview
+
+The import is coded to upsert a single `voter-reg` type post for a user voter registration -- saving it to an action we set via config variable. This action is changed each election year, in order to track user registrations per election.
+
+For example, if a user registered to vote through DS in 2016, 2018, and 2020, they will have three different posts created because our import was configured for three different Action IDs in each of those election years.
+
+As another example, if a user registers to vote twice in 2020 (e.g. change of address), a single post is upserted for this year's action (two posts are not created).
 
 ## Voter Registration Status
 
@@ -13,7 +19,7 @@ Ultimately, there are 4 `post` statuses we want to capture for `voter-reg` posts
 - `ineligible` - User is ineligible to register for whatever reason
 - `uncertain` - We can not be certain about this user registration status
 
-This is the logic for how to determine what a `post` status should be.
+This is the logic for the RTV columns that our import inspects to determine what the `post` status should be.
 
 - If `status` is `complete` and `finish with state` is `no` --> `register-form`
 - If `status` is `complete` and `finish with state` is `yes` --> `register-OVR`
@@ -24,7 +30,7 @@ Because we're pulling some of the columns into the post details, data will then 
 
 ### Status Hierarchy
 
-**When a RTV CSV has multiple records _per user_ we use the following hierarchy to determine which status should be reported on the Rogue post. If when importing, there is an existing status per the campaign and user from any previous import (TV or RTV), follow the hierarchy. **
+If RTV CSV contains multiple records _for a single user_,  we use the following hierarchy to determine which status should be reported on their Rogue post:
 
 1. `register-form`
 2. `register-OVR`
@@ -34,9 +40,7 @@ Because we're pulling some of the columns into the post details, data will then 
 
 For example: If a user has a `confirmed` status already from a TV import, and the RTV file suggests that it should be `uncertain`, do not update.
 
-We’ve established this hierarchy because each time a user interacts with the RTV form, a new row is created in the CSV. There are the edge cases when a user is chased to finish their registration that they would be interacting with the same row (thus the "steps"). The hierarchy is the simplest approach to dealing with varying statuses, but we anticipate some edge cases that we may need to deal with as they come up.
-
-Here’s one example:
+We’ve established this hierarchy because each time a user interacts with the RTV form, a new row is created in the CSV. There are the edge cases when a user is chased to finish their registration that they would be interacting with the same row (thus the "steps"). Here’s one example:
 
 - User A completes the RTV form —> `register-form` status
 - User A, for whatever reason, starts the RTV form again and drops off --> `uncertain` status
