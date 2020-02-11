@@ -51,10 +51,11 @@ In this case, we would want to count the form completion (`register-form`). Itâ€
 
 If an existing User is found using the NS ID, email, or number, we attempt to update the user's `voter_registration_status` profile field based on the new status from the record.
 
-If there's an existing status on the user, we follow the same hierarchy rules established above. There are a few additional statuses we take into account:
+If there's an existing status on the user, we follow the same hierarchy rules established above but check for a few additional statuses:
 
-- `unregistered` which is a status that can be set when creating an account in Northstar which denotes that the user has not registered to vote.
-- `registration_complete` which is the status we assign to the profile when importing from RTV if the record's status is either `register-form` or `register-ovr`.
+- `unregistered` -- can be set when creating an account on the web, denoting that the user has not registered to vote.
+
+- `registration_complete` -- set from our RTV import if the record's status is either `register-form` or `register-ovr`.
 
 So the full hierarchy order taken into account when updating the profile is:
 
