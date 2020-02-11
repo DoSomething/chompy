@@ -1,6 +1,6 @@
 # Rock The Vote
 
-We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` posts. We use the `Tracking Code` column provided to store referring source information of a voter registration (VR). See [VR Technical Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
+We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` posts. We previously imported this data from TurboVote (TV) in 2016, 2018.  See [VR Tech Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
 
 ## Overview
 
@@ -19,7 +19,7 @@ Ultimately, there are 4 `post` statuses we want to capture for `voter-reg` posts
 - `ineligible` - User is ineligible to register for whatever reason
 - `uncertain` - We can not be certain about this user registration status
 
-This is the logic for the RTV columns that our import inspects to determine what the `post` status should be.
+This is the import logic used to determine what the `post` status should be, looking at the following RTV columns.
 
 - If `status` is `complete` and `finish with state` is `no` --> `register-form`
 - If `status` is `complete` and `finish with state` is `yes` --> `register-OVR`
@@ -150,12 +150,11 @@ Signup Example:
 
 ## Notes
 
-- The `details` on the post will have the row of information available for data to use.
+- Data uses the post `details` to determine `source` and `source_detail` used in voter registration reporting.
 - The `submission_created_at` date is when the importer ran. Details about when the registration was created/updated are in the `source_details`.
 - All of these signups will have a `source` of `importer-client` (this is how messaging is suppressed in C.io)
-- All of these posts have a `type` = `voter-reg`
-- The month that the registration came in is what informs the `action` column (e.g., february-2018-rockthevote)
-- All posts are created for a single Action ID, which is set via config variable. We previously would pass Campaign/Run IDs as query parameters to upsert a  `voter-reg` post for.
+- In early iterations of the import, the month that the registration came in would inform the `action` column (e.g., february-2018-rockthevote)
+- In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a  `voter-reg` post.
 - If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants:
   See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
 
