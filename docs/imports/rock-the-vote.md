@@ -103,51 +103,6 @@ if (in_array($rogueStatus, ['confirmed', 'register-form', 'register-OVR'])) {
 }
 ```
 
-## What This Looks Like In Rogue
-
-Post Example:
-
-```
-{
-    "id" : 467424,
-    "signup_id" : 9157041,
-    "campaign_id" : 8017, // from "Tracking Source"
-    "northstar_id" : "5af5xxxxxxxxxxxxxxxx0493", // user from "Tracking Source" (or new user)
-    "type" : "voter-reg", // same for all
-    "action" : "may-2018-rockthevote", // Month and Year of "Started Registration"
-    "quantity" : null,
-    "url" : null,
-    "text" : null,
-    "details": {"Tracking Source":"iframe?r=user:5af5xxxxxxxxxxxxxxxx0493,campaignID:7059,campaignRunID:8105,source:web,source_details:VoterBlockGeneralLYVC","Started registration":"2018-05-11 18:21:50 UTC","Finish with State":"No"}, // "Tracking Source", "Started registration", and "Finish with State".
-    "status" : "ineligible", // We use "Status" and "Finish with State" to compute this in "Status Translation Rules" above
-    "source" : "rock-the-vote", // same for all
-    "source_detail" : NULL, // source_details from "Tracking Source"
-    "created_at" : 2018-08-01 15:40:03, // Time of import
-    "updated_at" : 2018-08-01 15:40:03, // Time of import
-    "deleted_at" : null
-}
-```
-
-Signup Example:
-
-```
-{
-    "id" : 9359595,
-    "campaign_id" : 8017,
-    "campaign_run_id" : 8022,
-    "northstar_id" : "5af5xxxxxxxxxxxxxxxx0493",
-    "why_participated" : null,
-    "quantity" : null,
-    "quantity_pending" : null,
-    "source" : "rock-the-vote",
-    "source_detail" : NULL,
-    "details": {"Tracking Source":"iframe?r=user:5af5xxxxxxxxxxxxxxxx0493,campaignID:7059,campaignRunID:8105,source:web,source_details:VoterBlockGeneralLYVC","Started registration":"2018-05-11 18:21:50 UTC","Finish with State":"No"},
-    "created_at" : 2018-08-01 15:40:03,
-    "updated_at" : 2018-08-01 15:40:03,
-    "deleted_at" : null
-}
-```
-
 ## Notes
 
 - Data uses the post `details` to determine `source` and `source_detail` used in voter registration reporting.
