@@ -112,9 +112,3 @@ if (in_array($rogueStatus, ['confirmed', 'register-form', 'register-OVR'])) {
 - In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a `voter-reg` post.
 - If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants:
   See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
-
-## Open Questions
-
-1. How can we distinguish between TV and RTV import? Do we need to?
-2. RTV has more birthdays in it, can we use that on the NS profile when we create accounts? (TV didn't provide this)
-3. We've been having some Chompy validation issues w/ the TV import -- is this the good time to tackle those things? If so, is a running list the best way of communicating some of the things we've seen in the referral column? There's one specific referral that's different and it's just `ads` -- these are from Google ads and the only way they could set up tracking that Google likes. Would love to talk through best way to deal with these...if it's something unique!
