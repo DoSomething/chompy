@@ -1,10 +1,10 @@
 # Rock The Vote
 
-We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` posts. We previously imported this data from TurboVote (TV) in 2016, 2018.  See [VR Tech Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
+We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` posts. We previously imported this data from TurboVote (TV) in 2016, 2018. See [VR Tech Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
 
 ## Overview
 
-The import is coded to upsert a single `voter-reg` type post for a user voter registration -- saving it to an action we set via config variable. This action is changed each election year, in order to track user registrations per election.
+The import is coded to upsert a single `voter-reg` type post for a user voter registration -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
 
 For example, if a user registered to vote through DS in 2016, 2018, and 2020, they will have three different posts created because our import was configured for three different Action IDs in each of those election years.
 
@@ -30,7 +30,7 @@ Because we're pulling some of the columns into the post details, data will then 
 
 ### Status Hierarchy
 
-If RTV CSV contains multiple records _for a single user_,  we use the following hierarchy to determine which status should be reported on their Rogue post:
+Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy to determine which status should be reported on their Rogue post if a user post already exists for the import Action:
 
 1. `register-form`
 2. `register-OVR`
@@ -109,7 +109,7 @@ if (in_array($rogueStatus, ['confirmed', 'register-form', 'register-OVR'])) {
 - The `submission_created_at` date is when the importer ran. Details about when the registration was created/updated are in the `source_details`.
 - All of these signups will have a `source` of `importer-client` (this is how messaging is suppressed in C.io)
 - In early iterations of the import, the month that the registration came in would inform the `action` column (e.g., february-2018-rockthevote)
-- In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a  `voter-reg` post.
+- In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a `voter-reg` post.
 - If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants:
   See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
 
