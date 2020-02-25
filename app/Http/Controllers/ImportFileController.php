@@ -5,11 +5,12 @@ namespace Chompy\Http\Controllers;
 use Carbon\Carbon;
 use Chompy\ImportType;
 use League\Csv\Reader;
-use Chompy\Jobs\ImportFile;
 use Illuminate\Http\Request;
+use Chompy\Models\ImportFile;
+use Chompy\Jobs\ImportFileRecords;
 use Illuminate\Support\Facades\Storage;
 
-class ImportController extends Controller
+class ImportFileController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -27,7 +28,7 @@ class ImportController extends Controller
      *
      * @param string $importType
      */
-    public function show($importType)
+    public function create($importType)
     {
         return view('pages.import', [
             'importType' => $importType,
@@ -68,9 +69,21 @@ class ImportController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        ImportFile::dispatch($path, $importType, $importOptions)->delay(now()->addSeconds(3));
+        ImportFileRecords::dispatch($path, $importType, $importOptions)->delay(now()->addSeconds(3));
 
         return redirect('import/'.$importType)
             ->with('status', 'Queued '.$path.' for import.');
+    }
+
+    /**
+     * Display a listing of import files.
+     *
+     * @return Response
+     */
+    public function index()
+    {
+        $data = ImportFile::orderBy('id', 'desc')->paginate(50);
+
+        return view('pages.import-files.index', ['data' => $data]);
     }
 }

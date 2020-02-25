@@ -11,9 +11,12 @@
 |
 */
 
-$router->get('import/{importType}', 'ImportController@show')->name('import.show');
-$router->post('import/{importType}', 'ImportController@store')->name('import.store');
 Route::resource('failed-jobs', 'FailedJobController');
+
+$router->get('import/{importType}', 'ImportFileController@create')->name('import.show');
+$router->post('import/{importType}', 'ImportFileController@store')->name('import.store');
+
+Route::resource('import-files', 'ImportFileController', ['only' => 'index']);
 
 Route::get('/', function () {
     return view('pages.home');
