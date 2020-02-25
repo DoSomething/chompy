@@ -5,6 +5,7 @@ namespace Chompy\Jobs;
 use Chompy\ImportType;
 use League\Csv\Reader;
 use Chompy\Services\Rogue;
+use Chompy\Models\ImportFile;
 use Illuminate\Bus\Queueable;
 use Chompy\Events\LogProgress;
 use Illuminate\Support\Facades\Storage;
@@ -12,7 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
-class ImportFile implements ShouldQueue
+class ImportFileRecords implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
@@ -90,6 +91,15 @@ class ImportFile implements ShouldQueue
         info('STARTING '.$this->importType.' IMPORT', ['options' => print_r($this->importOptions, true)]);
 
         $records = $this->getRecords($this->filepath);
+
+        $importFile = new ImportFile([
+            'filepath' => $this->filepath,
+            'import_type' => $this->importType,
+            'row_count' => $this->totalRecords,
+            'user_id' => \Auth::user()->northstar_id,
+        ]);
+
+        $importFile->save();
 
         foreach ($records as $offset => $record) {
             if ($this->importType === ImportType::$rockTheVote) {
