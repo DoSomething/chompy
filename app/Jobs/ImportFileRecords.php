@@ -91,12 +91,13 @@ class ImportFileRecords implements ShouldQueue
         info('STARTING '.$this->importType.' IMPORT', ['options' => print_r($this->importOptions, true)]);
 
         $records = $this->getRecords($this->filepath);
+        $user = \Auth::user();
 
         $importFile = new ImportFile([
             'filepath' => $this->filepath,
             'import_type' => $this->importType,
             'row_count' => $this->totalRecords,
-            'user_id' => \Auth::user()->northstar_id,
+            'user_id' => $user->northstar_id,
         ]);
 
         $importFile->save();
@@ -105,7 +106,7 @@ class ImportFileRecords implements ShouldQueue
             if ($this->importType === ImportType::$rockTheVote) {
                 ImportRockTheVoteRecord::dispatch($record);
             }
-            if ($this->importType === ImportType::$emailSubscription) {
+            elseif ($this->importType === ImportType::$emailSubscription) {
                 ImportEmailSubscription::dispatch($record, $this->importOptions['source_detail'], $this->importOptions['email_subscription_topic']);
             }
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
