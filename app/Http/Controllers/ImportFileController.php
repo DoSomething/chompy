@@ -84,8 +84,6 @@ class ImportFileController extends Controller
     {
         $data = ImportFile::orderBy('id', 'desc')->paginate(50);
 
-        info($data);
-
         return view('pages.import-files.index', ['data' => $data]);
     }
 }
