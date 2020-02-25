@@ -15,10 +15,10 @@ class CreateImportFilesTable extends Migration
     {
         Schema::create('import_files', function (Blueprint $table) {
             $table->increments('id');
-            $table->text('filepath');
-            $table->text('user_id');
+            $table->string('user_id');
+            $table->string('import_type')->index();
+            $table->string('filepath');
             $table->integer('row_count');
-            $table->text('import_type')->index();
             $table->timestamps();
         });
     }
