@@ -5,13 +5,10 @@ namespace Chompy\Http\Controllers;
 use Carbon\Carbon;
 use Chompy\ImportType;
 use League\Csv\Reader;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Chompy\Models\ImportFile;
 use Chompy\Jobs\ImportFileRecords;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
-
 
 class ImportFileController extends Controller
 {
