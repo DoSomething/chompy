@@ -13,7 +13,10 @@
 
 $router->get('import/{importType}', 'ImportController@show')->name('import.show');
 $router->post('import/{importType}', 'ImportController@store')->name('import.store');
+
 Route::resource('failed-jobs', 'FailedJobController');
+
+Route::resource('import-files', 'ImportFileController');
 
 Route::get('/', function () {
     return view('pages.home');
