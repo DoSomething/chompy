@@ -4,23 +4,32 @@
 
 <div>
     <table class="table">
-    @foreach($data as $key => $row)
-        <tr class="row">
-          <td class="col-md-2">
-            {{$row->id}}
-          </td>
-          <td class="col-md-4">
-            <strong>{{$row->created_at}}</strong>
-          </td>
-          <td class="col-md-3">
-            {{$row->import_type}}
-          </td> 
-          <td class="col-md-3">
-            {{$row->row_count}}
-          </td>     
-        </tr>
-    @endforeach
+        <thead>
+          <tr class="row">
+            <th class="col-md-3">Uploaded at</th>
+            <th class="col-md-3">Uploaded by</th>
+            <th class="col-md-3">Import type</th>
+            <th class="col-md-3">Row count</th>
+          </tr>
+        </thead>
+        @foreach($data as $key => $importFile)
+            <tr class="row">
+              <td class="col-md-3">
+                <strong>{{$importFile->created_at}}</strong>
+              </td>
+              <td class="col-md-3">
+                {{$importFile->user_id}}
+              </td>
+              <td class="col-md-3">
+                {{$importFile->import_type}}
+              </td> 
+              <td class="col-md-3">
+                {{$importFile->row_count}}
+              </td>     
+            </tr>
+        @endforeach
     </table>
+    {{$data->links()}}
 </div>
 
 @stop

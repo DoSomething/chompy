@@ -26,7 +26,7 @@ class ImportFileController extends Controller
      */
     public function index()
     {
-        $data = ImportFile::paginate(50);
+        $data = ImportFile::orderBy('id', 'desc')->paginate(50);
 
         info($data);
 
