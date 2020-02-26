@@ -37,16 +37,16 @@ class RockTheVoteLog extends Model
     /**
      * Log sanitized Rock The Vote data for given user and import file.
      */
-    static function createFromRecord($record, $user, $importFileId)
+    public static function createFromRecord($record, $user, $importFileId)
     {
         return static::firstOrCreate([
-           'import_file_id' => $importFileId,
-           'finish_with_state' => $record->rtv_finish_with_state,
-           'pre_registered' => $record->rtv_pre_registered,
-           'started_registration' => $record->rtv_started_registration,
-           'status' => $record->rtv_status,
-           'tracking_source' => $record->rtv_tracking_source,
-           'user_id' => $user->id,
+            'import_file_id' => $importFileId,
+            'finish_with_state' => $record->rtv_finish_with_state,
+            'pre_registered' => $record->rtv_pre_registered,
+            'started_registration' => $record->rtv_started_registration,
+            'status' => $record->rtv_status,
+            'tracking_source' => $record->rtv_tracking_source,
+            'user_id' => $user->id,
         ]);
     }
 }
