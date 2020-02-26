@@ -7,11 +7,12 @@ use Chompy\ImportType;
 use Chompy\Services\Rogue;
 use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
+use Chompy\Models\RockTheVoteRecord;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
-class RockTheVoteRecord
+class ParsedRockTheVoteRecord
 {
     /**
      * Parses values to send to DS API from given CSV record, using given config.
@@ -21,6 +22,7 @@ class RockTheVoteRecord
      */
     public function __construct($record, $config)
     {
+        // User PII.
         $this->addr_street1 = $record['Home address'];
         $this->addr_street2 = $record['Home unit'];
         $this->addr_city = $record['Home city'];
@@ -30,6 +32,12 @@ class RockTheVoteRecord
         $this->first_name = $record['First name'];
         $this->last_name = $record['Last name'];
         $this->mobile = $record['Phone'];
+
+        // Voter registration details.
+        $this->rtv_finish_with_state = $record['Finish with State'];
+        $this->rtv_started_registration = $record['Started registration'];
+        $this->rtv_status = $record['Status'];
+        $this->rtv_tracking_source = $record['Tracking Source'];
 
         $emailOptIn = $record['Opt-in to Partner email?'];
         if ($emailOptIn) {
@@ -184,10 +192,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($record)
+    public function __construct($record, $importFileId)
     {
         $this->config = ImportType::getConfig(ImportType::$rockTheVote);
-        $this->record = new RockTheVoteRecord($record, $this->config);
+        $this->record = new ParsedRockTheVoteRecord($record, $this->config);
+        $this->import_file_id = $importFileId;
     }
 
     /**
@@ -210,6 +219,15 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $user = $this->createUser($this->record);
             $this->sendUserPasswordResetIfSubscribed($user);
         }
+
+        $rockTheVoteRecord = RockTheVoteRecord::firstOrCreate([
+            'import_file_id' => $this->import_file_id,
+            'finish_with_state' => $this->record->rtv_finish_with_state,
+            'started_registration' => $this->record->rtv_started_registration,
+            'status' => $this->record->rtv_status,
+            'tracking_source' => $this->record->rtv_tracking_source,
+            'user_id' => $user->id,
+        ]);
 
         $existingPosts = $rogue->getPost([
             'action_id' => $this->record->post_action_id,
