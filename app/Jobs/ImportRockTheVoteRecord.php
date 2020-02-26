@@ -7,12 +7,12 @@ use Chompy\ImportType;
 use Chompy\Services\Rogue;
 use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
-use Chompy\Models\RockTheVoteRecord;
+use Chompy\Models\RockTheVoteLog;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
-class ParsedRockTheVoteRecord
+class RockTheVoteRecord
 {
     /**
      * Parses values to send to DS API from given CSV record, using given config.
@@ -35,6 +35,7 @@ class ParsedRockTheVoteRecord
 
         // Voter registration details.
         $this->rtv_finish_with_state = $record['Finish with State'];
+        $this->rtv_pre_registered = $record['Pre-Registered'];
         $this->rtv_started_registration = $record['Started registration'];
         $this->rtv_status = $record['Status'];
         $this->rtv_tracking_source = $record['Tracking Source'];
@@ -195,7 +196,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     public function __construct($record, $importFileId)
     {
         $this->config = ImportType::getConfig(ImportType::$rockTheVote);
-        $this->record = new ParsedRockTheVoteRecord($record, $this->config);
+        $this->record = new RockTheVoteRecord($record, $this->config);
         $this->import_file_id = $importFileId;
     }
 
@@ -220,14 +221,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $this->sendUserPasswordResetIfSubscribed($user);
         }
 
-        $rockTheVoteRecord = RockTheVoteRecord::firstOrCreate([
-            'import_file_id' => $this->import_file_id,
-            'finish_with_state' => $this->record->rtv_finish_with_state,
-            'started_registration' => $this->record->rtv_started_registration,
-            'status' => $this->record->rtv_status,
-            'tracking_source' => $this->record->rtv_tracking_source,
-            'user_id' => $user->id,
-        ]);
+        RockTheVoteLog::createFromRecord($this->record, $user, $this->import_file_id);
 
         $existingPosts = $rogue->getPost([
             'action_id' => $this->record->post_action_id,
