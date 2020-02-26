@@ -2,7 +2,9 @@
 
 namespace Chompy\Models;
 
+use Chompy\Jobs\RockTheVoteRecord;
 use Illuminate\Database\Eloquent\Model;
+use DoSomething\Gateway\Resources\NorthstarUser;
 
 class RockTheVoteLog extends Model
 {
@@ -37,7 +39,7 @@ class RockTheVoteLog extends Model
     /**
      * Log sanitized Rock The Vote data for given user and import file.
      */
-    public static function createFromRecord($record, $user, $importFileId)
+    public static function createFromRecord(RockTheVoteRecord $record, NorthstarUser $user, $importFileId)
     {
         return static::firstOrCreate([
             'import_file_id' => $importFileId,
