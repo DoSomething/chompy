@@ -7,6 +7,7 @@ use Chompy\ImportType;
 use Chompy\Services\Rogue;
 use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
+use Chompy\Models\RockTheVoteLog;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,6 +22,7 @@ class RockTheVoteRecord
      */
     public function __construct($record, $config)
     {
+        // User PII.
         $this->addr_street1 = $record['Home address'];
         $this->addr_street2 = $record['Home unit'];
         $this->addr_city = $record['Home city'];
@@ -30,6 +32,13 @@ class RockTheVoteRecord
         $this->first_name = $record['First name'];
         $this->last_name = $record['Last name'];
         $this->mobile = $record['Phone'];
+
+        // Voter registration details.
+        $this->rtv_finish_with_state = $record['Finish with State'];
+        $this->rtv_pre_registered = $record['Pre-Registered'];
+        $this->rtv_started_registration = $record['Started registration'];
+        $this->rtv_status = $record['Status'];
+        $this->rtv_tracking_source = $record['Tracking Source'];
 
         $emailOptIn = $record['Opt-in to Partner email?'];
         if ($emailOptIn) {
@@ -184,10 +193,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($record)
+    public function __construct($record, $importFileId)
     {
         $this->config = ImportType::getConfig(ImportType::$rockTheVote);
         $this->record = new RockTheVoteRecord($record, $this->config);
+        $this->import_file_id = $importFileId;
     }
 
     /**
@@ -210,6 +220,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $user = $this->createUser($this->record);
             $this->sendUserPasswordResetIfSubscribed($user);
         }
+
+        RockTheVoteLog::createFromRecord($this->record, $user, $this->import_file_id);
 
         $existingPosts = $rogue->getPost([
             'action_id' => $this->record->post_action_id,
