@@ -97,7 +97,7 @@ class ImportFileRecords implements ShouldQueue
             'filepath' => $this->filepath,
             'import_type' => $this->importType,
             'row_count' => $this->totalRecords,
-            'user_id' => $user->northstar_id,
+            'user_id' => $user ? $user->northstar_id : null,
         ]);
 
         $importFile->save();
