@@ -1,6 +1,6 @@
 <?php
 
-namespace Chompy\Http\Controllers\Auth;
+namespace Chompy\Http\Controllers\Web\Auth;
 
 use Chompy\Http\Controllers\Controller;
 use Psr\Http\Message\ResponseInterface;
