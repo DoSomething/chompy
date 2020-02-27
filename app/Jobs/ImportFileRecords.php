@@ -53,7 +53,7 @@ class ImportFileRecords implements ShouldQueue
      * @param array $importOptions
      * @return void
      */
-    public function __construct($user, $filepath, $importType, $importOptions)
+    public function __construct(\Chompy\User $user, string $filepath, string $importType, array $importOptions)
     {
         $this->filepath = $filepath;
         $this->importType = $importType;
