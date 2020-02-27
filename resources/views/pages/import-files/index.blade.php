@@ -15,7 +15,9 @@
         @foreach($data as $key => $importFile)
             <tr class="row">
               <td class="col-md-3">
-                <strong>{{$importFile->created_at}}</strong>
+                <a href="/import-files/{{$importFile->id}}">
+                  <strong>{{$importFile->created_at}}</strong>
+                <a href="/import-files/{{$importFile->id}}">
               </td>
               <td class="col-md-3">
                 {{$importFile->import_type}}
@@ -27,6 +29,7 @@
                 {{$importFile->user_id}}
               </td>     
             </tr>
+          </a>
         @endforeach
     </table>
     {{$data->links()}}
