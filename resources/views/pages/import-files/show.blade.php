@@ -18,7 +18,6 @@
             <th class="col-md-3">Tracking Source</th>
             <th class="col-md-2">Finish With State</th>
             <th class="col-md-2">Pre-Registered</th>
-
           </tr>
         </thead>
         @foreach($rows as $key => $row)

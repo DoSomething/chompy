@@ -32,7 +32,7 @@ class ImportFileController extends Controller
      */
     public function create($importType)
     {
-        return view('pages.import', [
+        return view('pages.import-files.create', [
             'importType' => $importType,
             'config' => ImportType::getConfig($importType),
         ]);
