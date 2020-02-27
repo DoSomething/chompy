@@ -1,6 +1,6 @@
 <?php
 
-namespace Chompy\Http\Controllers;
+namespace Chompy\Http\Controllers\Web;
 
 use Carbon\Carbon;
 use Chompy\ImportType;
@@ -8,6 +8,7 @@ use League\Csv\Reader;
 use Illuminate\Http\Request;
 use Chompy\Models\ImportFile;
 use Chompy\Jobs\ImportFileRecords;
+use Chompy\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
 class ImportFileController extends Controller
@@ -69,7 +70,7 @@ class ImportFileController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        ImportFileRecords::dispatch($path, $importType, $importOptions)->delay(now()->addSeconds(3));
+        ImportFileRecords::dispatch(\Auth::user(), $path, $importType, $importOptions)->delay(now()->addSeconds(3));
 
         return redirect('import/'.$importType)
             ->with('status', 'Queued '.$path.' for import.');
@@ -82,7 +83,7 @@ class ImportFileController extends Controller
      */
     public function index()
     {
-        $data = ImportFile::orderBy('id', 'desc')->paginate(50);
+        $data = ImportFile::orderBy('id', 'desc')->paginate(15);
 
         return view('pages.import-files.index', ['data' => $data]);
     }

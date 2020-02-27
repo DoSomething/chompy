@@ -1,8 +1,9 @@
 <?php
 
-namespace Chompy\Http\Controllers;
+namespace Chompy\Http\Controllers\Web;
 
 use Illuminate\Support\Str;
+use Chompy\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Artisan;
 
 class FailedJobController extends Controller

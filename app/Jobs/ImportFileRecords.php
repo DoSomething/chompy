@@ -48,16 +48,18 @@ class ImportFileRecords implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param User $user - This could be null for machine-triggered imports.
      * @param string $filepath
      * @param string $importType
      * @param array $importOptions
      * @return void
      */
-    public function __construct($filepath, $importType, $importOptions)
+    public function __construct(\Chompy\User $user, string $filepath, string $importType, array $importOptions)
     {
         $this->filepath = $filepath;
         $this->importType = $importType;
         $this->importOptions = $importOptions;
+        $this->user = $user;
     }
 
     /**
@@ -91,13 +93,12 @@ class ImportFileRecords implements ShouldQueue
         info('STARTING '.$this->importType.' IMPORT', ['options' => print_r($this->importOptions, true)]);
 
         $records = $this->getRecords($this->filepath);
-        $user = \Auth::user();
 
         $importFile = new ImportFile([
             'filepath' => $this->filepath,
             'import_type' => $this->importType,
             'row_count' => $this->totalRecords,
-            'user_id' => $user->northstar_id,
+            'user_id' => optional($this->user)->northstar_id,
         ]);
 
         $importFile->save();
