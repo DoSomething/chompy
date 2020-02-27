@@ -53,11 +53,12 @@ class ImportFileRecords implements ShouldQueue
      * @param array $importOptions
      * @return void
      */
-    public function __construct($filepath, $importType, $importOptions)
+    public function __construct($user, $filepath, $importType, $importOptions)
     {
         $this->filepath = $filepath;
         $this->importType = $importType;
         $this->importOptions = $importOptions;
+        $this->user = $user;
     }
 
     /**
@@ -91,13 +92,12 @@ class ImportFileRecords implements ShouldQueue
         info('STARTING '.$this->importType.' IMPORT', ['options' => print_r($this->importOptions, true)]);
 
         $records = $this->getRecords($this->filepath);
-        $user = \Auth::user();
 
         $importFile = new ImportFile([
             'filepath' => $this->filepath,
             'import_type' => $this->importType,
             'row_count' => $this->totalRecords,
-            'user_id' => $user ? $user->northstar_id : null,
+            'user_id' => $this->user ? $this->user->northstar_id : null,
         ]);
 
         $importFile->save();
