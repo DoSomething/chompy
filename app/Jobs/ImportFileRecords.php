@@ -48,6 +48,7 @@ class ImportFileRecords implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param User $user - This could be null for machine-triggered imports.
      * @param string $filepath
      * @param string $importType
      * @param array $importOptions
@@ -97,7 +98,7 @@ class ImportFileRecords implements ShouldQueue
             'filepath' => $this->filepath,
             'import_type' => $this->importType,
             'row_count' => $this->totalRecords,
-            'user_id' => $this->user ? $this->user->northstar_id : null,
+            'user_id' => optional($this->user)->northstar_id,
         ]);
 
         $importFile->save();
