@@ -7,6 +7,7 @@ use Chompy\ImportType;
 use League\Csv\Reader;
 use Illuminate\Http\Request;
 use Chompy\Models\ImportFile;
+use Chompy\Models\RockTheVoteLog;
 use Chompy\Jobs\ImportFileRecords;
 use Chompy\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
@@ -31,7 +32,7 @@ class ImportFileController extends Controller
      */
     public function create($importType)
     {
-        return view('pages.import', [
+        return view('pages.import-files.create', [
             'importType' => $importType,
             'config' => ImportType::getConfig($importType),
         ]);
@@ -86,5 +87,22 @@ class ImportFileController extends Controller
         $data = ImportFile::orderBy('id', 'desc')->paginate(15);
 
         return view('pages.import-files.index', ['data' => $data]);
+    }
+
+    /**
+     * Display an import file.
+     *
+     * @return Response
+     */
+    public function show($id)
+    {
+        $importFile = ImportFile::findOrFail($id);
+        $rows = [];
+
+        if ($importFile->import_type === ImportType::$rockTheVote) {
+            $rows = RockTheVoteLog::where('import_file_id', $id)->paginate(15);
+        }
+
+        return view('pages.import-files.show', ['importFile' => $importFile, 'rows' => $rows]);
     }
 }
