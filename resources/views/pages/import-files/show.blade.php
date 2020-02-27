@@ -34,8 +34,8 @@
               </td>
               <td class="col-md-3">
                 <ul>
-                  @foreach(explode(',', $row->tracking_source) as $key => $value)
-                    <li>{{$value}}</li>
+                  @foreach(explode(',', $row->tracking_source) as $attribute)
+                    <li>{{$attribute}}</li>
                   @endforeach
                 </ul>
               </td>
