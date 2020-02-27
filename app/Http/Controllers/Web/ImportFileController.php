@@ -8,6 +8,7 @@ use League\Csv\Reader;
 use Illuminate\Http\Request;
 use Chompy\Models\ImportFile;
 use Chompy\Jobs\ImportFileRecords;
+use Chompy\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
 class ImportFileController extends Controller
