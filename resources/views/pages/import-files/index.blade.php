@@ -29,7 +29,6 @@
                 {{$importFile->user_id}}
               </td>     
             </tr>
-          </a>
         @endforeach
     </table>
     {{$data->links()}}
