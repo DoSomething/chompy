@@ -1,6 +1,6 @@
 <?php
 
-namespace Chompy\Http\Controllers;
+namespace Chompy\Http\Controllers\Web;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;

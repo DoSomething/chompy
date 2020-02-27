@@ -1,6 +1,6 @@
 <?php
 
-namespace Chompy\Http\Controllers;
+namespace Chompy\Http\Controllers\Web;
 
 use Carbon\Carbon;
 use Chompy\ImportType;
