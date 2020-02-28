@@ -5,7 +5,7 @@ namespace Chompy\Http\Controllers\ThirdParty;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Chompy\Http\Controllers\Controller;
-use Chompy\Jobs\CreateSoftEdgePostInRogue;
+use Chompy\Jobs\ImportSoftEdgeRecord;
 
 class SoftEdgeController extends Controller
 {
@@ -39,7 +39,7 @@ class SoftEdgeController extends Controller
         ]);
 
         // Send to queued job.
-        CreateSoftEdgePostInRogue::dispatch($parameters);
+        ImportSoftEdgeRecord::dispatch($parameters);
 
         return response()->json(['success' => true]);
     }
