@@ -3,6 +3,7 @@
 @section('main_content')
 
 <div>
+    <p><strong>Note:</strong> We didn't start saving this data locally until Feb 27, 2020.</p>
     <table class="table">
         <thead>
           <tr class="row">
