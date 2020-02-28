@@ -2,7 +2,6 @@
 
 namespace Chompy\Http\Controllers\Web;
 
-use Illuminate\Http\Request;
 use Chompy\Models\RockTheVoteLog;
 use Chompy\Http\Controllers\Controller;
 
