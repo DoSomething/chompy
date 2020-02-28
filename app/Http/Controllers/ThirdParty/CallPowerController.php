@@ -5,7 +5,7 @@ namespace Chompy\Http\Controllers\ThirdParty;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Chompy\Http\Controllers\Controller;
-use Chompy\Jobs\CreateCallPowerPostInRogue;
+use Chompy\Jobs\ImportCallPowerRecord;
 
 class CallPowerController extends Controller
 {
@@ -45,6 +45,6 @@ class CallPowerController extends Controller
         );
 
         // Send to queued job.
-        CreateCallPowerPostInRogue::dispatch($parameters);
+        ImportCallPowerRecord::dispatch($parameters);
     }
 }

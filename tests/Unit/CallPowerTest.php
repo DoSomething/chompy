@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use Exception;
 use Tests\TestCase;
 use Illuminate\Http\Response;
-use Chompy\Jobs\CreateCallPowerPostInRogue;
+use Chompy\Jobs\ImportCallPowerRecord;
 
 class CallPowerTest extends TestCase
 {
@@ -89,7 +89,7 @@ class CallPowerTest extends TestCase
 
         $this->expectException(Exception::class);
 
-        CreateCallPowerPostInRogue::dispatch([
+        ImportCallPowerRecord::dispatch([
             'mobile' => '1234567891',
             'callpower_campaign_id' => 1,
             'status' => 'busy',
@@ -120,7 +120,7 @@ class CallPowerTest extends TestCase
 
         $this->expectException(Exception::class);
 
-        CreateCallPowerPostInRogue::dispatch([
+        ImportCallPowerRecord::dispatch([
             'mobile' => '1234567891',
             'callpower_campaign_id' => 1,
             'status' => 'busy',
@@ -145,7 +145,7 @@ class CallPowerTest extends TestCase
         $this->northstarMock->shouldNotReceive('getUser');
         $this->northstarMock->shouldNotReceive('createUser');
 
-        CreateCallPowerPostInRogue::dispatch([
+        ImportCallPowerRecord::dispatch([
             'mobile' => '+266696687',
             'callpower_campaign_id' => 1,
             'status' => 'busy',
