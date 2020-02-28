@@ -27,6 +27,6 @@ class UserController extends Controller
     {
         $rows = RockTheVoteLog::where('user_id', $id)->paginate(15);
 
-        return view('pages.users.show', ['user_id' => $id, 'rows' => $rows]);
+        return view('pages.users.show', ['id' => $id, 'rows' => $rows]);
     }
 }
