@@ -15,7 +15,7 @@
             @isset($row->parameters)
               <ul>
                 @foreach ($row->parameters as $key => $value)
-                  <li><code>{{$key}}</code> {{$value}}</li>
+                  <li><code>{{$key}}</code> {{is_array($value) ? print_r($value, true) : $value}}</li>
                 @endforeach
               </ul>
             @endif
