@@ -32,7 +32,7 @@
                             Email subscription
                         </a>
                     </li>
-                    <li @if (Request::path() === $rockTheVotePath) class="active" @endif>
+                    <li @if (strpos(Request::path(), 'rock-the-vote') !== false)) class="active" @endif>
                         <a class="nav-item nav-link" href="{{  '/'.$rockTheVotePath }}">
                             Rock The Vote
                         </a>
