@@ -391,4 +391,15 @@ class ImportRockTheVoteRecord implements ShouldQueue
         gateway('northstar')->asClient()->sendUserPasswordReset($user->id, $resetType);
         info('Sent reset email', $logParams);
     }
+    /**
+     * Returns parameters used to import for debugging
+     *
+     * @return array
+     */
+    public function getParameters() {
+        return [
+            'email' => $this->record->email,
+            'mobile' => $this->record->mobile,
+        ];
+    }
 }

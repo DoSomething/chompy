@@ -32,7 +32,7 @@ class FailedJobController extends Controller
         $failedJob->commandName = $json->data->commandName;
         $failedJob->errorMessage = Str::limit($failedJob->exception, 255);
 
-        if (Str::contains($failedJob->commandName, 'CallPower') || Str::contains($failedJob->commandName, 'SoftEdge')) {
+        if (Str::contains($failedJob->commandName, 'CallPower') || Str::contains($failedJob->commandName, 'SoftEdge') || Str::contains($failedJob->commandName, 'RockTheVote')) {
             $command = unserialize($json->data->command);
             $failedJob->parameters = $command->getParameters();
         }
