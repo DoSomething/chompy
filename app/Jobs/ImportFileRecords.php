@@ -54,7 +54,7 @@ class ImportFileRecords implements ShouldQueue
      * @param array $importOptions
      * @return void
      */
-    public function __construct(\Chompy\User $user, string $filepath, string $importType, array $importOptions)
+    public function __construct(\Chompy\User $user = null, string $filepath, string $importType, array $importOptions = [])
     {
         $this->filepath = $filepath;
         $this->importType = $importType;
@@ -99,6 +99,7 @@ class ImportFileRecords implements ShouldQueue
             'import_type' => $this->importType,
             'row_count' => $this->totalRecords,
             'user_id' => optional($this->user)->northstar_id,
+            'options' => $this->importOptions ? json_encode($this->importOptions) : null,
         ]);
 
         $importFile->save();

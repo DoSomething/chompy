@@ -34,12 +34,27 @@ class RockTheVote
      * @param int $id
      * @return array
      */
-    public function getReportById($id)
+    public function getReportStatusById($id)
     {
         $response = $this->client->get('registrant_reports/'.$id, [
             'query' => $this->authQuery,
         ]);
 
         return json_decode($response->getBody()->getContents());
+    }
+
+    /**
+     * Get a Rock The Vote report by URL.
+     *
+     * @param string $url
+     * @return string
+     */
+    public function getReportByUrl($url)
+    {
+        $response = $this->client->get($url, [
+            'query' => $this->authQuery,
+        ]);
+
+        return $response->getBody();
     }
 }
