@@ -50,6 +50,7 @@ class ImportFileController extends Controller
         $rules = [
             'upload-file' => 'required|mimes:csv,txt',
         ];
+
         if ($importType === ImportType::$emailSubscription) {
             $rules['source-detail'] = 'required';
             $rules['topic'] = 'required';
@@ -58,6 +59,7 @@ class ImportFileController extends Controller
                 'source_detail' => $request->input('source-detail'),
             ];
         }
+
         $request->validate($rules);
 
         // Push file to S3.

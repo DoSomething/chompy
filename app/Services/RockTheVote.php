@@ -34,7 +34,7 @@ class RockTheVote
      * @param int $id
      * @return array
      */
-    public function getReportById($id)
+    public function getReportStatusById($id)
     {
         $response = $this->client->get('registrant_reports/'.$id, [
             'query' => $this->authQuery,
@@ -44,12 +44,12 @@ class RockTheVote
     }
 
     /**
-     * Download a Rock The Vote report by ID.
+     * Get a Rock The Vote report by ID.
      *
      * @param int $id
      * @return string
      */
-    public function downloadReportById($id)
+    public function getReportById($id)
     {
         $response = $this->client->get('registrant_reports/'.$id.'/download', [
             'query' => $this->authQuery,

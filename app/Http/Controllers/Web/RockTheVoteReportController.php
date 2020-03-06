@@ -28,7 +28,7 @@ class RockTheVoteReportController extends Controller
 
         return view('pages.rock-the-vote-reports.show', [
             'id' => $id,
-            'report' => $client->getReportById($id),
+            'report' => $client->getReportStatusById($id),
         ]);
     }
 }

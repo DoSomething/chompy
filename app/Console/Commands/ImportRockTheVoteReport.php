@@ -45,7 +45,7 @@ class ImportRockTheVoteReport extends Command
         $reportId = $this->argument('id');
         $importType = ImportType::$rockTheVote;
         $path = 'uploads/' . $importType . '-report-' . $reportId . '-' . Carbon::now() . '.csv';
-        $success = Storage::put($path, $client->downloadReportById($reportId));
+        $success = Storage::put($path, $client->getReportById($reportId));
 
         info('Downloaded report '.$reportId);
 
