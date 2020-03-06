@@ -15,7 +15,7 @@ class ImportRockTheVoteReport extends Command
      *
      * @var string
      */
-    protected $signature = 'rtv:import {id}';
+    protected $signature = 'rtv:import {reportId}';
 
     /**
      * The console command description.
@@ -41,7 +41,7 @@ class ImportRockTheVoteReport extends Command
      */
     public function handle()
     {
-        $reportId = $this->argument('id');
+        $reportId = $this->argument('reportId');
 
         info('Checking status of report ' . $reportId);
 
