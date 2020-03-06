@@ -2,6 +2,7 @@
 
 namespace Chompy\Http\Controllers\Web;
 
+use Chompy\Models\RockTheVoteReport;
 use Chompy\Http\Controllers\Controller;
 
 class RockTheVoteReportController extends Controller
@@ -15,6 +16,35 @@ class RockTheVoteReportController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('role:admin');
+    }
+
+    /**
+     * Create a Rock The Vote report.
+     *
+     * @return Response
+     */
+    public function create()
+    {
+        return view('pages.rock-the-vote-reports.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            'id' => ['required', 'integer'],
+            'since' => ['required'],
+            'before' => ['required'],
+        ]);
+
+        // @TODO: Get Report ID by via RTV API request.
+        $report = RockTheVoteReport::create($request->all());
+
+        return redirect('rock-the-vote/reports/' . $report->id);
     }
 
     /**
