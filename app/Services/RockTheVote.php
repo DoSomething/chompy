@@ -42,4 +42,19 @@ class RockTheVote
 
         return json_decode($response->getBody()->getContents());
     }
+
+    /**
+     * Download a Rock The Vote report by ID.
+     *
+     * @param int $id
+     * @return string
+     */
+    public function downloadReportById($id)
+    {
+        $response = $this->client->get('registrant_reports/'.$id.'/download', [
+            'query' => $this->authQuery,
+        ]);
+
+        return $response->getBody();
+    }
 }
