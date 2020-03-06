@@ -3,7 +3,6 @@
 namespace Chompy\Console\Commands;
 
 use Carbon\Carbon;
-use League\Csv\Reader;
 use Chompy\ImportType;
 use Illuminate\Console\Command;
 use Chompy\Jobs\ImportFileRecords;
@@ -45,7 +44,7 @@ class ImportRockTheVoteReport extends Command
         $client = app('Chompy\Services\RockTheVote');
         $reportId = $this->argument('id');
         $importType = ImportType::$rockTheVote;
-        $path = 'uploads/' . $importType . '-report-' . $reportId . '.csv';
+        $path = 'uploads/' . $importType . '-report-' . $reportId . '-' . Carbon::now() . '.csv';
         $success = Storage::put($path, $client->downloadReportById($reportId));
 
         info('Downloaded report '.$reportId);
