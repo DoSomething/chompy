@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class RockTheVoteReport extends Model
 {
     /**
+     * We use the externally created Rock the Vote ID as our primary key.
+     */
+    public $incrementing = false;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
@@ -14,6 +19,8 @@ class RockTheVoteReport extends Model
     protected $fillable = [
         'id',
         'status',
+        'since',
+        'before',
         'imported',
     ];
 
