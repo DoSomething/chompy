@@ -44,14 +44,14 @@ class RockTheVote
     }
 
     /**
-     * Get a Rock The Vote report by ID.
+     * Get a Rock The Vote report by URL.
      *
-     * @param int $id
+     * @param string $url
      * @return string
      */
-    public function getReportById($id)
+    public function getReportByUrl($url)
     {
-        $response = $this->client->get('registrant_reports/'.$id.'/download', [
+        $response = $this->client->get($url, [
             'query' => $this->authQuery,
         ]);
 

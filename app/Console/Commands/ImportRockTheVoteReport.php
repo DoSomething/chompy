@@ -5,6 +5,7 @@ namespace Chompy\Console\Commands;
 use Carbon\Carbon;
 use Chompy\ImportType;
 use Illuminate\Console\Command;
+use Chompy\Services\RockTheVote;
 use Chompy\Jobs\ImportFileRecords;
 use Illuminate\Support\Facades\Storage;
 
@@ -41,14 +42,31 @@ class ImportRockTheVoteReport extends Command
      */
     public function handle()
     {
-        $client = app('Chompy\Services\RockTheVote');
-        $reportId = $this->argument('id');
+        $id = $this->argument('id');
+
+        info('Checking status of report ' . $id);
+
+        $report = app('Chompy\Services\RockTheVote')->getReportStatusById($id);
+
+        info('Report ' . $id . ' status is ' . $report->status);
+
+        if ($report->status === 'complete') {
+            $this->downloadAndImport($id, $report->download_url);
+        }
+    }
+
+    /**
+     * @param int $id
+     * @param string $url
+     */
+    private function downloadAndImport($id, $url) {
         $importType = ImportType::$rockTheVote;
-        $path = 'uploads/' . $importType . '-report-' . $reportId . '-' . Carbon::now() . '.csv';
-        $success = Storage::put($path, $client->getReportById($reportId));
+        $path = 'uploads/' . $importType . '-report-' . $id . '-' . Carbon::now() . '.csv';
 
-        info('Downloaded report '.$reportId);
+        Storage::put($path, app('Chompy\Services\RockTheVote')->getReportByUrl($url));
 
-        ImportFileRecords::dispatch(null, $path, $importType, ['report_id' => $reportId])->delay(now()->addSeconds(3));
+        info('Downloaded report '.$id);
+
+        ImportFileRecords::dispatch(null, $path, $importType, ['report_id' => $id])->delay(now()->addSeconds(3));
     }
 }
