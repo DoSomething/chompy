@@ -14,6 +14,7 @@ class ImportFile extends Model
     protected $fillable = [
         'filepath',
         'import_type',
+        'options',
         'row_count',
         'user_id',
     ];

@@ -99,6 +99,7 @@ class ImportFileRecords implements ShouldQueue
             'import_type' => $this->importType,
             'row_count' => $this->totalRecords,
             'user_id' => optional($this->user)->northstar_id,
+            'options' => $this->importOptions ? json_encode($this->importOptions) : null,
         ]);
 
         $importFile->save();
