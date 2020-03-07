@@ -30,22 +30,34 @@ class RockTheVoteReportController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created Rock The Vote report in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      */
     public function store(Request $request)
     {
+        // @TODO: Figure out expected format, not having any luck with passing these.
         $this->validate($request, [
-            'id' => ['required', 'integer'],
             'since' => ['required'],
             'before' => ['required'],
         ]);
 
-        // @TODO: Get Report ID by via RTV API request.
-        $report = RockTheVoteReport::create($request->all());
+        // Execute API request to create a new Rock The Vote report.
+        $report = app('Chompy\Services\RockTheVote')->createReport($request->all());
 
-        return redirect('rock-the-vote/reports/' . $report->id);
+        // Parse response to find the new Rock The Vote Report ID.
+        $statusUrlParts = explode('/', $report->status_url);
+        $reportId = $statusUrlParts[count($statusUrlParts) - 1];
+
+        // Log our created report in the database, to keep track of reports requested.
+        RockTheVoteReport::create([
+            'id' => $reportId,
+            'since' => $request['since'],
+            'before' => $request['before'],
+            'status' => $report->status,
+        ]);
+
+        return redirect('rock-the-vote/reports/' . $reportId);
     }
 
     /**
@@ -55,11 +67,9 @@ class RockTheVoteReportController extends Controller
      */
     public function show($id)
     {
-        $client = app('Chompy\Services\RockTheVote');
-
         return view('pages.rock-the-vote-reports.show', [
             'id' => $id,
-            'report' => $client->getReportStatusById($id),
+            'report' => app('Chompy\Services\RockTheVote')->getReportStatusById($id),
         ]);
     }
 }

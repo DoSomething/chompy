@@ -9,27 +9,12 @@
     <form method="POST" action="{{ route('reports.store') }}">
         {{ csrf_field()}}
         <div class="form-group row">
-            <label for="id" class="col-sm-3 col-form-label" required>
-                Report ID
-            </label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" name="id">
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="id" class="col-sm-3 col-form-label" required>
-                Status
-            </label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" name="status">
-            </div>
-        </div>
-        <div class="form-group row">
             <label for="since" class="col-sm-3 col-form-label" required>
                 Since
             </label>
             <div class="col-sm-9">
               <input type="text" class="form-control" name="since">
+              <small>e.g. 2020-02-07T05:13:27Z</small>
             </div>
         </div>
         <div class="form-group row">
@@ -38,6 +23,15 @@
             </label>
             <div class="col-sm-9">
               <input type="text" class="form-control" name="before">
+              <small>e.g. 2020-03-07T05:13:27Z</small>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="email" class="col-sm-3 col-form-label" required>
+                Email
+            </label>
+            <div class="col-sm-9">
+              <input type="text" class="form-control" name="email">
             </div>
         </div>
         <div>

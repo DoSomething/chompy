@@ -21,10 +21,28 @@ class RockTheVote
         $this->client = new \GuzzleHttp\Client([
             'base_uri' => $config['url'] . '/api/v4/',
         ]);
+
         $this->authQuery = [
             'partner_API_key' => $config['api_key'],
             'partner_id' => $config['partner_id'],
         ];
+    }
+
+    /**
+     * Creates a Rock The Vote report.
+     *
+     * @param array $params
+     * @return array
+     */
+    public function createReport($params)
+    {
+        $response = $this->client->post('registrant_reports', [
+            // @TODO - since/before causing intenral server error
+            // when trying to pass array_merge($params, $this->authQuery)
+            'json' => $this->authQuery,
+        ]);
+
+        return json_decode($response->getBody()->getContents());
     }
 
     /**
