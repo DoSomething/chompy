@@ -3,9 +3,13 @@
 @section('main_content')
 
 <div>
-    <h1>
-        Create Report
-    </h1>
+    <h1>Create Report</h1>
+    <p>
+        Use this form to create a Rock The Vote CSV report of voter registrations.
+    <p>
+    <p>
+        <strong>Note</strong>: It won't automatically be imported yet, you'll still need to find and download it from our Rock The Vote partner portal for now.
+    </p> 
     <form method="POST" action="{{ route('reports.store') }}">
         {{ csrf_field()}}
         <div class="form-group row">
@@ -23,7 +27,7 @@
             </label>
             <div class="col-sm-9">
               <input type="text" class="form-control" name="before">
-              <small>e.g. 2019-02-28 13:00</small>
+              <small>e.g. 2020-02-28 13:00</small>
             </div>
         </div>
         <div>
