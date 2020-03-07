@@ -30,7 +30,7 @@ class RockTheVoteReportController extends Controller
     }
 
     /**
-     * Store a newly created Rock The Vote report in storage.
+     * Execute API request to create a Rock The Vote Report, and save to storage.
      *
      * @param  \Illuminate\Http\Request  $request
      */
@@ -42,7 +42,7 @@ class RockTheVoteReportController extends Controller
             'before' => ['required'],
         ]);
 
-        // Execute API request to create a new Rock The Vote report.
+        // Execute API request to create a new Rock The Vote Report.
         $report = app('Chompy\Services\RockTheVote')->createReport($request->all());
 
         // Parse response to find the new Rock The Vote Report ID.
