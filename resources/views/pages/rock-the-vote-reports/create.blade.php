@@ -17,6 +17,14 @@
             </div>
         </div>
         <div class="form-group row">
+            <label for="id" class="col-sm-3 col-form-label" required>
+                Status
+            </label>
+            <div class="col-sm-9">
+              <input type="text" class="form-control" name="status">
+            </div>
+        </div>
+        <div class="form-group row">
             <label for="since" class="col-sm-3 col-form-label" required>
                 Since
             </label>

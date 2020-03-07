@@ -21,7 +21,7 @@ class RockTheVoteReport extends Model
         'status',
         'since',
         'before',
-        'imported',
+        'imported_at',
     ];
 
     /**
