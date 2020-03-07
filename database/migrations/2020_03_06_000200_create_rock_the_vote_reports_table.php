@@ -20,7 +20,7 @@ class CreateRockTheVoteReportsTable extends Migration
             $table->string('before');
             $table->timestamps();
             $table->date('imported_at')->nullable();
-            $table->primary(array('id'));
+            $table->primary(['id']);
         });
     }
 
