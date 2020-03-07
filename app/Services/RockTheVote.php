@@ -30,6 +30,7 @@ class RockTheVote
 
     /**
      * Creates a Rock The Vote report.
+     * @see https://rock-the-vote.github.io/Voter-Registration-Tool-API-Docs/#reports
      *
      * @param array $params
      * @return array
@@ -47,7 +48,7 @@ class RockTheVote
 
     /**
      * Get a Rock The Vote report by ID.
-     * @see https://rock-the-vote.github.io/Voter-Registration-Tool-API-Docs/?emci=da3e348b-feda-e911-b5e9-2818784d6d68&emdi=925c56a9-00db-e911-b5e9-2818784d6d68&ceid=2948039#report_status
+     * @see https://rock-the-vote.github.io/Voter-Registration-Tool-API-Docs/#report_status
      *
      * @param int $id
      * @return array
