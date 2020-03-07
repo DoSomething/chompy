@@ -14,7 +14,7 @@
             </label>
             <div class="col-sm-9">
               <input type="text" class="form-control" name="since">
-              <small>e.g. 2020-02-07T05:13:27Z</small>
+              <small>e.g. 2019-12-01 12:00</small>
             </div>
         </div>
         <div class="form-group row">
@@ -23,15 +23,7 @@
             </label>
             <div class="col-sm-9">
               <input type="text" class="form-control" name="before">
-              <small>e.g. 2020-03-07T05:13:27Z</small>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="email" class="col-sm-3 col-form-label" required>
-                Email
-            </label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" name="email">
+              <small>e.g. 2019-12-01 12:00</small>
             </div>
         </div>
         <div>

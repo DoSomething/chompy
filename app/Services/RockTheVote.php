@@ -38,9 +38,7 @@ class RockTheVote
     public function createReport($params)
     {
         $response = $this->client->post('registrant_reports', [
-            // @TODO - since/before causing intenral server error
-            // when trying to pass array_merge($params, $this->authQuery)
-            'json' => $this->authQuery,
+            'json' => array_merge($params, $this->authQuery),
         ]);
 
         return json_decode($response->getBody()->getContents());

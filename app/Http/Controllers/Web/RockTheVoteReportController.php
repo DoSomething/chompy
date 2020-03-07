@@ -30,13 +30,12 @@ class RockTheVoteReportController extends Controller
     }
 
     /**
-     * Execute API request to create a Rock The Vote Report, and save to storage.
+     * Execute API request to create a Rock The Vote Report, and save ID to storage.
      *
      * @param  \Illuminate\Http\Request  $request
      */
     public function store(Request $request)
     {
-        // @TODO: Figure out expected format, not having any luck with passing these.
         $this->validate($request, [
             'since' => ['required'],
             'before' => ['required'],
@@ -61,7 +60,7 @@ class RockTheVoteReportController extends Controller
     }
 
     /**
-     * Display a Rock The Vote report.
+     * Display Rock The Vote Report status information.
      *
      * @return Response
      */
