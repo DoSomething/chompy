@@ -45,8 +45,7 @@ class RockTheVoteReportController extends Controller
         $apiResponse = app('Chompy\Services\RockTheVote')->createReport($request->all());
 
         // Log our created report in the database, to keep track of reports requested.
-        $report = RockTheVoteReport::createFromApiResponse($apiResponse, $request['since'], $request['before']); 
-
+        $report = RockTheVoteReport::createFromApiResponse($apiResponse, $request['since'], $request['before']);
 
         return redirect('rock-the-vote/reports/' . $report->id);
     }
