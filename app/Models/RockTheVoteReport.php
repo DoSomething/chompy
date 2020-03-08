@@ -37,7 +37,7 @@ class RockTheVoteReport extends Model
     ];
 
     /**
-     * Logs a Rock The Vote Reported created via API request.
+     * Logs a Rock The Vote Report that we've created via API request.
      *
      * @param array $response
      * @param string $since
