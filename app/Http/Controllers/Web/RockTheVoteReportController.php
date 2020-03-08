@@ -42,21 +42,13 @@ class RockTheVoteReportController extends Controller
         ]);
 
         // Execute API request to create a new Rock The Vote Report.
-        $report = app('Chompy\Services\RockTheVote')->createReport($request->all());
-
-        // Parse response to find the new Rock The Vote Report ID.
-        $statusUrlParts = explode('/', $report->status_url);
-        $reportId = $statusUrlParts[count($statusUrlParts) - 1];
+        $apiResponse = app('Chompy\Services\RockTheVote')->createReport($request->all());
 
         // Log our created report in the database, to keep track of reports requested.
-        RockTheVoteReport::create([
-            'id' => $reportId,
-            'since' => $request['since'],
-            'before' => $request['before'],
-            'status' => $report->status,
-        ]);
+        $report = RockTheVoteReport::createFromApiResponse($apiResponse, $request['since'], $request['before']); 
 
-        return redirect('rock-the-vote/reports/' . $reportId);
+
+        return redirect('rock-the-vote/reports/' . $report->id);
     }
 
     /**

@@ -35,4 +35,27 @@ class RockTheVoteReport extends Model
     public static $indexes = [
         'status',
     ];
+
+    /**
+     * Logs a Rock The Vote Reported created via API request.
+     *
+     * @param array $response
+     * @param string $since
+     * @param string $before
+     * @return RockTheVoteReport
+     */
+    public static function createFromApiResponse($response, $since = null, $before = null)
+    {
+        // Parse response to find the new Rock The Vote Report ID.
+        $statusUrlParts = explode('/', $response->status_url);
+        $reportId = $statusUrlParts[count($statusUrlParts) - 1];
+
+        // Log our created report in the database, to keep track of reports requested.
+        return static::create([
+            'id' => $reportId,
+            'since' => $since,
+            'before' => $before,
+            'status' => $response->status,
+        ]);
+    }
 }
