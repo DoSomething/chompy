@@ -16,11 +16,12 @@ class CreateRockTheVoteReportsTable extends Migration
         Schema::create('rock_the_vote_reports', function (Blueprint $table) {
             $table->integer('id');
             $table->string('status')->index();
-            $table->string('since')->nullable();
-            $table->string('before')->nullable();
+            $table->dateTime('since')->nullable();
+            $table->dateTime('before')->nullable();
             $table->timestamps();
-            $table->date('imported_at')->nullable();
+            $table->dateTime('dispatched_at')->nullable();
             $table->primary(['id']);
+            $table->index(['status', 'dispatched_at']);
         });
     }
 

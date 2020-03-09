@@ -21,7 +21,17 @@ class RockTheVoteReport extends Model
         'status',
         'since',
         'before',
-        'imported_at',
+        'dispatched_at',
+    ];
+
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = [
+        'status',
+        'dispatched_at',
     ];
 
     /**
