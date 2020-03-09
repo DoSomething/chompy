@@ -18,7 +18,7 @@
             </label>
             <div class="col-sm-9">
               <input type="text" class="form-control" name="since">
-              <small>e.g. 2020-02-28 12:00</small>
+              <small>e.g. 2020-02-28 12:00:00</small>
             </div>
         </div>
         <div class="form-group row">
@@ -27,7 +27,7 @@
             </label>
             <div class="col-sm-9">
               <input type="text" class="form-control" name="before">
-              <small>e.g. 2020-02-28 13:00</small>
+              <small>e.g. 2020-02-28 13:00:00</small>
             </div>
         </div>
         <div>
