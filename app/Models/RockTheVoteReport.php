@@ -30,7 +30,6 @@ class RockTheVoteReport extends Model
      * @var array
      */
     protected $dates = [
-        'status',
         'dispatched_at',
     ];
 
@@ -44,14 +43,15 @@ class RockTheVoteReport extends Model
      */
     public static $indexes = [
         'status',
+        'dispatched_at',
     ];
 
     /**
      * Logs a Rock The Vote Report that we've created via API request.
      *
      * @param array $response
-     * @param string $since
-     * @param string $before
+     * @param datetime $since
+     * @param datetime $before
      * @return RockTheVoteReport
      */
     public static function createFromApiResponse($response, $since = null, $before = null)

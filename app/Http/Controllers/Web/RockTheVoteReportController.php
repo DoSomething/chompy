@@ -3,6 +3,7 @@
 namespace Chompy\Http\Controllers\Web;
 
 use Illuminate\Http\Request;
+use Chompy\Services\RockTheVote;
 use Chompy\Models\RockTheVoteReport;
 use Chompy\Http\Controllers\Controller;
 
@@ -42,7 +43,7 @@ class RockTheVoteReportController extends Controller
         ]);
 
         // Execute API request to create a new Rock The Vote Report.
-        $apiResponse = app('Chompy\Services\RockTheVote')->createReport($request->all());
+        $apiResponse = app(RockTheVote::class)->createReport($request->all());
 
         // Log our created report in the database, to keep track of reports requested.
         $report = RockTheVoteReport::createFromApiResponse($apiResponse, $request['since'], $request['before']);
@@ -59,7 +60,7 @@ class RockTheVoteReportController extends Controller
     {
         return view('pages.rock-the-vote-reports.show', [
             'id' => $id,
-            'report' => app('Chompy\Services\RockTheVote')->getReportStatusById($id),
+            'report' => app(RockTheVote::class)->getReportStatusById($id),
         ]);
     }
 }
