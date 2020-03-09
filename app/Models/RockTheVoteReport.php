@@ -30,6 +30,8 @@ class RockTheVoteReport extends Model
      * @var array
      */
     protected $dates = [
+        'since',
+        'before',
         'dispatched_at',
     ];
 
