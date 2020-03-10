@@ -1,5 +1,7 @@
 @extends('layouts.master')
 
+@section('title', 'Import details');
+
 @section('main_content')
 
 <div>

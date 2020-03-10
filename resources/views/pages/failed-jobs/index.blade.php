@@ -1,5 +1,7 @@
 @extends('layouts.master')
 
+@section('title', 'Failed jobs')
+
 @section('main_content')
 
 <div>

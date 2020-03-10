@@ -1,5 +1,7 @@
 @extends('layouts.master')
 
+@section('title', 'Upload CSV')
+
 @section('main_content')
 
 <div>
