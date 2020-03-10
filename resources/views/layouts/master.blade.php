@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>@yield('title') | Chompy </title>
+        <title>@yield('title') | Chompy</title>
         <link rel="stylesheet" href="{{ mix('/css/app.css') }}">
         <link rel="icon" type="image/png" href="http://twooter.biz/Gifs/tonguecat.png">
     </head>
