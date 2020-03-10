@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Http\Web;
 
 use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 
-class ImporterTest extends TestCase
+class ImportFileTest extends TestCase
 {
     /**
      * Test validation error thrown without upload-file for email subscription import.
