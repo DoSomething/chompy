@@ -3,6 +3,7 @@
 @section('main_content')
 
 <div>
+    <h1>Rock The Vote Reports</h1>
     <table class="table">
         <thead>
           <tr class="row">
