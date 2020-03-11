@@ -1,5 +1,7 @@
 @extends('layouts.master')
 
+@section('title', 'Rock The Vote report')
+
 @section('main_content')
 
 <div>

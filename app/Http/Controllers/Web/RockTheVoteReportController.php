@@ -63,4 +63,16 @@ class RockTheVoteReportController extends Controller
             'report' => app(RockTheVote::class)->getReportStatusById($id),
         ]);
     }
+
+    /**
+     * Display a listing of Rock The Vote reports.
+     *
+     * @return Response
+     */
+    public function index()
+    {
+        $data = RockTheVoteReport::orderBy('id', 'desc')->paginate(15);
+
+        return view('pages.rock-the-vote-reports.index', ['data' => $data]);
+    }
 }
