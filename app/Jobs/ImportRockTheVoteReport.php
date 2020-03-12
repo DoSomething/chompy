@@ -28,8 +28,9 @@ class ImportRockTheVoteReport implements ShouldQueue
      * @param RockTheVoteReport $report
      * @return void
      */
-    public function __construct(\Chompy\Models\RockTheVoteReport $report)
+    public function __construct(\Chompy\User $user = null, \Chompy\Models\RockTheVoteReport $report)
     {
+        $this->user = $user;
         $this->report = $report;
     }
 
@@ -56,7 +57,7 @@ class ImportRockTheVoteReport implements ShouldQueue
         if ($status !== 'complete') {
             $this->report->save();
 
-            return self::dispatch($this->report)->delay(now()->addMinutes(2));
+            return self::dispatch($this->user, $this->report)->delay(now()->addMinutes(2));
         }
 
         $now = Carbon::now();
@@ -66,7 +67,7 @@ class ImportRockTheVoteReport implements ShouldQueue
 
         info('Downloaded report '.$reportId);
 
-        ImportFileRecords::dispatch(null, $path, ImportType::$rockTheVote, ['report_id' => $reportId])->delay(now()->addSeconds(3));
+        ImportFileRecords::dispatch($this->user, $path, ImportType::$rockTheVote, ['report_id' => $reportId])->delay(now()->addSeconds(3));
 
         $this->report->dispatched_at = $now;
         $this->report->save();
