@@ -3,6 +3,7 @@
 use Faker\Generator;
 use Chompy\Models\RockTheVoteReport;
 
+// @TODO: Is this used?
 $factory->define(Chompy\User::class, function (Generator $faker) {
     static $password;
 

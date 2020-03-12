@@ -3,6 +3,7 @@
 namespace Tests\Http\Web;
 
 use Tests\TestCase;
+use Chompy\User;
 use Chompy\Jobs\ImportFileRecords;
 use Illuminate\Support\Facades\Bus;
 use Chompy\Models\RockTheVoteReport;
@@ -21,6 +22,7 @@ class ImportRockTheVoteReportTest extends TestCase
         Bus::fake();
 
         $report = factory(RockTheVoteReport::class)->create();
+        $user = \Chompy\User::forceCreate(['role' => 'admin']);
 
         $this->rockTheVoteMock->shouldReceive('getReportStatusById')->andReturn((object) [
             'status'=> 'merging',
@@ -29,13 +31,14 @@ class ImportRockTheVoteReportTest extends TestCase
         ]);
         $this->rockTheVoteMock->shouldNotReceive('getReportByUrl');
 
-        $job = new ImportRockTheVoteReport(null, $report);
+        $job = new ImportRockTheVoteReport($user, $report);
 
         $job->handle();
 
         $this->assertEquals($report->status, 'merging');
         $this->assertEquals($report->row_count, 117);
         $this->assertEquals($report->current_index, 3);
+        $this->assertEquals($report->user_id, $user->northstar_id);
 
         Bus::assertNotDispatched(ImportFileRecords::class, function () {
             return true;
@@ -53,6 +56,7 @@ class ImportRockTheVoteReportTest extends TestCase
         Storage::fake();
 
         $report = factory(RockTheVoteReport::class)->create();
+        $user = \Chompy\User::forceCreate(['role' => 'admin']);
 
         $this->rockTheVoteMock->shouldReceive('getReportStatusById')->andReturn((object) [
             'status'=> 'complete',
@@ -63,11 +67,16 @@ class ImportRockTheVoteReportTest extends TestCase
 
         $this->rockTheVoteMock->shouldReceive('getReportByUrl');
 
-        $job = new ImportRockTheVoteReport(null, $report);
+        $job = new ImportRockTheVoteReport($user, $report);
 
         $job->handle();
 
-        Bus::assertDispatched(ImportFileRecords::class, function ($job) {
+        Bus::assertDispatched(ImportFileRecords::class, function ($job) use (&$report, &$user) {
+            $params = $job->getParameters();
+
+            $this->assertEquals($params['options']['report_id'], $report->id);
+            $this->assertEquals($params['user_id'], $user->northstar_id);
+
             return true;
         });
 

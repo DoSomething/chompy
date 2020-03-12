@@ -118,4 +118,17 @@ class ImportFileRecords implements ShouldQueue
 
         event(new LogProgress('Done!', 'general'));
     }
+
+    /**
+     * Returns the record passed to this job.
+     *
+     * @return array
+     */
+    public function getParameters()
+    {
+        return [
+            'options' => $this->importOptions,
+            'user_id' => optional($this->user)->northstar_id,
+        ];
+    }
 }
