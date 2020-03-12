@@ -51,12 +51,12 @@ class RockTheVoteReport extends Model
     /**
      * Logs a Rock The Vote Report that we've created via API request.
      *
-     * @param array $response
+     * @param object $response
      * @param datetime $since
      * @param datetime $before
      * @return RockTheVoteReport
      */
-    public static function createFromApiResponse($response, $since = null, $before = null)
+    public static function createFromApiResponse($response, $since, $before)
     {
         // Parse response to find the new Rock The Vote Report ID.
         $statusUrlParts = explode('/', $response->status_url);
