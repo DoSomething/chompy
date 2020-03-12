@@ -75,4 +75,12 @@ class RockTheVoteReport extends Model
             'user_id' => optional(Auth::user())->northstar_id,
         ]);
     }
+
+    /**
+     * @return int
+     */
+    public function getPercentageAttribute()
+    {
+        return round(($this->current_index * 100) / $this->row_count);
+    }
 }

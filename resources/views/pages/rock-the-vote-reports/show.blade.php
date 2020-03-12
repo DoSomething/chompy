@@ -6,19 +6,27 @@
 
 <div>
     <h1>
-        Report #{{$id}}
+        Report #{{$report->id}}
     </h1>
+    <p>
+        Since: <strong>{{$report->since}}</strong>
+    </p>
+    <p>
+        Before: <strong>{{$report->before}}</strong>
+    </p>
     <p>
         Status: <strong>{{$report->status}}</strong>
     </p>
     <p>
-        Total rows: <strong>{{$report->record_count}}</strong>
+        Total rows: <strong>{{$report->row_count}}</strong>
     </p>
     @if ($report->status === 'building')
     <p>
-        Progress: <strong>{{round(($report->current_index * 100) / $report->record_count)}}% </strong>(processed <strong>{{$report->current_index}}</strong> rows)
+        Progress: <strong>{{$report->percentage}}% </strong>(processed <strong>{{$report->current_index}}</strong> rows)
     </p>
     @endif
+    <hr />
+    <small>This report was created by {{$report->user_id}} on {{$report->created_at}}.</small>
 </div>
 
 @stop

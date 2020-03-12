@@ -62,8 +62,7 @@ class RockTheVoteReportController extends Controller
     public function show($id)
     {
         return view('pages.rock-the-vote-reports.show', [
-            'id' => $id,
-            'report' => app(RockTheVote::class)->getReportStatusById($id),
+            'report' => RockTheVoteReport::find($id),
         ]);
     }
 
@@ -74,8 +73,8 @@ class RockTheVoteReportController extends Controller
      */
     public function index()
     {
-        $data = RockTheVoteReport::orderBy('id', 'desc')->paginate(15);
-
-        return view('pages.rock-the-vote-reports.index', ['data' => $data]);
+        return view('pages.rock-the-vote-reports.index', [
+            'data' => RockTheVoteReport::orderBy('id', 'desc')->paginate(15),
+        ]);
     }
 }
