@@ -48,6 +48,8 @@ class ImportRockTheVoteReport implements ShouldQueue
         $status = $response->status;
 
         $this->report->status = $status;
+        $this->report->row_count = $response->record_count;
+        $this->report->current_index = $response->current_index;
 
         info('Report status is ' . $status);
 

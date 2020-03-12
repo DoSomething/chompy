@@ -2,6 +2,7 @@
 
 namespace Chompy\Models;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 
 class RockTheVoteReport extends Model
@@ -21,7 +22,10 @@ class RockTheVoteReport extends Model
         'status',
         'since',
         'before',
+        'row_count',
+        'current_index',
         'dispatched_at',
+        'user_id',
     ];
 
     /**
@@ -68,6 +72,7 @@ class RockTheVoteReport extends Model
             'since' => $since,
             'before' => $before,
             'status' => $response->status,
+            'user_id' => optional(Auth::user())->northstar_id,
         ]);
     }
 }
