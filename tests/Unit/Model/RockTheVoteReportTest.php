@@ -29,6 +29,9 @@ class RockTheVoteReportTest extends TestCase
         $this->assertEquals($report->before, $before);
         $this->assertEquals($report->status, 'queued');
         $this->assertEquals($report->user_id, null);
+        $this->assertDatabaseHas('rock_the_vote_reports', [
+            'id' => 17,
+        ]);
     }
 
     /**
@@ -38,7 +41,6 @@ class RockTheVoteReportTest extends TestCase
      */
     public function testCreateFromApiResponseWithInvalidResponseType()
     {
-        // Passing a string as the API response should throw an exception.
         $this->expectException(ErrorException::class);
 
         RockTheVoteReport::createFromApiResponse('test', null, null);
@@ -51,7 +53,6 @@ class RockTheVoteReportTest extends TestCase
      */
     public function testCreateFromApiResponseWithMissingStatusUrl()
     {
-        // A missing status_url in the API response should throw an exception.
         $this->expectException(ErrorException::class);
 
         $apiResponse = (object) [
