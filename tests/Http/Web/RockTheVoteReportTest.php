@@ -29,7 +29,12 @@ class RockTheVoteReportTest extends TestCase
             'before' => '2020-02-19 00:00:00',
         ]);
 
-        Bus::assertDispatched(ImportRockTheVoteReport::class, function () {
+        Bus::assertDispatched(ImportRockTheVoteReport::class, function ($job) use (&$admin) {
+            $params = $job->getParameters();
+
+            $this->assertEquals($params['report']->id, 17);
+            $this->assertEquals($params['user'], $admin);
+
             return true;
         });
 

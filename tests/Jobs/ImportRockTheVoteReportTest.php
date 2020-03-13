@@ -13,7 +13,7 @@ use Chompy\Jobs\ImportRockTheVoteReport;
 class ImportRockTheVoteReportTest extends TestCase
 {
     /**
-     * Test that report is not downloaded if status not complete.
+     * Test that report is not downloaded when status not complete.
      *
      * @return void
      */
@@ -25,7 +25,7 @@ class ImportRockTheVoteReportTest extends TestCase
         $user = User::forceCreate(['role' => 'admin']);
 
         $this->rockTheVoteMock->shouldReceive('getReportStatusById')->andReturn((object) [
-            'status'=> 'merging',
+            'status'=> 'building',
             'record_count' => 117,
             'current_index' => 3,
         ]);
@@ -35,7 +35,7 @@ class ImportRockTheVoteReportTest extends TestCase
 
         $importRockTheVoteReportJob->handle();
 
-        $this->assertEquals($report->status, 'merging');
+        $this->assertEquals($report->status, 'building');
         $this->assertEquals($report->row_count, 117);
         $this->assertEquals($report->current_index, 3);
         $this->assertEquals($report->user_id, $user->northstar_id);
@@ -55,7 +55,7 @@ class ImportRockTheVoteReportTest extends TestCase
     }
 
     /**
-     * Test that report is downloaded when status is complete..
+     * Test that report is downloaded and imported when status is complete.
      *
      * @return void
      */
