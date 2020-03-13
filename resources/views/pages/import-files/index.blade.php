@@ -10,8 +10,8 @@
           <tr class="row">
             <th class="col-md-3">Created</th>
             <th class="col-md-3">Import type</th>
-            <th class="col-md-2">Row count</th>
-            <th class="col-md-4">Created by</th>
+            <th class="col-md-3">Row count</th>
+            <th class="col-md-3">Created by</th>
           </tr>
         </thead>
         @foreach($data as $key => $importFile)
@@ -23,19 +23,27 @@
               </td>
               <td class="col-md-3">
                 {{$importFile->import_type}}
-              </td> 
-              <td class="col-md-2">
-                {{$importFile->row_count}}
-              </td>
-              <td class="col-md-4">
-                {{$importFile->user_id ? $importFile->user_id : 'Console'}}
                 @if ($importFile->options)
                   <ul>
                   @foreach (json_decode($importFile->options) as $key => $value)
-                    <li>{{$key}}: <strong>{{$value}}</strong></li>
+                    @if ($key === 'report_id')
+                      <li>
+                        <a href="/rock-the-vote/reports/{{$value}}">
+                          Report <strong>#{{$value}}</strong>
+                        </a>
+                      </li>
+                    @else
+                      <li>{{$key}}: <strong>{{$value}}</strong></li>
+                    @endif
                   @endforeach
                   </ul>
                 @endif
+              </td> 
+              <td class="col-md-3">
+                {{$importFile->row_count}}
+              </td>
+              <td class="col-md-3">
+                {{$importFile->user_id ? $importFile->user_id : 'Console'}}
               </td>     
             </tr>
         @endforeach
