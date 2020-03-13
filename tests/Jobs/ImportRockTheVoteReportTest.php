@@ -22,7 +22,7 @@ class ImportRockTheVoteReportTest extends TestCase
         Bus::fake();
 
         $report = factory(RockTheVoteReport::class)->create();
-        $user = \Chompy\User::forceCreate(['role' => 'admin']);
+        $user = User::forceCreate(['role' => 'admin']);
 
         $this->rockTheVoteMock->shouldReceive('getReportStatusById')->andReturn((object) [
             'status'=> 'merging',
@@ -56,7 +56,7 @@ class ImportRockTheVoteReportTest extends TestCase
         Storage::fake();
 
         $report = factory(RockTheVoteReport::class)->create();
-        $user = \Chompy\User::forceCreate(['role' => 'admin']);
+        $user = User::forceCreate(['role' => 'admin']);
 
         $this->rockTheVoteMock->shouldReceive('getReportStatusById')->andReturn((object) [
             'status'=> 'complete',
