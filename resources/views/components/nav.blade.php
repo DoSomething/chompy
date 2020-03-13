@@ -33,7 +33,7 @@
                         </a>
                     </li>
                     <li @if (strpos(Request::path(), 'rock-the-vote') !== false)) class="active" @endif>
-                        <a class="nav-item nav-link" href="{{  '/'.$rockTheVotePath }}">
+                        <a class="nav-item nav-link" href="{{'/rock-the-vote/reports/create'}}">
                             Rock The Vote
                         </a>
                     </li>
