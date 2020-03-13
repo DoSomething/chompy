@@ -29,9 +29,6 @@ class RockTheVoteReportTest extends TestCase
         $this->assertEquals($report->before, $before);
         $this->assertEquals($report->status, 'queued');
         $this->assertEquals($report->user_id, null);
-        $this->assertDatabaseHas('rock_the_vote_reports', [
-            'id' => 17,
-        ]);
     }
 
     /**
