@@ -9,19 +9,34 @@ use Chompy\Jobs\ImportRockTheVoteReport;
 class RockTheVoteReportTest extends TestCase
 {
     /**
-     * Test creating and importing a Rock The Vote Report via web.
+     * Test for unauthorized requests.
      *
      * @return void
      */
     public function testUnauthorized()
     {
-        $user = \Chompy\User::forceCreate(['role' => 'user']);
-        $response = $this->be($user)->postJson('/rock-the-vote-reports', [
+        $response = $this->postJson('/rock-the-vote-reports', [
                 'since' => '2019-12-19 00:00:00',
                 'before' => '2020-02-19 00:00:00',
             ]);
 
         $response->assertStatus(401);
+    }
+
+    /**
+     * Test for invalid parameters.
+     *
+     * @return void
+     */
+    public function testCreateRockTheReportFormValidation()
+    {
+        $admin = \Chompy\User::forceCreate(['role' => 'admin']);
+        $response = $this->be($admin)->postJson('/rock-the-vote-reports', [
+                'since' => null,
+                'before' => '2020-02-19 00:00:00',
+            ]);
+
+        $response->assertStatus(422);
     }
 
     /**
