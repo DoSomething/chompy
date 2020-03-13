@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Chompy\Services\RockTheVote;
 use Chompy\Models\RockTheVoteReport;
 use Chompy\Http\Controllers\Controller;
+use Chompy\Jobs\ImportRockTheVoteReport;
 
 class RockTheVoteReportController extends Controller
 {
@@ -48,6 +49,8 @@ class RockTheVoteReportController extends Controller
         // Log our created report in the database, to keep track of reports requested.
         $report = RockTheVoteReport::createFromApiResponse($apiResponse, $request['since'], $request['before']);
 
+        ImportRockTheVoteReport::dispatch(\Auth::user(), $report);
+
         return redirect('rock-the-vote/reports/' . $report->id);
     }
 
@@ -59,8 +62,7 @@ class RockTheVoteReportController extends Controller
     public function show($id)
     {
         return view('pages.rock-the-vote-reports.show', [
-            'id' => $id,
-            'report' => app(RockTheVote::class)->getReportStatusById($id),
+            'report' => RockTheVoteReport::find($id),
         ]);
     }
 
@@ -71,8 +73,8 @@ class RockTheVoteReportController extends Controller
      */
     public function index()
     {
-        $data = RockTheVoteReport::orderBy('id', 'desc')->paginate(15);
-
-        return view('pages.rock-the-vote-reports.index', ['data' => $data]);
+        return view('pages.rock-the-vote-reports.index', [
+            'data' => RockTheVoteReport::orderBy('id', 'desc')->paginate(15),
+        ]);
     }
 }

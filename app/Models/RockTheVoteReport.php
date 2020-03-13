@@ -21,7 +21,10 @@ class RockTheVoteReport extends Model
         'status',
         'since',
         'before',
+        'row_count',
+        'current_index',
         'dispatched_at',
+        'user_id',
     ];
 
     /**
@@ -51,12 +54,12 @@ class RockTheVoteReport extends Model
     /**
      * Logs a Rock The Vote Report that we've created via API request.
      *
-     * @param array $response
+     * @param object $response
      * @param datetime $since
      * @param datetime $before
      * @return RockTheVoteReport
      */
-    public static function createFromApiResponse($response, $since = null, $before = null)
+    public static function createFromApiResponse($response, $since, $before)
     {
         // Parse response to find the new Rock The Vote Report ID.
         $statusUrlParts = explode('/', $response->status_url);
@@ -68,6 +71,15 @@ class RockTheVoteReport extends Model
             'since' => $since,
             'before' => $before,
             'status' => $response->status,
+            'user_id' => optional(\Auth::user())->northstar_id,
         ]);
+    }
+
+    /**
+     * @return int
+     */
+    public function getPercentageAttribute()
+    {
+        return round(($this->current_index * 100) / $this->row_count);
     }
 }
