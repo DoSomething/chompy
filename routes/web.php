@@ -25,7 +25,7 @@ Route::resource('rock-the-vote/reports', 'RockTheVoteReportController', [
 Route::resource('users', 'UserController', ['only' => ['show']]);
 
 Route::get('/', function () {
-    return view('pages.home');
+    return \Auth::check() ? redirect('import-files') : view('pages.home');
 });
 
 // Authentication
