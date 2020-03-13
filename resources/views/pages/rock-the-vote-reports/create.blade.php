@@ -32,6 +32,8 @@
         <div>
             <input type="submit" class="btn btn-primary btn-lg" value="Create">
         </div>
+        <hr />
+        @include('pages.partials.rock-the-vote.create', ['config' => $config])
     </form>
 </div>
 

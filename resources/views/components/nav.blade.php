@@ -27,13 +27,13 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
-                    <li @if (Request::path() === $emailSubscriptionPath) class="active" @endif>
-                        <a class="nav-item nav-link" href="{{  '/'.$emailSubscriptionPath }}">
+                    <li @if (Request::path() === "import/email-subscription") class="active" @endif>
+                        <a class="nav-item nav-link" href="/import/email-subscription">
                             Email subscription
                         </a>
                     </li>
                     <li @if (strpos(Request::path(), 'rock-the-vote') !== false)) class="active" @endif>
-                        <a class="nav-item nav-link" href="{{'/rock-the-vote/reports/create'}}">
+                        <a class="nav-item nav-link" href="/rock-the-vote/reports/create">
                             Rock The Vote
                         </a>
                     </li>

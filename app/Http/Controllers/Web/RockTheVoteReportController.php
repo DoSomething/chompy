@@ -2,6 +2,7 @@
 
 namespace Chompy\Http\Controllers\Web;
 
+use Chompy\ImportType;
 use Illuminate\Http\Request;
 use Chompy\Services\RockTheVote;
 use Chompy\Models\RockTheVoteReport;
@@ -28,7 +29,9 @@ class RockTheVoteReportController extends Controller
      */
     public function create()
     {
-        return view('pages.rock-the-vote-reports.create');
+        return view('pages.rock-the-vote-reports.create', [
+            'config' => ImportType::getConfig(ImportType::$rockTheVote),
+        ]);
     }
 
     /**

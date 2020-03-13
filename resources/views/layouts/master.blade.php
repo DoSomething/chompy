@@ -29,10 +29,7 @@
             </div>
         @endif
         <div class="container-fluid">
-            @include('components.nav', [
-                'emailSubscriptionPath' => 'import/'.\Chompy\ImportType::$emailSubscription,
-                'rockTheVotePath' => 'import/'.\Chompy\ImportType::$rockTheVote,
-            ])
+            @include('components.nav')
         </div>
 
         <div class="container">
