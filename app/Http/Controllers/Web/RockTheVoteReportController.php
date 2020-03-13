@@ -54,7 +54,7 @@ class RockTheVoteReportController extends Controller
 
         ImportRockTheVoteReport::dispatch(\Auth::user(), $report);
 
-        return redirect('rock-the-vote/reports/' . $report->id);
+        return redirect('rock-the-vote-reports/' . $report->id);
     }
 
     /**
