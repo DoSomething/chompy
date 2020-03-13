@@ -1,11 +1,5 @@
-<div class="form-group">
-    <h1>Rock The Vote</h1>
-    <p class="lead">
-      Creates or updates users and their voter registration post per uploaded Rock The Vote CSV.
-    </p>
-    </p>
-</div>
-<h3>Users</h3>
+<h3>Import configuration</h3>
+<h4>Users</h4>
 <div class="form-group row">
     <label class="col-sm-3 col-form-label">Email subscription topics</label>
     <div class="col-sm-9">
@@ -42,7 +36,7 @@
         </small>
     </div>
 </div>
-<h3>Posts</h3>
+<h4>Posts</h4>
 <div class="form-group row">
     <label class="col-sm-3 col-form-label">Action ID</label>
     <div class="col-sm-9">

@@ -2,6 +2,7 @@
 
 namespace Chompy\Http\Controllers\Web;
 
+use Chompy\ImportType;
 use Illuminate\Http\Request;
 use Chompy\Services\RockTheVote;
 use Chompy\Models\RockTheVoteReport;
@@ -28,7 +29,9 @@ class RockTheVoteReportController extends Controller
      */
     public function create()
     {
-        return view('pages.rock-the-vote-reports.create');
+        return view('pages.rock-the-vote-reports.create', [
+            'config' => ImportType::getConfig(ImportType::$rockTheVote),
+        ]);
     }
 
     /**
@@ -39,8 +42,8 @@ class RockTheVoteReportController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'since' => ['required'],
-            'before' => ['required'],
+            'since' => 'required|date_format:Y-m-d H:i:s',
+            'before' => 'required|date_format:Y-m-d H:i:s',
         ]);
 
         // Execute API request to create a new Rock The Vote Report.
@@ -51,7 +54,7 @@ class RockTheVoteReportController extends Controller
 
         ImportRockTheVoteReport::dispatch(\Auth::user(), $report);
 
-        return redirect('rock-the-vote/reports/' . $report->id);
+        return redirect('rock-the-vote-reports/' . $report->id);
     }
 
     /**

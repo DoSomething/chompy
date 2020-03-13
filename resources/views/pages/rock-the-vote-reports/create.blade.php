@@ -7,12 +7,9 @@
 <div>
     <h1>Create Report</h1>
     <p>
-        Use this form to create a Rock The Vote CSV report of voter registrations.
+        Use this form to create and import a new Rock The Vote report.
     <p>
-    <p>
-        <strong>Note</strong>: It won't automatically be imported yet, you'll still need to find and download it from our Rock The Vote partner portal for now.
-    </p> 
-    <form method="POST" action="{{ route('reports.store') }}">
+    <form method="POST" action="{{ route('rock-the-vote-reports.store') }}">
         {{ csrf_field()}}
         <div class="form-group row">
             <label for="since" class="col-sm-3 col-form-label" required>
@@ -35,6 +32,8 @@
         <div>
             <input type="submit" class="btn btn-primary btn-lg" value="Create">
         </div>
+        <hr />
+        @include('pages.partials.rock-the-vote.create', ['config' => $config])
     </form>
 </div>
 

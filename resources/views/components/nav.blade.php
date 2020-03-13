@@ -8,7 +8,7 @@
                 <span class="icon-bar"></span>
             </button>
 
-            <a class="navbar-brand">Chompy</a>
+            <a class="navbar-brand" href="/">Chompy</a>
             <ul class="nav navbar-nav">
                 @if (Auth::user())
                     <li @if (Request::is('import-files*')) class="active" @endif>
@@ -27,13 +27,13 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 @if (Auth::user())
-                    <li @if (Request::path() === $emailSubscriptionPath) class="active" @endif>
-                        <a class="nav-item nav-link" href="{{  '/'.$emailSubscriptionPath }}">
+                    <li @if (Request::path() === "import/email-subscription") class="active" @endif>
+                        <a class="nav-item nav-link" href="/import/email-subscription">
                             Email subscription
                         </a>
                     </li>
                     <li @if (strpos(Request::path(), 'rock-the-vote') !== false)) class="active" @endif>
-                        <a class="nav-item nav-link" href="{{  '/'.$rockTheVotePath }}">
+                        <a class="nav-item nav-link" href="/rock-the-vote-reports">
                             Rock The Vote
                         </a>
                     </li>

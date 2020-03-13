@@ -6,7 +6,7 @@
 
 <div>
     <h1>
-        Report #{{$report->id}}
+        Report #{{$report->id}} <small>{{$report->row_count}} rows</small>
     </h1>
     <p>
         Since: <strong>{{$report->since}}</strong>
@@ -17,12 +17,13 @@
     <p>
         Status: <strong>{{$report->status}}</strong>
     </p>
-    <p>
-        Total rows: <strong>{{$report->row_count}}</strong>
-    </p>
     @if ($report->status === 'building')
     <p>
         Progress: <strong>{{$report->percentage}}% </strong>(processed <strong>{{$report->current_index}}</strong> rows)
+    </p>
+    @elseif ($report->status === 'complete')
+    <p>
+        Imported: <strong>{{$report->dispatched_at}}</strong>
     </p>
     @endif
     <hr />

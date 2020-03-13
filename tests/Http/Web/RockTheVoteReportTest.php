@@ -9,6 +9,37 @@ use Chompy\Jobs\ImportRockTheVoteReport;
 class RockTheVoteReportTest extends TestCase
 {
     /**
+     * Test for unauthorized requests.
+     *
+     * @return void
+     */
+    public function testUnauthorized()
+    {
+        $response = $this->postJson('/rock-the-vote-reports', [
+            'since' => '2019-12-19 00:00:00',
+            'before' => '2020-02-19 00:00:00',
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    /**
+     * Test for invalid parameters.
+     *
+     * @return void
+     */
+    public function testCreateRockTheReportFormValidation()
+    {
+        $admin = \Chompy\User::forceCreate(['role' => 'admin']);
+        $response = $this->be($admin)->postJson('/rock-the-vote-reports', [
+            'since' => null,
+            'before' => '2020-02-19 00:00:00',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    /**
      * Test creating and importing a Rock The Vote Report via web.
      *
      * @return void
@@ -23,7 +54,7 @@ class RockTheVoteReportTest extends TestCase
         ]);
 
         $admin = \Chompy\User::forceCreate(['role' => 'admin']);
-        $response = $this->be($admin)->postJson('/rock-the-vote/reports', [
+        $response = $this->be($admin)->postJson('/rock-the-vote-reports', [
             'since' => '2019-12-19 00:00:00',
             'before' => '2020-02-19 00:00:00',
         ]);
@@ -35,6 +66,6 @@ class RockTheVoteReportTest extends TestCase
         });
 
         // Verify redirect to new Rock the Vote report.
-        $response->assertRedirect('/rock-the-vote/reports/17');
+        $response->assertRedirect('/rock-the-vote-reports/17');
     }
 }
