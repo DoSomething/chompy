@@ -28,8 +28,8 @@
                   @foreach (json_decode($importFile->options) as $key => $value)
                     @if ($key === 'report_id')
                       <li>
-                        <a href="/rock-the-vote/reports/{{$value}}">
-                          Report <strong>#{{$value}}</strong>
+                        <a href="/rock-the-vote-reports/{{$value}}">
+                          <strong>#{{$value}}</strong>
                         </a>
                       </li>
                     @else

@@ -18,7 +18,7 @@ $router->post('import/{importType}', 'ImportFileController@store')->name('import
 
 Route::resource('import-files', 'ImportFileController', ['only' => ['index', 'show']]);
 
-Route::resource('rock-the-vote/reports', 'RockTheVoteReportController', [
+Route::resource('rock-the-vote-reports', 'RockTheVoteReportController', [
     'except' => ['delete', 'update'],
 ]);
 

@@ -9,7 +9,7 @@
     <p>
         Use this form to create and import a new Rock The Vote report.
     <p>
-    <form method="POST" action="{{ route('reports.store') }}">
+    <form method="POST" action="{{ route('rock-the-vote-reports.store') }}">
         {{ csrf_field()}}
         <div class="form-group row">
             <label for="since" class="col-sm-3 col-form-label" required>

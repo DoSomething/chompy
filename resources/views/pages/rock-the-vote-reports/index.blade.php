@@ -5,7 +5,7 @@
 @section('main_content')
 
 <div>
-    <h1>Rock The Vote Reports</h1>
+    <h1>Rock The Vote Reports <small><a class="pull-right" href="/rock-the-vote-reports/create">Create</a></small></h1>
     <table class="table">
         <thead>
           <tr class="row">
