@@ -72,4 +72,17 @@ class ImportRockTheVoteReport implements ShouldQueue
         $this->report->dispatched_at = $now;
         $this->report->save();
     }
+
+    /**
+     * Returns the parameters passed to this job.
+     *
+     * @return array
+     */
+    public function getParameters()
+    {
+        return [
+            'report' => $this->report,
+            'user' => $this->user,
+        ];
+    }
 }

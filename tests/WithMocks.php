@@ -4,6 +4,7 @@ namespace Tests;
 
 use Carbon\Carbon;
 use Chompy\Services\Rogue;
+use Chompy\Services\RockTheVote;
 use DoSomething\Gateway\Northstar;
 use Illuminate\Support\Facades\Storage;
 use DoSomething\Gateway\Resources\NorthstarUser;
@@ -39,6 +40,9 @@ trait WithMocks
 
         // Rogue Mock
         $this->rogueMock = $this->mock(Rogue::class);
+
+        // Rock The Vote Mock
+        $this->rockTheVoteMock = $this->mock(RockTheVote::class);
     }
 
     /**
