@@ -8,7 +8,7 @@
                 <span class="icon-bar"></span>
             </button>
 
-            <a class="navbar-brand">Chompy</a>
+            <a class="navbar-brand" href="/">Chompy</a>
             <ul class="nav navbar-nav">
                 @if (Auth::user())
                     <li @if (Request::is('import-files*')) class="active" @endif>
