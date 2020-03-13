@@ -39,8 +39,8 @@ class RockTheVoteReportController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'since' => ['required'],
-            'before' => ['required'],
+            'since' => ['date_format:Y-m-d H:i:s'],
+            'before' => ['date_format:Y-m-d H:i:s'],
         ]);
 
         // Execute API request to create a new Rock The Vote Report.
