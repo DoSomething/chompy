@@ -43,15 +43,10 @@ class ImportRockTheVoteReportTest extends TestCase
         Bus::assertDispatched(ImportRockTheVoteReport::class, function ($job) use (&$report, &$user) {
             $params = $job->getParameters();
 
-            $this->assertEquals($report, $params['report']);
-            $this->assertEquals($user, $params['user']);
-
-            return true;
+            return $params['report'] == $report && $params['user'] == $user;
         });
 
-        Bus::assertNotDispatched(ImportFileRecords::class, function () {
-            return true;
-        });
+        Bus::assertNotDispatched(ImportFileRecords::class);
     }
 
     /**
