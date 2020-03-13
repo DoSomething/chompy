@@ -13,7 +13,7 @@
             <th class="col-md-3">Since</th>
             <th class="col-md-3">Before</th>
             <th class="col-md-2">Status</th>
-            <th class="col-md-2">Created</th>
+            <th class="col-md-2">Imported</th>
           </tr>
         </thead>
         @foreach($data as $key => $report)
@@ -33,7 +33,7 @@
                 {{$report->status}}
               </td>
               <td class="col-md-2">
-                {{$report->created_at}}
+                {{$report->dispatched_at}}
               </td>    
             </tr>
         @endforeach
