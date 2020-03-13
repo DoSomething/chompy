@@ -73,6 +73,7 @@ class ImportRockTheVoteReport implements ShouldQueue
         $this->report->save();
     }
 
+
     /**
      * Returns the parameters passed to this job.
      *
