@@ -16,9 +16,9 @@ class RockTheVoteReportTest extends TestCase
     public function testUnauthorized()
     {
         $response = $this->postJson('/rock-the-vote-reports', [
-                'since' => '2019-12-19 00:00:00',
-                'before' => '2020-02-19 00:00:00',
-            ]);
+            'since' => '2019-12-19 00:00:00',
+            'before' => '2020-02-19 00:00:00',
+        ]);
 
         $response->assertStatus(401);
     }
@@ -32,9 +32,9 @@ class RockTheVoteReportTest extends TestCase
     {
         $admin = \Chompy\User::forceCreate(['role' => 'admin']);
         $response = $this->be($admin)->postJson('/rock-the-vote-reports', [
-                'since' => null,
-                'before' => '2020-02-19 00:00:00',
-            ]);
+            'since' => null,
+            'before' => '2020-02-19 00:00:00',
+        ]);
 
         $response->assertStatus(422);
     }
