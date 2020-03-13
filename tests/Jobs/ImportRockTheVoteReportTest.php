@@ -31,14 +31,23 @@ class ImportRockTheVoteReportTest extends TestCase
         ]);
         $this->rockTheVoteMock->shouldNotReceive('getReportByUrl');
 
-        $job = new ImportRockTheVoteReport($user, $report);
+        $importRockTheVoteReportJob = new ImportRockTheVoteReport($user, $report);
 
-        $job->handle();
+        $importRockTheVoteReportJob->handle();
 
         $this->assertEquals($report->status, 'merging');
         $this->assertEquals($report->row_count, 117);
         $this->assertEquals($report->current_index, 3);
         $this->assertEquals($report->user_id, $user->northstar_id);
+
+        Bus::assertDispatched(ImportRockTheVoteReport::class, function ($job) use (&$report, &$user) {
+            $params = $job->getParameters();
+
+            $this->assertEquals($report, $params['report']);
+            $this->assertEquals($user, $params['user']);
+
+            return true;
+        });
 
         Bus::assertNotDispatched(ImportFileRecords::class, function () {
             return true;
@@ -67,13 +76,14 @@ class ImportRockTheVoteReportTest extends TestCase
 
         $this->rockTheVoteMock->shouldReceive('getReportByUrl');
 
-        $job = new ImportRockTheVoteReport($user, $report);
+        $importRockTheVoteReportJob = new ImportRockTheVoteReport($user, $report);
 
-        $job->handle();
+        $importRockTheVoteReportJob->handle();
 
         Bus::assertDispatched(ImportFileRecords::class, function ($job) use (&$report, &$user) {
             $params = $job->getParameters();
 
+            $this->assertEquals($params['import_type'], \Chompy\ImportType::$rockTheVote);
             $this->assertEquals($params['options']['report_id'], $report->id);
             $this->assertEquals($params['user_id'], $user->northstar_id);
 

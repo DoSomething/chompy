@@ -120,13 +120,14 @@ class ImportFileRecords implements ShouldQueue
     }
 
     /**
-     * Returns the record passed to this job.
+     * Returns the parameters passed to this job.
      *
      * @return array
      */
     public function getParameters()
     {
         return [
+            'import_type' => $this->importType,
             'options' => $this->importOptions,
             'user_id' => optional($this->user)->northstar_id,
         ];
