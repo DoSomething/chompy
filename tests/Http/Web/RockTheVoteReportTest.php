@@ -3,7 +3,6 @@
 namespace Tests\Http\Web;
 
 use Tests\TestCase;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Bus;
 use Chompy\Jobs\ImportRockTheVoteReport;
 
@@ -32,10 +31,7 @@ class RockTheVoteReportTest extends TestCase
         Bus::assertDispatched(ImportRockTheVoteReport::class, function ($job) use (&$admin) {
             $params = $job->getParameters();
 
-            $this->assertEquals($params['report']->id, 17);
-            $this->assertEquals($params['user'], $admin);
-
-            return true;
+            return $params['report']->id == 17 && $params['user'] == $admin;
         });
 
         // Verify redirect to new Rock the Vote report.
