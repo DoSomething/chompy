@@ -19,7 +19,7 @@
         @foreach($data as $key => $report)
             <tr class="row">
               <td class="col-md-2">
-                <a href="/rock-the-vote/reports/{{$report->id}}">
+                <a href="/rock-the-vote-reports/{{$report->id}}">
                   <strong>{{$report->id}}</strong>
                 </a>
               </td>
