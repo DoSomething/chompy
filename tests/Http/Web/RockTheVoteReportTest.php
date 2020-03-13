@@ -39,7 +39,6 @@ class RockTheVoteReportTest extends TestCase
         });
 
         // Verify redirect to new Rock the Vote report.
-        $this->assertEquals(302, $response->status());
-        $this->assertTrue(Str::contains($response->getTargetUrl(), '/rock-the-vote/reports/17'));
+        $response->assertRedirect('/rock-the-vote/reports/17');
     }
 }
