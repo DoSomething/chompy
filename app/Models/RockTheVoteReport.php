@@ -2,6 +2,7 @@
 
 namespace Chompy\Models;
 
+use Chompy\Services\RockTheVote;
 use Illuminate\Database\Eloquent\Model;
 
 class RockTheVoteReport extends Model
@@ -52,15 +53,19 @@ class RockTheVoteReport extends Model
     ];
 
     /**
-     * Logs a Rock The Vote Report that we've created via API request.
+     * Creates a Rock The Vote Report via API request and saves to storage.
      *
-     * @param object $response
      * @param datetime $since
      * @param datetime $before
      * @return RockTheVoteReport
      */
-    public static function createFromApiResponse($response, $since, $before)
+    public static function createViaApi($since = null, $before = null)
     {
+        $response = app(RockTheVote::class)->createReport([
+            'since' => $since,
+            'before' => $before,
+        ]);
+
         // Parse response to find the new Rock The Vote Report ID.
         $statusUrlParts = explode('/', $response->status_url);
         $reportId = $statusUrlParts[count($statusUrlParts) - 1];
