@@ -27,6 +27,13 @@ class CreateRockTheVoteReport implements ShouldQueue
     protected $before;
 
     /**
+     * The Rock The Vote report created upon success.
+     *
+     * @var DateTime
+     */
+    protected $report;
+
+    /**
      * Create a new job instance.
      *
      * @param DateTime $since
@@ -48,9 +55,9 @@ class CreateRockTheVoteReport implements ShouldQueue
     {
         info('Creating report', ['before' => $this->before, 'since' => $this->since]);
 
-        $report = RockTheVoteReport::createViaApi($this->since, $this->before);
+        $this->report = RockTheVoteReport::createViaApi($this->since, $this->before);
 
-        ImportRockTheVoteReport::dispatch(null, $report);
+        ImportRockTheVoteReport::dispatch(null, $this->report);
     }
 
     /**
@@ -63,6 +70,7 @@ class CreateRockTheVoteReport implements ShouldQueue
         return [
             'since' => $this->since,
             'before' => $this->before,
+            'report' => $this->report,
         ];
     }
 }
