@@ -34,6 +34,6 @@ class ImportRockTheVoteCommand extends Command
         $since = clone $before;
 
         // ... and after an hour ago (adding two overlapping minutes to ensure we don't miss any within the internal)
-        CreateRockTheVoteReport::dispatch($before, $since->subHours(1)->subMinutes(2));
+        CreateRockTheVoteReport::dispatch($since->subHours(1)->subMinutes(2), $before);
     }
 }
