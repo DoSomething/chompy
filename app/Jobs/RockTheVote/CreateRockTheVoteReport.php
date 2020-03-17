@@ -36,8 +36,8 @@ class CreateRockTheVoteReport implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param DateTime $since
-     * @param DateTime $before
+     * @param string $since
+     * @param string $before
      * @return void
      */
     public function __construct($since, $before)
@@ -53,7 +53,7 @@ class CreateRockTheVoteReport implements ShouldQueue
      */
     public function handle()
     {
-        info('Creating report', ['before' => $this->before, 'since' => $this->since]);
+        info('Creating report', ['since' => $this->since, 'before' => $this->before]);
 
         $this->report = RockTheVoteReport::createViaApi($this->since, $this->before);
 

@@ -22,7 +22,7 @@ class ImportRockTheVoteCommandTest extends TestCase
         Bus::assertDispatched(CreateRockTheVoteReport::class, function ($job) use (&$startTime) {
             $params = $job->getParameters();
 
-            return $params['before'] == $startTime && $params['since'] == $startTime->subHours(1)->subMinutes(2);
+            return $params['before'] == $startTime->toDateTimeString() && $params['since'] == $startTime->subHours(1)->subMinutes(2)->toDateTimeString();
         });
     }
 }
