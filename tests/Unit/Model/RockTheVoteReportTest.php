@@ -13,16 +13,17 @@ class RockTheVoteReportTest extends TestCase
      *
      * @return void
      */
-    public function testCreateFromApiResponseWithValidResponse()
+    public function testCreateViaApiWithValidResponse()
     {
-        $apiResponse = (object) [
+        $this->rockTheVoteMock->shouldReceive('createReport')->andReturn((object) [
             'status'=> 'queued',
             'status_url' => 'https://register.rockthevote.com/api/v4/registrant_reports/17',
-        ];
+        ]);
+
         $since = '2019-12-19 00:00:00';
         $before = '2020-02-19 00:00:00';
 
-        $report = RockTheVoteReport::createFromApiResponse($apiResponse, $since, $before);
+        $report = RockTheVoteReport::createViaApi($since, $before);
 
         $this->assertEquals($report->id, 17);
         $this->assertEquals($report->since, $since);
@@ -36,11 +37,13 @@ class RockTheVoteReportTest extends TestCase
      *
      * @return void
      */
-    public function testCreateFromApiResponseWithInvalidResponseType()
+    public function testCreateViaApiWithInvalidResponseType()
     {
+        $this->rockTheVoteMock->shouldReceive('createReport')->andReturn('test');
+
         $this->expectException(ErrorException::class);
 
-        RockTheVoteReport::createFromApiResponse('test', null, null);
+        RockTheVoteReport::createViaApi();
     }
 
     /**
@@ -48,14 +51,14 @@ class RockTheVoteReportTest extends TestCase
      *
      * @return void
      */
-    public function testCreateFromApiResponseWithMissingStatusUrl()
+    public function testCreateViaApiWithMissingStatusUrl()
     {
+        $this->rockTheVoteMock->shouldReceive('createReport')->andReturn((object) [
+            'status'=> 'queued',
+        ]);
+
         $this->expectException(ErrorException::class);
 
-        $apiResponse = (object) [
-            'status'=> 'queued',
-        ];
-
-        RockTheVoteReport::createFromApiResponse($apiResponse, null, null);
+        RockTheVoteReport::createViaApi();
     }
 }

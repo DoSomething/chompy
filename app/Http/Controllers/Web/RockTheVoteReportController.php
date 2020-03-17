@@ -4,7 +4,6 @@ namespace Chompy\Http\Controllers\Web;
 
 use Chompy\ImportType;
 use Illuminate\Http\Request;
-use Chompy\Services\RockTheVote;
 use Chompy\Models\RockTheVoteReport;
 use Chompy\Http\Controllers\Controller;
 use Chompy\Jobs\ImportRockTheVoteReport;
@@ -46,11 +45,7 @@ class RockTheVoteReportController extends Controller
             'before' => 'required|date_format:Y-m-d H:i:s',
         ]);
 
-        // Execute API request to create a new Rock The Vote Report.
-        $apiResponse = app(RockTheVote::class)->createReport($request->all());
-
-        // Log our created report in the database, to keep track of reports requested.
-        $report = RockTheVoteReport::createFromApiResponse($apiResponse, $request['since'], $request['before']);
+        $report = RockTheVoteReport::createViaApi($request['since'], $request['before']);
 
         ImportRockTheVoteReport::dispatch(\Auth::user(), $report);
 
