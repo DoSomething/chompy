@@ -63,4 +63,17 @@ trait WithMocks
             ]);
         });
     }
+
+    /**
+     * "Freeze" time so we can make assertions based on it.
+     *
+     * @param string $time
+     * @return Carbon
+     */
+    public function mockTime($time = 'now')
+    {
+        Carbon::setTestNow((string) new Carbon($time));
+
+        return Carbon::getTestNow();
+    }
 }

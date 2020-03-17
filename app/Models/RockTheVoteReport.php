@@ -55,8 +55,8 @@ class RockTheVoteReport extends Model
     /**
      * Creates a Rock The Vote Report via API request and saves to storage.
      *
-     * @param datetime $since
-     * @param datetime $before
+     * @param string $since
+     * @param string $before
      * @return RockTheVoteReport
      */
     public static function createViaApi($since = null, $before = null)
