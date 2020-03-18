@@ -33,8 +33,8 @@ class ImportRockTheVoteCommand extends Command
         $before = Carbon::now();
         $since = clone $before;
 
-        // ... and after an hour ago (adding two overlapping minutes to ensure we don't miss any within the internal).
-        $since->subHours(1)->subMinutes(2);
+        // ... and after an hour ago (adding 30 overlapping minutes to ensure we don't miss any within the internal).
+        $since->subHours(1)->subMinutes(30);
 
         info('Executing import command', ['since' => $since, 'before' => $before]);
 
