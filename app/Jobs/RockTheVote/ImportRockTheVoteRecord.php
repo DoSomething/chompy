@@ -207,10 +207,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function handle(Rogue $rogue)
     {
-        info('progress_log: Processing: ' . $this->record->email);
+        info('progress_log: Processing Rock The Vote record');
 
         $user = $this->getUser($this->record);
+
         if ($user && $user->id) {
+            info('Found user', ['user' => $user->id]);
+
             $newStatus = $this->getVoterRegistrationStatusChange($user->voter_registration_status, $this->record->voter_registration_status);
 
             if ($newStatus) {
@@ -218,6 +221,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
             }
         } else {
             $user = $this->createUser($this->record);
+
+            info('Created user', ['user' => $user->id]);
+
             $this->sendUserPasswordResetIfSubscribed($user);
         }
 
@@ -317,7 +323,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
         if (! $user->id) {
             throw new Exception(500, 'Unable to create user: ' . $record->email);
         }
-        info('Created user', ['user' => $user->id]);
 
         return $user;
     }
