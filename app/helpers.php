@@ -35,3 +35,18 @@ function is_anonymous_mobile($mobile)
         '+8656696',
     ]);
 }
+
+/**
+ * Determines if a mobile number is valid.
+ *
+ * @TODO: Add phone number validation lib, or DRY this with Northstar validation through Gateway.
+ * @see https://git.io/Jvy0A
+ * For now, RTV is passing through a 000-000-0000 number that causes user creation to fail.
+ *
+ * @param string $mobile
+ * @return bool
+ */
+function is_valid_mobile($mobile)
+{
+    return $mobile != '000-000-0000';
+}
