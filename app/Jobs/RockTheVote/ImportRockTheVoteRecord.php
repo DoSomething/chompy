@@ -31,7 +31,7 @@ class RockTheVoteRecord
         $this->email = $record['Email address'];
         $this->first_name = $record['First name'];
         $this->last_name = $record['Last name'];
-        $this->mobile = is_valid_mobile($record['Phone']) ? $record['Phone'] : null;
+        $this->mobile = isset($record['Phone']) && is_valid_mobile($record['Phone']) ? $record['Phone'] : null;
 
         // Voter registration details.
         $this->rtv_finish_with_state = $record['Finish with State'];
