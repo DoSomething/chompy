@@ -42,6 +42,7 @@ function is_anonymous_mobile($mobile)
  * @TODO: Add phone number validation lib, or DRY this with Northstar validation through Gateway.
  * @see https://git.io/Jvy0A
  * For now, RTV is passing through a 000-000-0000 number that causes user creation to fail.
+ * @see https://github.com/DoSomething/chompy/pull/140
  *
  * @param string $mobile
  * @return bool
