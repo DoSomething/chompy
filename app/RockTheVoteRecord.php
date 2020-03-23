@@ -51,7 +51,7 @@ class RockTheVoteRecord
 
         $this->voter_registration_status = Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
 
-        $this->user_id = $this->parseUserId($record['Tracking Source']);
+        $this->parseUserId($record['Tracking Source']);
 
         $postConfig = $config['post'];
         $this->post_source = $postConfig['source'];
@@ -68,7 +68,7 @@ class RockTheVoteRecord
      * @param  string $referralCode
      * @return string
      */
-    private function parseUserId($referralCode)
+    public function parseUserId($referralCode)
     {
         info('Parsing referral code: ' . $referralCode);
 
@@ -114,7 +114,7 @@ class RockTheVoteRecord
             }
         }
 
-        return isset($userId) ? $userId : null;
+        $this->user_id = isset($userId) ? $userId : null;
     }
 
     /**
