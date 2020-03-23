@@ -2,8 +2,6 @@
 
 namespace Tests;
 
-use Tests\TestCase;
-
 class HelpersTest extends TestCase
 {
     /**
