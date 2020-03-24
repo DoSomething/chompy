@@ -17,14 +17,14 @@ class RockTheVoteRecordTest extends TestCase
     {
         return array_merge([
             'Home address' => $this->faker->streetAddress,
-            'Home unit' => null,
+            'Home unit' => $this->faker->randomDigit,
             'Home city' => $this->faker->city,
-            'Home state' => null,
-            'Home zip code' => null,
-            'Email address' => null,
-            'First name' => null,
-            'Last name' => null,
-            'Phone' => null,
+            'Home state' => $this->faker->state,
+            'Home zip code' => $this->faker->postcode,
+            'Email address' => $this->faker->email,
+            'First name' => $this->faker->firstName,
+            'Last name' => $this->faker->lastName,
+            'Phone' => $this->faker->phoneNumber,
             'Finish with State' => null,
             'Pre-Registered' => null,
             'Started registration' => null,
@@ -33,6 +33,37 @@ class RockTheVoteRecordTest extends TestCase
             'Opt-in to Partner email?' => null,
             'Opt-in to Partner SMS/robocall' => null,
         ], $data);
+    }
+
+    /**
+     * Test that userData and postData arrays are parsed from record.
+     *
+     * @return void
+     */
+    public function testSetsUserDataAndPostData()
+    {
+        $exampleRow = $this->getExampleRow();
+        $config = $this->getConfig();
+
+        $record = new RockTheVoteRecord($exampleRow, $this->getConfig());
+
+        $this->assertEquals($record->userData['addr_street1'], $exampleRow['Home address']);
+        $this->assertEquals($record->userData['addr_street2'], $exampleRow['Home unit']);
+        $this->assertEquals($record->userData['addr_city'], $exampleRow['Home city']);
+        $this->assertEquals($record->userData['email'], $exampleRow['Email address']);
+        $this->assertEquals($record->userData['first_name'], $exampleRow['First name']);
+        $this->assertEquals($record->userData['id'], null);
+        $this->assertEquals($record->userData['last_name'], $exampleRow['Last name']);
+        $this->assertEquals($record->userData['mobile'], $exampleRow['Phone']);
+        $this->assertEquals($record->userData['referrer_user_id'], null);
+        $this->assertEquals($record->userData['source'], config('services.northstar.client_credentials.client_id'));
+        $this->assertEquals($record->userData['source_detail'], $config['user']['source_detail']);
+
+        $this->assertEquals($record->postData['action_id'], $config['post']['action_id']);
+        $this->assertEquals($record->postData['source'], $config['post']['source']);
+        $this->assertEquals($record->postData['source_details'], null);
+        $this->assertEquals($record->postData['type'], $config['post']['type']);
+        $this->assertEquals($record->postData['referrer_user_id'], null);
     }
 
     /**
