@@ -53,7 +53,7 @@ class RockTheVoteRecordTest extends TestCase
     {
         $record = new RockTheVoteRecord($this->getExampleRow(), ImportType::getConfig(ImportType::$rockTheVote));
 
-       $record->setUserId('campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger');
+        $record->setUserId('campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger');
 
         $this->assertEquals($record->userData['id'], null);
     }
