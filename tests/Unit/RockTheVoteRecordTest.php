@@ -8,9 +8,14 @@ use Chompy\RockTheVoteRecord;
 
 class RockTheVoteRecordTest extends TestCase
 {
-    public function getExampleRow()
+    public function getConfig()
     {
-        return [
+        return ImportType::getConfig(ImportType::$rockTheVote);
+    }
+
+    public function getExampleRow($data = [])
+    {
+        return array_merge([
             'Home address' => $this->faker->streetAddress,
             'Home unit' => null,
             'Home city' => $this->faker->city,
@@ -27,7 +32,7 @@ class RockTheVoteRecordTest extends TestCase
             'Tracking Source' => null,
             'Opt-in to Partner email?' => null,
             'Opt-in to Partner SMS/robocall' => null,
-        ];
+        ], $data);
     }
 
     /**
@@ -37,11 +42,15 @@ class RockTheVoteRecordTest extends TestCase
      */
     public function testSetsUserIdIfExistsInTrackingSource()
     {
-        $record = new RockTheVoteRecord($this->getExampleRow(), ImportType::getConfig(ImportType::$rockTheVote));
+        $trackingSource = 'user:58007c1242a0646e3a8b46b8,campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger';
 
-        $record->setUserId('user:58007c1242a0646e3a8b46b8,campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger');
+        $record = new RockTheVoteRecord($this->getExampleRow([
+            'Tracking Source' => $trackingSource,
+        ]), $this->getConfig());
 
         $this->assertEquals($record->userData['id'], '58007c1242a0646e3a8b46b8');
+        $this->assertEquals($record->userData['referrer_user_id'], null);
+        $this->assertEquals($record->postData['referrer_user_id'], null);
     }
 
     /**
@@ -51,11 +60,15 @@ class RockTheVoteRecordTest extends TestCase
      */
     public function testSetsUserIdToNullIfNotExistsInTrackingSource()
     {
-        $record = new RockTheVoteRecord($this->getExampleRow(), ImportType::getConfig(ImportType::$rockTheVote));
+        $trackingSource = 'campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger';
 
-        $record->setUserId('campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger');
+        $record = new RockTheVoteRecord($this->getExampleRow([
+            'Tracking Source' => $trackingSource,
+        ]), $this->getConfig());
 
         $this->assertEquals($record->userData['id'], null);
+        $this->assertEquals($record->userData['referrer_user_id'], null);
+        $this->assertEquals($record->postData['referrer_user_id'], null);
     }
 
     /**
@@ -65,10 +78,14 @@ class RockTheVoteRecordTest extends TestCase
      */
     public function testSetsUserIdToNullIfReferralTrackingSource()
     {
-        $record = new RockTheVoteRecord($this->getExampleRow(), ImportType::getConfig(ImportType::$rockTheVote));
+        $trackingSource = 'user:5552aa34469c64ec7d8b715b,campaignID:7059,campaignRunID:8128,source:web,source_details:onlinedrivereferral,referral=true';
 
-        $record->setUserId('user:5552aa34469c64ec7d8b715b,campaignID:7059,campaignRunID:8128,source:web,source_details:onlinedrivereferral,referral=true');
+        $record = new RockTheVoteRecord($this->getExampleRow([
+            'Tracking Source' => $trackingSource,
+        ]), $this->getConfig());
 
         $this->assertEquals($record->userData['id'], null);
+        $this->assertEquals($record->userData['referrer_user_id'], '5552aa34469c64ec7d8b715b');
+        $this->assertEquals($record->postData['referrer_user_id'], '5552aa34469c64ec7d8b715b');
     }
 }

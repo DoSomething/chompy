@@ -49,19 +49,28 @@ class RockTheVoteRecord
             'action_id' => $config['post']['action_id'],
         ];
 
-        $this->setUserId($record['Tracking Source']);
+        $trackingSource = $this->parseTrackingSource($record['Tracking Source']);
+
+        $this->userData['id'] = $trackingSource['user_id'];
+        $this->userData['referrer_user_id'] = $trackingSource['referrer_user_id'];
+        $this->postData['referrer_user_id'] = $trackingSource['referrer_user_id'];
     }
 
     /**
-     * Parse existing user ID from referral code string, and add to userData.
+     * Parses User ID or Referrer User ID from Tracking Source value.
+     * The Tracking Source value is manually added by editors into URL's, so check for typos.
      *
      * @param string $referralCode
+     * @return array
      */
-    public function setUserId($referralCode)
+    public function parseTrackingSource($referralCode)
     {
-        $this->userData['id'] = null;
-
         info('Parsing referral code: ' . $referralCode);
+
+        $result = [
+            'user_id' => null,
+            'referrer_user_id' => null,
+        ];
 
         // Remove some nonsense that comes in front of the referral code sometimes
         if (str_contains($referralCode, 'iframe?r=')) {
@@ -72,7 +81,7 @@ class RockTheVoteRecord
         }
 
         if (empty($referralCode)) {
-            return null;
+            return $result;
         }
 
         $referralCode = explode(',', $referralCode);
@@ -86,7 +95,7 @@ class RockTheVoteRecord
             }
 
             $key = strtolower($value[0]);
-            // We expect 'user', but check for any variations/typos in any manually entered URLs.
+
             if ($key === 'user' || $key === 'user_id' || $key === 'userid') {
                 $userId = $value[1];
             }
@@ -95,19 +104,20 @@ class RockTheVoteRecord
              * If referral parameter is set to true, the user parameter belongs to the referring
              * user, not the user that should be associated with this voter registration record.
              */
-            // We expect 'referral', but check for any typos in any manually entered URLs.
             if (($key === 'referral' || $key === 'refferal') && str_to_boolean($value[1])) {
                 /**
-                 * Return null to force querying for existing user via this record email or mobile
+                 * Return result to force querying for existing user via this record email or mobile
                  * upon import.
                  */
-                return null;
+                $result['referrer_user_id'] = $userId;
+
+                return $result;
             }
         }
 
-        if (isset($userId)) {
-            $this->userData['id'] = $userId;
-        }
+        $result['user_id'] = isset($userId) ? $userId : null;
+
+        return $result;
     }
 
     /**
