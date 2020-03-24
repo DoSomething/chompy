@@ -2,7 +2,7 @@
 
 namespace Chompy\Models;
 
-use Chompy\Jobs\RockTheVoteRecord;
+use Chompy\RockTheVoteRecord;
 use Illuminate\Database\Eloquent\Model;
 use DoSomething\Gateway\Resources\NorthstarUser;
 
