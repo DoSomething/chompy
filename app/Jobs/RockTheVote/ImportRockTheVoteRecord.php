@@ -47,8 +47,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $user = $this->getUser($this->record);
 
         if ($user && $user->id) {
-            info('Found user', ['user' => $user->id]);
-
             $newStatus = $this->getVoterRegistrationStatusChange($user->voter_registration_status, $this->record->voter_registration_status);
 
             if ($newStatus) {
@@ -103,21 +101,37 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         if ($record->user_id) {
             $user = gateway('northstar')->asClient()->getUser('id', $record->user_id);
+
             if ($user && $user->id) {
+                info('Found user by id', ['user' => $user->id]);
+
                 return $user;
             }
         }
+
         if ($record->email) {
             $user = gateway('northstar')->asClient()->getUser('email', $record->email);
+
             if ($user && $user->id) {
+                info('Found user by email', ['user' => $user->id]);
+
                 return $user;
             }
         }
+
         if (! $record->mobile) {
             return null;
         }
 
-        return gateway('northstar')->asClient()->getUser('mobile', $record->mobile);
+        $user = gateway('northstar')->asClient()->getUser('mobile', $record->mobile);
+
+        if ($user && $user->id) {
+            info('Found user by mobile', ['user' => $user->id]);
+
+            return $user;
+        }
+
+        return null;
     }
 
     /**
