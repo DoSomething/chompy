@@ -96,6 +96,7 @@ class RockTheVoteRecord
 
             $key = strtolower($value[0]);
 
+            // Expected key: "user"
             if ($key === 'user' || $key === 'user_id' || $key === 'userid') {
                 $userId = $value[1];
             }
@@ -103,6 +104,8 @@ class RockTheVoteRecord
             /**
              * If referral parameter is set to true, the user parameter belongs to the referring
              * user, not the user that should be associated with this voter registration record.
+             *
+             * Expected key: "referral"
              */
             if (($key === 'referral' || $key === 'refferal') && str_to_boolean($value[1])) {
                 /**

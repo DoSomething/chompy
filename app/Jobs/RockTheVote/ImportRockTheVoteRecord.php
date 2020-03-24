@@ -34,7 +34,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $this->record = new RockTheVoteRecord($record, $this->config);
         $this->userData = $this->record->userData;
         $this->postData = $this->record->postData;
-        $this->import_file_id = $importFileId;
+        $this->importFileId = $importFileId;
     }
 
     /**
@@ -62,7 +62,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $this->sendUserPasswordResetIfSubscribed($user);
         }
 
-        RockTheVoteLog::createFromRecord($this->record, $user, $this->import_file_id);
+        RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
 
         $existingPosts = $rogue->getPost([
             'action_id' => $this->postData['action_id'],
@@ -89,9 +89,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Check for user first by record user_id, next by email, last by mobile.
+     * Check for user first by id, next by email, last by mobile.
      *
-     * @param array $record
+     * @param string $id
+     * @param string $email
+     * @param string $mobile
      * @return NorthstarUser
      */
     private function getUser($id, $email, $mobile)
