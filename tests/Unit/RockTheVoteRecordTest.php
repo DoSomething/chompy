@@ -45,7 +45,7 @@ class RockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that a user ID is parsed from a tracking source that contains a user property.
+     * Test that a user ID is not set if tracking source does not contain a user property.
      *
      * @return void
      */
@@ -54,6 +54,20 @@ class RockTheVoteRecordTest extends TestCase
         $record = new RockTheVoteRecord($this->getExampleRow(), ImportType::getConfig(ImportType::$rockTheVote));
 
         $result = $record->parseUserId('campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger');
+
+        $this->assertEquals($result, null);
+    }
+
+    /**
+     * Test that a user ID is not set if tracking source contains a referral property.
+     *
+     * @return void
+     */
+    public function testSetsUserIdToNullIfReferralTrackingSource()
+    {
+        $record = new RockTheVoteRecord($this->getExampleRow(), ImportType::getConfig(ImportType::$rockTheVote));
+
+        $result = $record->parseUserId('user:5552aa34469c64ec7d8b715b,campaignID:7059,campaignRunID:8128,source:web,source_details:onlinedrivereferral,referral=true');
 
         $this->assertEquals($result, null);
     }
