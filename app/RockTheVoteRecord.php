@@ -51,7 +51,7 @@ class RockTheVoteRecord
 
         $this->voter_registration_status = Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
 
-        $this->parseUserId($record['Tracking Source']);
+        $this->user_id = $this->parseUserId($record['Tracking Source']);
 
         $postConfig = $config['post'];
         $this->post_source = $postConfig['source'];
@@ -114,7 +114,7 @@ class RockTheVoteRecord
             }
         }
 
-        $this->user_id = isset($userId) ? $userId : null;
+        return isset($userId) ? $userId : null;
     }
 
     /**
