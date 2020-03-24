@@ -71,16 +71,18 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         if (! $existingPosts['data']) {
             $post = $rogue->createPost(array_merge(['northstar_id' => $user->id], $this->postData));
-
-            info('Created post', ['user' => $user->id]);
+ 
+            info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
 
             return;
         }
 
         $post = $existingPosts['data'][0];
+
         info('Found post', ['post' => $post['id'], 'user' => $user->id]);
 
         $newStatus = $this->getVoterRegistrationStatusChange($post['status'], $this->postData['status']);
+
         if ($newStatus) {
             $rogue->updatePost($post['id'], ['status' => $newStatus]);
         }

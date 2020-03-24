@@ -28,10 +28,12 @@ class RockTheVoteRecord
             'first_name' => $record['First name'],
             'last_name' => $record['Last name'],
             'mobile' => isset($record['Phone']) && is_valid_mobile($record['Phone']) ? $record['Phone'] : null,
-            'source_detail' => $config['user']['source_detail'],
             'email_subscription_status' => $emailOptIn,
             'email_subscription_topics' => $emailOptIn ? explode(',', $config['user']['email_subscription_topics']) : [],
             'voter_registration_status' => Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus,
+            // Source is required in order to set the source detail.
+            'source' => config('services.northstar.client_credentials.client_id'),
+            'source_detail' => $config['user']['source_detail'],
         ];
 
         if ($smsOptIn && $this->userData['mobile']) {
@@ -51,7 +53,7 @@ class RockTheVoteRecord
     }
 
     /**
-     * Parse existing user ID from referral code string.and add to userData.
+     * Parse existing user ID from referral code string, and add to userData.
      *
      * @param string $referralCode
      */
