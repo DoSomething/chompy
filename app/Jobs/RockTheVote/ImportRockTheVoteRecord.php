@@ -32,6 +32,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         $this->config = ImportType::getConfig(ImportType::$rockTheVote);
         $this->record = new RockTheVoteRecord($record, $this->config);
+        $this->userData = $this->record->userData;
+        $this->postData = $this->record->postData;
         $this->import_file_id = $importFileId;
     }
 
@@ -44,16 +46,16 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         info('progress_log: Processing Rock The Vote record');
 
-        $user = $this->getUser($this->record);
+        $user = $this->getUser($this->userData['id'], $this->userData['email'], $this->userData['mobile']);
 
         if ($user && $user->id) {
-            $newStatus = $this->getVoterRegistrationStatusChange($user->voter_registration_status, $this->record->voter_registration_status);
+            $newStatus = $this->getVoterRegistrationStatusChange($user->voter_registration_status, $this->userData['voter_registration_status']);
 
             if ($newStatus) {
                 $this->updateUser($user, ['voter_registration_status' => $newStatus]);
             }
         } else {
-            $user = $this->createUser($this->record);
+            $user = $this->createUser($this->userData);
 
             info('Created user', ['user' => $user->id]);
 
@@ -63,20 +65,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
         RockTheVoteLog::createFromRecord($this->record, $user, $this->import_file_id);
 
         $existingPosts = $rogue->getPost([
-            'action_id' => $this->record->post_action_id,
+            'action_id' => $this->postData['action_id'],
             'northstar_id' => $user->id,
         ]);
 
         if (! $existingPosts['data']) {
-            $post = $rogue->createPost([
-                'action_id' => $this->record->post_action_id,
-                'northstar_id' => $user->id,
-                'type' => $this->record->post_type,
-                'status' => $this->record->post_status,
-                'source' => $this->record->post_source,
-                'source_details' => $this->record->post_source_details,
-                'details' => $this->record->post_details,
-            ]);
+            $post = $rogue->createPost(array_merge(['northstar_id' => $user->id], $this->postData));
+
             info('Created post', ['user' => $user->id]);
 
             return;
@@ -85,7 +80,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $post = $existingPosts['data'][0];
         info('Found post', ['post' => $post['id'], 'user' => $user->id]);
 
-        $newStatus = $this->getVoterRegistrationStatusChange($post['status'], $this->record->post_status);
+        $newStatus = $this->getVoterRegistrationStatusChange($post['status'], $this->postData['status']);
         if ($newStatus) {
             $rogue->updatePost($post['id'], ['status' => $newStatus]);
         }
@@ -97,10 +92,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
      * @param array $record
      * @return NorthstarUser
      */
-    private function getUser($record)
+    private function getUser($id, $email, $mobile)
     {
-        if ($record->user_id) {
-            $user = gateway('northstar')->asClient()->getUser('id', $record->user_id);
+        if ($id) {
+            $user = gateway('northstar')->asClient()->getUser('id', $id);
 
             if ($user && $user->id) {
                 info('Found user by id', ['user' => $user->id]);
@@ -109,8 +104,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
             }
         }
 
-        if ($record->email) {
-            $user = gateway('northstar')->asClient()->getUser('email', $record->email);
+        if ($email) {
+            $user = gateway('northstar')->asClient()->getUser('email', $email);
 
             if ($user && $user->id) {
                 info('Found user by email', ['user' => $user->id]);
@@ -119,11 +114,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
             }
         }
 
-        if (! $record->mobile) {
+        if (! $mobile) {
             return null;
         }
 
-        $user = gateway('northstar')->asClient()->getUser('mobile', $record->mobile);
+        $user = gateway('northstar')->asClient()->getUser('mobile', $mobile);
 
         if ($user && $user->id) {
             info('Found user by mobile', ['user' => $user->id]);
@@ -135,42 +130,17 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Creates new user from record.
+     * Creates new user with given data.
      *
-     * @param array $record
+     * @param array $data
      * @return NorthstarUser
      */
-    private function createUser($record)
+    private function createUser($data)
     {
-        $userData = [];
-
-        $userFields = ['addr_city', 'addr_state', 'addr_street1', 'addr_street2', 'addr_zip', 'email', 'mobile', 'first_name', 'last_name', 'voter_registration_status'];
-
-        foreach ($userFields as $key) {
-            $userData[$key] = $record->{$key};
-        }
-
-        if (isset($record->email_subscription_status)) {
-            $userData['email_subscription_status'] = $record->email_subscription_status;
-        }
-
-        if (isset($record->email_subscription_topics)) {
-            $userData['email_subscription_topics'] = $record->email_subscription_topics;
-        }
-
-        if (isset($record->sms_status)) {
-            $userData['sms_status'] = $record->sms_status;
-        }
-
-        if (isset($record->user_source_detail)) {
-            $userData['source_detail'] = $record->user_source_detail;
-            $userData['source'] = config('services.northstar.client_credentials.client_id');
-        }
-
-        $user = gateway('northstar')->asClient()->createUser($userData);
+        $user = gateway('northstar')->asClient()->createUser($data);
 
         if (! $user->id) {
-            throw new Exception(500, 'Unable to create user: ' . $record->email);
+            throw new Exception(500, 'Unable to create user');
         }
 
         return $user;

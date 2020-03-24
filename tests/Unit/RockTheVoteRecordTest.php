@@ -39,9 +39,9 @@ class RockTheVoteRecordTest extends TestCase
     {
         $record = new RockTheVoteRecord($this->getExampleRow(), ImportType::getConfig(ImportType::$rockTheVote));
 
-        $result = $record->parseUserId('user:58007c1242a0646e3a8b46b8,campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger');
+        $record->setUserId('user:58007c1242a0646e3a8b46b8,campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger');
 
-        $this->assertEquals($result, '58007c1242a0646e3a8b46b8');
+        $this->assertEquals($record->userData['id'], '58007c1242a0646e3a8b46b8');
     }
 
     /**
@@ -53,9 +53,9 @@ class RockTheVoteRecordTest extends TestCase
     {
         $record = new RockTheVoteRecord($this->getExampleRow(), ImportType::getConfig(ImportType::$rockTheVote));
 
-        $result = $record->parseUserId('campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger');
+       $record->setUserId('campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger');
 
-        $this->assertEquals($result, null);
+        $this->assertEquals($record->userData['id'], null);
     }
 
     /**
@@ -67,8 +67,8 @@ class RockTheVoteRecordTest extends TestCase
     {
         $record = new RockTheVoteRecord($this->getExampleRow(), ImportType::getConfig(ImportType::$rockTheVote));
 
-        $result = $record->parseUserId('user:5552aa34469c64ec7d8b715b,campaignID:7059,campaignRunID:8128,source:web,source_details:onlinedrivereferral,referral=true');
+        $record->setUserId('user:5552aa34469c64ec7d8b715b,campaignID:7059,campaignRunID:8128,source:web,source_details:onlinedrivereferral,referral=true');
 
-        $this->assertEquals($result, null);
+        $this->assertEquals($record->userData['id'], null);
     }
 }

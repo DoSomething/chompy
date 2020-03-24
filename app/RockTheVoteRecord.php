@@ -14,62 +14,51 @@ class RockTheVoteRecord
      */
     public function __construct($record, $config)
     {
-        // User PII.
-        $this->addr_street1 = $record['Home address'];
-        $this->addr_street2 = $record['Home unit'];
-        $this->addr_city = $record['Home city'];
-        $this->addr_state = $record['Home state'];
-        $this->addr_zip = $record['Home zip code'];
-        $this->email = $record['Email address'];
-        $this->first_name = $record['First name'];
-        $this->last_name = $record['Last name'];
-        $this->mobile = isset($record['Phone']) && is_valid_mobile($record['Phone']) ? $record['Phone'] : null;
-
-        // Voter registration details.
-        $this->rtv_finish_with_state = $record['Finish with State'];
-        $this->rtv_pre_registered = $record['Pre-Registered'];
-        $this->rtv_started_registration = $record['Started registration'];
-        $this->rtv_status = $record['Status'];
-        $this->rtv_tracking_source = $record['Tracking Source'];
-
-        $emailOptIn = $record['Opt-in to Partner email?'];
-        if ($emailOptIn) {
-            $this->email_subscription_status = str_to_boolean($emailOptIn);
-            if ($this->email_subscription_status) {
-                $this->email_subscription_topics = explode(',', $config['user']['email_subscription_topics']);
-            }
-        }
-
-        $this->user_source_detail = $config['user']['source_detail'];
-
+        $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
         // Note: Not a typo, this column name does not have the trailing question mark.
-        $smsOptIn = $record['Opt-in to Partner SMS/robocall'];
-        if ($smsOptIn && $this->mobile) {
-            $this->sms_status = str_to_boolean($smsOptIn) ? 'active' : 'stop';
-        }
+        $smsOptIn = str_to_boolean($record['Opt-in to Partner SMS/robocall']);
         $rtvStatus = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
 
-        $this->voter_registration_status = Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus;
+        $this->userData = [
+            'addr_street1' => $record['Home address'],
+            'addr_street2' => $record['Home unit'],
+            'addr_city' => $record['Home city'],
+            'addr_zip' => $record['Home zip code'],
+            'email' => $record['Email address'],
+            'first_name' => $record['First name'],
+            'last_name' => $record['Last name'],
+            'mobile' => isset($record['Phone']) && is_valid_mobile($record['Phone']) ? $record['Phone'] : null,
+            'source_detail' => $config['user']['source_detail'],
+            'email_subscription_status' => $emailOptIn,
+            'email_subscription_topics' => $emailOptIn ? explode(',', $config['user']['email_subscription_topics']) : [],
+            'voter_registration_status' => Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus,
+        ];
 
-        $this->user_id = $this->parseUserId($record['Tracking Source']);
+        if ($smsOptIn && $this->userData['mobile']) {
+            $this->userData['sms_status'] = $smsOptin ? 'active' : 'stop';
+        }
 
-        $postConfig = $config['post'];
-        $this->post_source = $postConfig['source'];
-        $this->post_source_details = null;
-        $this->post_details = $this->parsePostDetails($record);
-        $this->post_status = $rtvStatus;
-        $this->post_type = $postConfig['type'];
-        $this->post_action_id = $postConfig['action_id'];
+        $this->postData = [
+            'source' => $config['post']['source'],
+            'source_details' => null,
+            'details' => $this->parsePostDetails($record),
+            'status' => $rtvStatus,
+            'type' => $config['post']['type'],
+            'action_id' => $config['post']['action_id'],
+        ];
+
+        $this->setUserId($record['Tracking Source']);
     }
 
     /**
-     * Parse existing user ID from referral code string.
+     * Parse existing user ID from referral code string.and add to userData.
      *
-     * @param  string $referralCode
-     * @return string
+     * @param string $referralCode
      */
-    public function parseUserId($referralCode)
+    public function setUserId($referralCode)
     {
+        $this->userData['id'] = null;
+
         info('Parsing referral code: ' . $referralCode);
 
         // Remove some nonsense that comes in front of the referral code sometimes
@@ -114,7 +103,9 @@ class RockTheVoteRecord
             }
         }
 
-        return isset($userId) ? $userId : null;
+        if (isset($userId)) {
+            $this->userData['id'] = $userId;
+        }
     }
 
     /**
@@ -158,6 +149,7 @@ class RockTheVoteRecord
             'Started registration',
             'Finish with State',
             'Status',
+            'Pre-Registered',
             'Home zip code',
         ];
 
