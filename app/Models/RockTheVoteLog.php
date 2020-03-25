@@ -41,13 +41,15 @@ class RockTheVoteLog extends Model
      */
     public static function createFromRecord(RockTheVoteRecord $record, NorthstarUser $user, $importFileId)
     {
+        $info = get_object_vars(json_decode($record->postData['details']));
+
         return static::firstOrCreate([
             'import_file_id' => $importFileId,
-            'finish_with_state' => $record->rtv_finish_with_state,
-            'pre_registered' => $record->rtv_pre_registered,
-            'started_registration' => $record->rtv_started_registration,
-            'status' => $record->rtv_status,
-            'tracking_source' => $record->rtv_tracking_source,
+            'finish_with_state' => $info['Tracking Source'],
+            'pre_registered' => $info['Pre-Registered'],
+            'started_registration' => $info['Started registration'],
+            'status' => $info['Status'],
+            'tracking_source' => $info['Tracking Source'],
             'user_id' => $user->id,
         ]);
     }
