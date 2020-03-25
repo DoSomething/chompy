@@ -45,7 +45,7 @@ class RockTheVoteLog extends Model
 
         return static::firstOrCreate([
             'import_file_id' => $importFileId,
-            'finish_with_state' => $info['Tracking Source'],
+            'finish_with_state' => $info['Finish with State'],
             'pre_registered' => $info['Pre-Registered'],
             'started_registration' => $info['Started registration'],
             'status' => $info['Status'],
