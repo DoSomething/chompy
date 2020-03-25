@@ -49,21 +49,21 @@ class RockTheVoteRecord
             'action_id' => $config['post']['action_id'],
         ];
 
-        $trackingSource = $this->parseTrackingSource($record['Tracking Source']);
+        $referralCode = $this->parseReferralCode($record['Tracking Source']);
 
-        $this->userData['id'] = $trackingSource['user_id'];
-        $this->userData['referrer_user_id'] = $trackingSource['referrer_user_id'];
-        $this->postData['referrer_user_id'] = $trackingSource['referrer_user_id'];
+        $this->userData['id'] = $referralCode['user_id'];
+        $this->userData['referrer_user_id'] = $referralCode['referrer_user_id'];
+        $this->postData['referrer_user_id'] = $referralCode['referrer_user_id'];
     }
 
     /**
-     * Parses User ID or Referrer User ID from Tracking Source value.
-     * The Tracking Source value is manually added by editors into URL's, so check for typos.
+     * Parses User ID or Referrer User ID from input value.
+     * Editors manually enter this value as a URL query string, so we safety check for typos.
      *
      * @param string $referralCode
      * @return array
      */
-    public function parseTrackingSource($referralCode)
+    public function parseReferralCode($referralCode)
     {
         info('Parsing referral code: ' . $referralCode);
 
