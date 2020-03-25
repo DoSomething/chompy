@@ -12,11 +12,13 @@ class RockTheVoteRecord
      * @param array $record
      * @param array $config
      */
-    public function __construct($record, $config)
+    public function __construct($record, $config = null)
     {
+        if (! $config) {
+            $config = ImportType::getConfig(ImportType::$rockTheVote);
+        }
+
         $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
-        // Note: Not a typo, this column name does not have the trailing question mark.
-        $smsOptIn = str_to_boolean($record['Opt-in to Partner SMS/robocall']);
         $rtvStatus = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
 
         $this->userData = [
@@ -36,8 +38,9 @@ class RockTheVoteRecord
             'source_detail' => $config['user']['source_detail'],
         ];
 
-        if ($smsOptIn && $this->userData['mobile']) {
-            $this->userData['sms_status'] = $smsOptin ? 'active' : 'stop';
+        if ($this->userData['mobile']) {
+            // Note: Not a typo, this column name does not have the trailing question mark.
+            $this->userData['sms_status'] = str_to_boolean($record['Opt-in to Partner SMS/robocall']) ? 'active' : 'stop';
         }
 
         $this->postData = [
