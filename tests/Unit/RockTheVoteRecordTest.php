@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Http;
+namespace Tests\Unit;
 
 use Tests\TestCase;
 use Chompy\ImportType;

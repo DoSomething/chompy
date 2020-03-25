@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Http\Web;
+namespace Tests\Jobs\RockTheVote;
 
 use Tests\TestCase;
 use Chompy\User;
