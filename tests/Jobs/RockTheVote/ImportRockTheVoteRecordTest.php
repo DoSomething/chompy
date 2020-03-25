@@ -24,7 +24,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             ],
         ]);
 
-        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow(), 42);
+        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow(),  $this->faker->randomDigitNotNull);
     }
 
     /**
@@ -44,6 +44,30 @@ class ImportRockTheVoteRecordTest extends TestCase
             ],
         ]);
 
-        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow(), 42);
+        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow(), $this->faker->randomDigitNotNull);
+    }
+
+    /**
+     * Test that post is not created or updated if it exists with completed status.
+     *
+     * @return void
+     */
+    public function testDoesNotCreateOrUpdatePostIfCompletedPostFound()
+    {
+        $this->mockGetNorthstarUser();
+        $this->northstarMock->shouldNotReceive('createUser');
+        $this->northstarMock->shouldNotReceive('sendPasswordReset');
+        $this->rogueMock->shouldReceive('getPost')->andReturn([
+            'data' => [
+                0 => [
+                    'id' => $this->faker->randomDigitNotNull,
+                    'status' => 'registration_complete'
+                ],
+            ],
+        ]);
+        $this->rogueMock->shouldNotReceive('createPost');
+        $this->rogueMock->shouldNotReceive('updatePost');
+
+        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow(), $this->faker->randomDigitNotNull);
     }
 }
