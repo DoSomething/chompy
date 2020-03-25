@@ -8,28 +8,6 @@ use Chompy\RockTheVoteRecord;
 
 class RockTheVoteRecordTest extends TestCase
 {
-    public function getExampleRow($data = [])
-    {
-        return array_merge([
-            'Home address' => $this->faker->streetAddress,
-            'Home unit' => $this->faker->randomDigit,
-            'Home city' => $this->faker->city,
-            'Home state' => $this->faker->state,
-            'Home zip code' => $this->faker->postcode,
-            'Email address' => $this->faker->email,
-            'First name' => $this->faker->firstName,
-            'Last name' => $this->faker->lastName,
-            'Phone' => $this->faker->phoneNumber,
-            'Finish with State' => null,
-            'Pre-Registered' => null,
-            'Started registration' => null,
-            'Status' => null,
-            'Tracking Source' => null,
-            'Opt-in to Partner email?' => 'Yes',
-            'Opt-in to Partner SMS/robocall' => 'Yes',
-        ], $data);
-    }
-
     /**
      * Test that userData and postData arrays are parsed from record.
      *
@@ -37,7 +15,7 @@ class RockTheVoteRecordTest extends TestCase
      */
     public function testSetsUserDataAndPostData()
     {
-        $exampleRow = $this->getExampleRow();
+        $exampleRow = $this->faker->rockTheVoteReportRow();
         $config = ImportType::getConfig(ImportType::$rockTheVote);
 
         $record = new RockTheVoteRecord($exampleRow, $config);
@@ -71,7 +49,7 @@ class RockTheVoteRecordTest extends TestCase
      */
     public function testDidNotOptIn()
     {
-        $exampleRow = $this->getExampleRow([
+        $exampleRow = $this->faker->rockTheVoteReportRow([
             'Opt-in to Partner email?' => 'No',
             'Opt-in to Partner SMS/robocall' => 'No',
         ]);
@@ -90,7 +68,7 @@ class RockTheVoteRecordTest extends TestCase
      */
     public function testInvalidMobile()
     {
-        $exampleRow = $this->getExampleRow([
+        $exampleRow = $this->faker->rockTheVoteReportRow([
             'Phone' => '000-000-0000',
             'Opt-in to Partner SMS/robocall' => 'Yes',
         ]);
@@ -108,7 +86,7 @@ class RockTheVoteRecordTest extends TestCase
      */
     public function testMissingMobile()
     {
-        $exampleRow = $this->getExampleRow([
+        $exampleRow = $this->faker->rockTheVoteReportRow([
             'Phone' => '',
             'Opt-in to Partner SMS/robocall' => 'Yes',
         ]);
@@ -128,7 +106,7 @@ class RockTheVoteRecordTest extends TestCase
     {
         $trackingSource = 'user:58007c1242a0646e3a8b46b8,campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger';
 
-        $record = new RockTheVoteRecord($this->getExampleRow([
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
             'Tracking Source' => $trackingSource,
         ]));
 
@@ -146,7 +124,7 @@ class RockTheVoteRecordTest extends TestCase
     {
         $trackingSource = 'campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger';
 
-        $record = new RockTheVoteRecord($this->getExampleRow([
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
             'Tracking Source' => $trackingSource,
         ]));
 
@@ -164,7 +142,7 @@ class RockTheVoteRecordTest extends TestCase
     {
         $trackingSource = 'user:5552aa34469c64ec7d8b715b,campaignID:7059,campaignRunID:8128,source:web,source_details:onlinedrivereferral,referral=true';
 
-        $record = new RockTheVoteRecord($this->getExampleRow([
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
             'Tracking Source' => $trackingSource,
         ]));
 
