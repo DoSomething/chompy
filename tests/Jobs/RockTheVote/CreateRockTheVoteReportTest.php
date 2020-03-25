@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Console;
+namespace Tests\Jobs\RockTheVote;
 
 use Exception;
 use Tests\TestCase;

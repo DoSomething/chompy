@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Http;
+namespace Tests\Unit;
 
 use Tests\TestCase;
 use Chompy\ImportType;
@@ -8,11 +8,6 @@ use Chompy\RockTheVoteRecord;
 
 class RockTheVoteRecordTest extends TestCase
 {
-    public function getConfig()
-    {
-        return ImportType::getConfig(ImportType::$rockTheVote);
-    }
-
     public function getExampleRow($data = [])
     {
         return array_merge([
@@ -30,8 +25,8 @@ class RockTheVoteRecordTest extends TestCase
             'Started registration' => null,
             'Status' => null,
             'Tracking Source' => null,
-            'Opt-in to Partner email?' => null,
-            'Opt-in to Partner SMS/robocall' => null,
+            'Opt-in to Partner email?' => 'Yes',
+            'Opt-in to Partner SMS/robocall' => 'Yes',
         ], $data);
     }
 
@@ -43,19 +38,22 @@ class RockTheVoteRecordTest extends TestCase
     public function testSetsUserDataAndPostData()
     {
         $exampleRow = $this->getExampleRow();
-        $config = $this->getConfig();
+        $config = ImportType::getConfig(ImportType::$rockTheVote);
 
-        $record = new RockTheVoteRecord($exampleRow, $this->getConfig());
+        $record = new RockTheVoteRecord($exampleRow, $config);
 
         $this->assertEquals($record->userData['addr_street1'], $exampleRow['Home address']);
         $this->assertEquals($record->userData['addr_street2'], $exampleRow['Home unit']);
         $this->assertEquals($record->userData['addr_city'], $exampleRow['Home city']);
         $this->assertEquals($record->userData['email'], $exampleRow['Email address']);
+        $this->assertEquals($record->userData['email_subscription_status'], true);
+        $this->assertEquals($record->userData['email_subscription_topics'], explode(',', $config['user']['email_subscription_topics']));
         $this->assertEquals($record->userData['first_name'], $exampleRow['First name']);
         $this->assertEquals($record->userData['id'], null);
         $this->assertEquals($record->userData['last_name'], $exampleRow['Last name']);
         $this->assertEquals($record->userData['mobile'], $exampleRow['Phone']);
         $this->assertEquals($record->userData['referrer_user_id'], null);
+        $this->assertEquals($record->userData['sms_status'], 'active');
         $this->assertEquals($record->userData['source'], config('services.northstar.client_credentials.client_id'));
         $this->assertEquals($record->userData['source_detail'], $config['user']['source_detail']);
 
@@ -64,6 +62,61 @@ class RockTheVoteRecordTest extends TestCase
         $this->assertEquals($record->postData['source_details'], null);
         $this->assertEquals($record->postData['type'], $config['post']['type']);
         $this->assertEquals($record->postData['referrer_user_id'], null);
+    }
+
+    /**
+     * Test that user is not subscribed if they did not opt-in.
+     *
+     * @return void
+     */
+    public function testDidNotOptIn()
+    {
+        $exampleRow = $this->getExampleRow([
+            'Opt-in to Partner email?' => 'No',
+            'Opt-in to Partner SMS/robocall' => 'No',
+        ]);
+
+        $record = new RockTheVoteRecord($exampleRow);
+
+        $this->assertEquals($record->userData['email_subscription_status'], false);
+        $this->assertEquals($record->userData['email_subscription_topics'], []);
+        $this->assertEquals($record->userData['sms_status'], 'stop');
+    }
+
+    /**
+     * Test that user mobile is not set if invalid.
+     *
+     * @return void
+     */
+    public function testInvalidMobile()
+    {
+        $exampleRow = $this->getExampleRow([
+            'Phone' => '000-000-0000',
+            'Opt-in to Partner SMS/robocall' => 'Yes',
+        ]);
+
+        $record = new RockTheVoteRecord($exampleRow);
+
+        $this->assertEquals($record->userData['mobile'], null);
+        $this->assertFalse(isset($record->userData['sms_status']));
+    }
+
+    /**
+     * Test that user is not subscribed to SMS if mobile not provided.
+     *
+     * @return void
+     */
+    public function testMissingMobile()
+    {
+        $exampleRow = $this->getExampleRow([
+            'Phone' => '',
+            'Opt-in to Partner SMS/robocall' => 'Yes',
+        ]);
+
+        $record = new RockTheVoteRecord($exampleRow);
+
+        $this->assertEquals($record->userData['mobile'], null);
+        $this->assertFalse(isset($record->userData['sms_status']));
     }
 
     /**
@@ -77,7 +130,7 @@ class RockTheVoteRecordTest extends TestCase
 
         $record = new RockTheVoteRecord($this->getExampleRow([
             'Tracking Source' => $trackingSource,
-        ]), $this->getConfig());
+        ]));
 
         $this->assertEquals($record->userData['id'], '58007c1242a0646e3a8b46b8');
         $this->assertEquals($record->userData['referrer_user_id'], null);
@@ -95,7 +148,7 @@ class RockTheVoteRecordTest extends TestCase
 
         $record = new RockTheVoteRecord($this->getExampleRow([
             'Tracking Source' => $trackingSource,
-        ]), $this->getConfig());
+        ]));
 
         $this->assertEquals($record->userData['id'], null);
         $this->assertEquals($record->userData['referrer_user_id'], null);
@@ -113,7 +166,7 @@ class RockTheVoteRecordTest extends TestCase
 
         $record = new RockTheVoteRecord($this->getExampleRow([
             'Tracking Source' => $trackingSource,
-        ]), $this->getConfig());
+        ]));
 
         $this->assertEquals($record->userData['id'], null);
         $this->assertEquals($record->userData['referrer_user_id'], '5552aa34469c64ec7d8b715b');
