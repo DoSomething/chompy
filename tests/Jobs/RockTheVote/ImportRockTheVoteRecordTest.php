@@ -24,7 +24,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             ],
         ]);
 
-        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow(),  $this->faker->randomDigitNotNull);
+        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow(), $this->faker->randomDigitNotNull);
     }
 
     /**
@@ -61,7 +61,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             'data' => [
                 0 => [
                     'id' => $this->faker->randomDigitNotNull,
-                    'status' => 'registration_complete'
+                    'status' => 'registration_complete',
                 ],
             ],
         ]);
