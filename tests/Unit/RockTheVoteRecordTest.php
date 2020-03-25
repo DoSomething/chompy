@@ -65,7 +65,7 @@ class RockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that userData and postData arrays are parsed from record.
+     * Test that user is not subscribed if they did not opt-in.
      *
      * @return void
      */
@@ -81,6 +81,42 @@ class RockTheVoteRecordTest extends TestCase
         $this->assertEquals($record->userData['email_subscription_status'], false);
         $this->assertEquals($record->userData['email_subscription_topics'], []);
         $this->assertEquals($record->userData['sms_status'], 'stop');
+    }
+
+    /**
+     * Test that user mobile is not set if invalid.
+     *
+     * @return void
+     */
+    public function testInvalidMobile()
+    {
+        $exampleRow = $this->getExampleRow([
+            'Phone' => '000-000-0000',
+            'Opt-in to Partner SMS/robocall' => 'Yes',
+        ]);
+
+        $record = new RockTheVoteRecord($exampleRow);
+
+        $this->assertEquals($record->userData['mobile'], null);
+        $this->assertFalse(isset($record->userData['sms_status']));
+    }
+
+    /**
+     * Test that user is not subscribed to SMS if mobile not provided.
+     *
+     * @return void
+     */
+    public function testMissingMobile()
+    {
+        $exampleRow = $this->getExampleRow([
+            'Phone' => '',
+            'Opt-in to Partner SMS/robocall' => 'Yes',
+        ]);
+
+        $record = new RockTheVoteRecord($exampleRow);
+
+        $this->assertEquals($record->userData['mobile'], null);
+        $this->assertFalse(isset($record->userData['sms_status']));
     }
 
     /**
