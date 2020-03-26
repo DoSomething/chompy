@@ -32,6 +32,7 @@ trait WithMocks
         // Get a new Faker generator from Laravel.
         $this->faker = app(\Faker\Generator::class);
         $this->faker->addProvider(new \FakerNorthstarId($this->faker));
+        $this->faker->addProvider(new \FakerRockTheVoteReportRow($this->faker));
 
         // Northstar Mock
         $this->northstarMock = $this->mock(Northstar::class);
@@ -46,7 +47,7 @@ trait WithMocks
     }
 
     /**
-     * Mock the getUser Northstar Call.
+     * Mock the getUser Northstar call.
      *
      * @return user
      */
@@ -62,6 +63,25 @@ trait WithMocks
                 'mobile' => $this->faker->phoneNumber,
             ]);
         });
+    }
+
+    /**
+     * Mock the createUser Northstar call.
+     *
+     * @return user
+     */
+    public function mockCreateNorthstarUser()
+    {
+        $this->northstarMock
+            ->shouldReceive('createUser')
+            ->andReturn(new NorthstarUser([
+                'id' => $this->faker->northstar_id,
+                'first_name' => $this->faker->firstName,
+                'last_name' => $this->faker->lastName,
+                'birthdate' => $this->faker->date,
+                'email' => $this->faker->email,
+                'mobile' => $this->faker->phoneNumber,
+            ]));
     }
 
     /**
