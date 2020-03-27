@@ -40,7 +40,10 @@ class RockTheVoteRecord
 
         if ($this->userData['mobile']) {
             // Note: Not a typo, this column name does not have the trailing question mark.
-            $this->userData['sms_status'] = str_to_boolean($record['Opt-in to Partner SMS/robocall']) ? 'active' : 'stop';
+            $smsOptIn = str_to_boolean($record['Opt-in to Partner SMS/robocall']);
+
+            $this->userData['sms_status'] = $smsOptIn ? 'active' : 'stop';
+            $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
         }
 
         $this->postData = [
