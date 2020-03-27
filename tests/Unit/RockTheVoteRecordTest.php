@@ -36,6 +36,14 @@ class RockTheVoteRecordTest extends TestCase
         $this->assertEquals($record->userData['source_detail'], $config['user']['source_detail']);
 
         $this->assertEquals($record->postData['action_id'], $config['post']['action_id']);
+        $this->assertEquals($record->postData['details'], json_encode([
+            'Tracking Source' => $exampleRow['Tracking Source'],
+            'Started registration' => $exampleRow['Started registration'],
+            'Finish with State' => $exampleRow['Finish with State'],
+            'Status' => $exampleRow['Status'],
+            'Pre-Registered' => $exampleRow['Pre-Registered'],
+            'Home zip code' => $exampleRow['Home zip code'],
+        ]));
         $this->assertEquals($record->postData['source'], $config['post']['source']);
         $this->assertEquals($record->postData['source_details'], null);
         $this->assertEquals($record->postData['type'], $config['post']['type']);
@@ -149,5 +157,58 @@ class RockTheVoteRecordTest extends TestCase
         $this->assertEquals($record->userData['id'], null);
         $this->assertEquals($record->userData['referrer_user_id'], '5552aa34469c64ec7d8b715b');
         $this->assertEquals($record->postData['referrer_user_id'], '5552aa34469c64ec7d8b715b');
+    }
+
+    /**
+     * Test expected values per given Status and Finish with State column values.
+     *
+     * @return void
+     */
+    public function testUserVoterRegistrationStatusAndPostStatus()
+    {
+        // Step values
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Step 1',
+            'Finish with State' => 'No',
+        ]));
+
+        $this->assertEquals($record->userData['voter_registration_status'], 'uncertain');
+        $this->assertEquals($record->postData['status'], 'uncertain');
+
+        // Complete + Did not finish with state
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Complete',
+            'Finish with State' => 'No',
+        ]));
+
+        $this->assertEquals($record->userData['voter_registration_status'], 'registration_complete');
+        $this->assertEquals($record->postData['status'], 'register-form');
+
+        // Complete + Finished with state
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Complete',
+            'Finish with State' => 'Yes',
+        ]));
+
+        $this->assertEquals($record->userData['voter_registration_status'], 'registration_complete');
+        $this->assertEquals($record->postData['status'], 'register-OVR');
+
+        // Rejected
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Rejected',
+            'Finish with State' => 'No',
+        ]));
+
+        $this->assertEquals($record->userData['voter_registration_status'], 'ineligible');
+        $this->assertEquals($record->postData['status'], 'ineligible');
+
+        // Under 18
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Under 18',
+            'Finish with State' => 'No',
+        ]));
+
+        $this->assertEquals($record->userData['voter_registration_status'], 'ineligible');
+        $this->assertEquals($record->postData['status'], 'ineligible');
     }
 }
