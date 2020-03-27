@@ -175,7 +175,7 @@ class RockTheVoteRecordTest extends TestCase
         $this->assertEquals($record->userData['voter_registration_status'], 'uncertain');
         $this->assertEquals($record->postData['status'], 'uncertain');
 
-        // Complete + Finish with state
+        // Complete + Did not finish with state
         $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
             'Status' => 'Complete',
             'Finish with State' => 'No',
@@ -184,7 +184,7 @@ class RockTheVoteRecordTest extends TestCase
         $this->assertEquals($record->userData['voter_registration_status'], 'registration_complete');
         $this->assertEquals($record->postData['status'], 'register-form');
 
-        // Complete + Did not finish with state
+        // Complete + Finished with state
         $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
             'Status' => 'Complete',
             'Finish with State' => 'Yes',
