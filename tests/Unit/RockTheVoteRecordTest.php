@@ -158,4 +158,57 @@ class RockTheVoteRecordTest extends TestCase
         $this->assertEquals($record->userData['referrer_user_id'], '5552aa34469c64ec7d8b715b');
         $this->assertEquals($record->postData['referrer_user_id'], '5552aa34469c64ec7d8b715b');
     }
+
+    /**
+     * Test expected values per given Status and Finish with State column values.
+     *
+     * @return void
+     */
+    public function testUserVoterRegistrationStatusAndPostStatus()
+    {
+        // Step values
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Step 1',
+            'Finish with State' => 'No',
+        ]));
+
+        $this->assertEquals($record->userData['voter_registration_status'], 'uncertain');
+        $this->assertEquals($record->postData['status'], 'uncertain');
+
+        // Complete + Finish with state
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Complete',
+            'Finish with State' => 'No',
+        ]));
+
+        $this->assertEquals($record->userData['voter_registration_status'], 'registration_complete');
+        $this->assertEquals($record->postData['status'], 'register-form');
+
+        // Complete + Did not finish with state
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Complete',
+            'Finish with State' => 'Yes',
+        ]));
+
+        $this->assertEquals($record->userData['voter_registration_status'], 'registration_complete');
+        $this->assertEquals($record->postData['status'], 'register-OVR');
+
+        // Rejected
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Rejected',
+            'Finish with State' => 'No',
+        ]));
+
+        $this->assertEquals($record->userData['voter_registration_status'], 'ineligible');
+        $this->assertEquals($record->postData['status'], 'ineligible');
+
+        // Under 18
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Under 18',
+            'Finish with State' => 'No',
+        ]));
+
+        $this->assertEquals($record->userData['voter_registration_status'], 'ineligible');
+        $this->assertEquals($record->postData['status'], 'ineligible');
+    }
 }
