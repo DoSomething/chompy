@@ -49,13 +49,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $user = $this->getUser($this->userData['id'], $this->userData['email'], $this->userData['mobile']);
 
         if ($user && $user->id) {
-            $newStatus = $this->getVoterRegistrationStatusChange($user->voter_registration_status, $this->userData['voter_registration_status']);
-
-            if ($newStatus) {
-                $this->updateUser($user, ['voter_registration_status' => $newStatus]);
-            }
+            $this->updateUserIfChanged($user);
         } else {
-            $user = $this->createUser($this->userData);
+            $user = $this->createUser();
 
             info('Created user', ['user' => $user->id]);
 
@@ -81,10 +77,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         info('Found post', ['post' => $post['id'], 'user' => $user->id]);
 
-        $newStatus = $this->getVoterRegistrationStatusChange($post['status'], $this->postData['status']);
-
-        if ($newStatus) {
-            $rogue->updatePost($post['id'], ['status' => $newStatus]);
+        if ($this->shouldUpdateStatus($post['status'], $this->postData['status'])) {
+            $rogue->updatePost($post['id'], ['status' => $this->postData['status']]);
+        } else {
+            info('No changes to update for post', ['post' => $post['id']]);
         }
     }
 
@@ -134,14 +130,14 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Creates new user with given data.
+     * Creates new user with record user data.
      *
      * @param array $data
      * @return NorthstarUser
      */
-    private function createUser($data)
+    private function createUser()
     {
-        $user = gateway('northstar')->asClient()->createUser($data);
+        $user = gateway('northstar')->asClient()->createUser($this->userData);
 
         if (! $user->id) {
             throw new Exception(500, 'Unable to create user');
@@ -151,13 +147,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Determines if a status should be changed and what it should be changed to.
+     * Determines if a current status should be changed to given value.
      *
      * @param string $currentStatus
      * @param string $newStatus
-     * @return string|null
+     * @return boolean
      */
-    private function getVoterRegistrationStatusChange($currentStatus, $newStatus)
+    private function shouldUpdateStatus($currentStatus, $newStatus)
     {
         // List includes status values expected from RTV as well as
         // values potentially assigned from within Northstar.
@@ -174,7 +170,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $indexOfCurrentStatus = array_search($currentStatus, $statusHierarchy);
         $indexOfNewStatus = array_search($newStatus, $statusHierarchy);
 
-        return $indexOfCurrentStatus < $indexOfNewStatus ? $newStatus : null;
+        return $indexOfCurrentStatus < $indexOfNewStatus;
     }
 
     /**
@@ -183,10 +179,23 @@ class ImportRockTheVoteRecord implements ShouldQueue
      * @param object $user
      * @param array $data
      */
-    private function updateUser($user, $data)
+    private function updateUserIfChanged($user)
     {
-        gateway('northstar')->asClient()->updateUser($user->id, $data);
-        info('Updated user', ['user' => $user->id]);
+        $payload = [];
+
+        if ($this->shouldUpdateStatus($user->voter_registration_status, $this->userData['voter_registration_status'])) {
+            $payload['voter_registration_status'] = $this->userData['voter_registration_status'];
+        }
+
+        if ( !count($payload)) {
+            info('No changes to update for user', ['user' => $user->id]);
+
+            return;
+        }
+
+        gateway('northstar')->asClient()->updateUser($user->id, $payload);
+
+        info('Updated user', ['user' => $user->id, 'voter_registration_status' => $this->userData['voter_registration_status']]);
     }
 
     /**
