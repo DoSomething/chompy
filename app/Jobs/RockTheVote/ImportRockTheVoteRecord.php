@@ -77,11 +77,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         info('Found post', ['post' => $post['id'], 'user' => $user->id]);
 
-        if ($this->shouldUpdateStatus($post['status'], $this->postData['status'])) {
-            $rogue->updatePost($post['id'], ['status' => $this->postData['status']]);
-        } else {
-            info('No changes to update for post', ['post' => $post['id']]);
-        }
+        $this->updatePostIfChanged($post);
     }
 
     /**
@@ -151,7 +147,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @param string $currentStatus
      * @param string $newStatus
-     * @return boolean
+     * @return bool
      */
     private function shouldUpdateStatus($currentStatus, $newStatus)
     {
@@ -174,10 +170,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Update Northstar user with given data.
+     * Update Northstar user with record data.
      *
      * @param object $user
-     * @param array $data
      */
     private function updateUserIfChanged($user)
     {
@@ -187,7 +182,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $payload['voter_registration_status'] = $this->userData['voter_registration_status'];
         }
 
-        if ( !count($payload)) {
+        // @TODO: Check for SMS status change.
+
+        if (! count($payload)) {
             info('No changes to update for user', ['user' => $user->id]);
 
             return;
@@ -196,6 +193,24 @@ class ImportRockTheVoteRecord implements ShouldQueue
         gateway('northstar')->asClient()->updateUser($user->id, $payload);
 
         info('Updated user', ['user' => $user->id, 'voter_registration_status' => $this->userData['voter_registration_status']]);
+    }
+
+    /**
+     * Update post with record data.
+     *
+     * @param array $post
+     */
+    private function updatePostIfChanged($post)
+    {
+        if (! $this->shouldUpdateStatus($post['status'], $this->postData['status'])) {
+            info('No changes to update for post', ['post' => $post['id']]);
+
+            return;
+        }
+
+        $rogue->updatePost($post['id'], ['status' => $this->postData['status']]);
+
+        info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
     }
 
     /**
