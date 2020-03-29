@@ -174,7 +174,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @param object $user
      */
-    private function updateUserIfChanged($user)
+    public function updateUserIfChanged($user)
     {
         $payload = [];
 
@@ -251,6 +251,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function getParameters()
     {
-        return get_object_vars($this->record);
+        return [
+            'userData' => $this->userData,
+            'postData' => $this->postData,
+        ];
     }
 }
