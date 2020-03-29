@@ -149,7 +149,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      * @param string $newStatus
      * @return bool
      */
-    private function shouldUpdateStatus($currentStatus, $newStatus)
+    public static function shouldUpdateStatus($currentStatus, $newStatus)
     {
         // List includes status values expected from RTV as well as
         // values potentially assigned from within Northstar.
@@ -178,7 +178,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         $payload = [];
 
-        if ($this->shouldUpdateStatus($user->voter_registration_status, $this->userData['voter_registration_status'])) {
+        if (self::shouldUpdateStatus($user->voter_registration_status, $this->userData['voter_registration_status'])) {
             $payload['voter_registration_status'] = $this->userData['voter_registration_status'];
         }
 
@@ -202,7 +202,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     private function updatePostIfChanged($post)
     {
-        if (! $this->shouldUpdateStatus($post['status'], $this->postData['status'])) {
+        if (! self::shouldUpdateStatus($post['status'], $this->postData['status'])) {
             info('No changes to update for post', ['post' => $post['id']]);
 
             return;

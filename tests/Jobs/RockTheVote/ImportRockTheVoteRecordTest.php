@@ -120,4 +120,36 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job->updateUserIfChanged($user);
     }
+
+    /**
+     * Test that status should update when update value has higher priority than the current.
+     *
+     * @return void
+     */
+    public function testShouldUpdateStatus()
+    {
+        $priority = [
+            'uncertain',
+            'ineligible',
+            'unregistered',
+            'confirmed',
+            'register-OVR',
+            'register-form',
+            'registration_complete',
+        ];
+
+        for ($i = 0; $i < count($priority); $i++) {
+            $firstValue = $priority[$i];
+
+            for ($j = 0; $j < count($priority); $j++) {
+                $secondValue = $priority[$j];
+
+                if ($j > $i) {
+                    $this->assertTrue(ImportRockTheVoteRecord::shouldUpdateStatus($firstValue, $priority[$j]));
+                } else {
+                    $this->assertFalse(ImportRockTheVoteRecord::shouldUpdateStatus($firstValue, $priority[$j]));
+                }
+            }
+        }
+    }
 }
