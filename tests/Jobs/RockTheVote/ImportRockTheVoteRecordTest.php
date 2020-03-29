@@ -72,7 +72,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that user is updated if record indicates their voter registration status should change.
+     * Test that user is updated if their voter registration status should change.
      *
      * @return void
      */
@@ -93,6 +93,30 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
             'voter_registration_status' => $params['userData']['voter_registration_status'],
         ]);
+
+        $job->updateUserIfChanged($user);
+    }
+
+    /**
+     * Test that user is not updated if their voter registration status should not change.
+     *
+     * @return void
+     */
+    public function testDoesNotUpdatesUserIfShouldNotChangeStatus()
+    {
+        $user = (object) [
+            'id' => $this->faker->northstar_id,
+            'voter_registration_status' => 'registration_complete',
+        ];
+
+        $job = new ImportRockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Status' => 'Step 1',
+            'Finish with State' => 'No',
+        ]), $this->faker->randomDigitNotNull);
+
+        $params = $job->getParameters();
+
+        $this->northstarMock->shouldNotReceive('updateUser');
 
         $job->updateUserIfChanged($user);
     }
