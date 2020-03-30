@@ -118,7 +118,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->mockGetNorthstarUser([
             'voter_registration_status' => 'registration_complete',
         ]);
-        $this->rogueMock->shouldNotReceive('createUser');
+        $this->northstarMock->shouldNotReceive('createUser');
         $this->northstarMock->shouldNotReceive('updateUser');
         $this->rogueMock->shouldReceive('getPost')->andReturn([
             'data' => [
