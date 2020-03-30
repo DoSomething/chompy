@@ -51,17 +51,17 @@ trait WithMocks
      *
      * @return user
      */
-    public function mockGetNorthstarUser()
+    public function mockGetNorthstarUser($data = [])
     {
-        $this->northstarMock->shouldReceive('getUser')->andReturnUsing(function ($type, $id) {
-            return new NorthstarUser([
+        $this->northstarMock->shouldReceive('getUser')->andReturnUsing(function ($type, $id) use (&$data) {
+            return new NorthstarUser(array_merge([
                 'id' => $type === 'id' ? $id : $this->faker->northstar_id,
                 'first_name' => $this->faker->firstName,
                 'last_name' => $this->faker->lastName,
                 'birthdate' => $this->faker->date,
                 'email' => $this->faker->email,
                 'mobile' => $this->faker->phoneNumber,
-            ]);
+            ], $data));
         });
     }
 

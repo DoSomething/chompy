@@ -78,23 +78,39 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testUpdatesUserIfShouldChangeStatus()
     {
-        $user = (object) [
-            'id' => $this->faker->northstar_id,
-            'voter_registration_status' => 'uncertain',
-        ];
+        $userId = $this->faker->northstar_id;
+        $postId = $this->faker->randomDigitNotNull;
 
-        $job = new ImportRockTheVoteRecord($this->faker->rockTheVoteReportRow([
+        $this->mockGetNorthstarUser([
+            'id' => $userId,
+            'voter_registration_status' => 'uncertain',
+        ]);
+
+        $this->northstarMock->shouldNotReceive('createUser');
+
+        $this->rogueMock->shouldReceive('getPost')->andReturn([
+            'data' => [
+                0 => [
+                    'id' => $postId,
+                    'status' => 'uncertain',
+                ],
+            ],
+        ]);
+
+        $this->rogueMock->shouldNotReceive('createPost');
+
+        $this->northstarMock->shouldReceive('updateUser')->with($userId, [
+            'voter_registration_status' => 'registration_complete',
+        ]);
+
+        $this->rogueMock->shouldReceive('updatePost')->with($postId, [
+            'status' => 'register-OVR',
+        ]);
+
+        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow([
             'Status' => 'Complete',
             'Finish with State' => 'Yes',
         ]), $this->faker->randomDigitNotNull);
-
-        $params = $job->getParameters();
-
-        $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
-            'voter_registration_status' => $params['userData']['voter_registration_status'],
-        ]);
-
-        $job->updateUserIfChanged($user);
     }
 
     /**

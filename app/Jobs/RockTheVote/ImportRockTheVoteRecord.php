@@ -77,7 +77,15 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         info('Found post', ['post' => $post['id'], 'user' => $user->id]);
 
-        $this->updatePostIfChanged($post);
+        if (! self::shouldUpdateStatus($post['status'], $this->postData['status'])) {
+            info('No changes to update for post', ['post' => $post['id']]);
+
+            return;
+        }
+
+        $rogue->updatePost($post['id'], ['status' => $this->postData['status']]);
+
+        info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
     }
 
     /**
@@ -193,24 +201,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
         gateway('northstar')->asClient()->updateUser($user->id, $payload);
 
         info('Updated user', ['user' => $user->id, 'voter_registration_status' => $this->userData['voter_registration_status']]);
-    }
-
-    /**
-     * Update post with record data.
-     *
-     * @param array $post
-     */
-    private function updatePostIfChanged($post)
-    {
-        if (! self::shouldUpdateStatus($post['status'], $this->postData['status'])) {
-            info('No changes to update for post', ['post' => $post['id']]);
-
-            return;
-        }
-
-        $rogue->updatePost($post['id'], ['status' => $this->postData['status']]);
-
-        info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
     }
 
     /**
