@@ -85,9 +85,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             'id' => $userId,
             'voter_registration_status' => 'uncertain',
         ]);
-
         $this->northstarMock->shouldNotReceive('createUser');
-
         $this->rogueMock->shouldReceive('getPost')->andReturn([
             'data' => [
                 0 => [
@@ -96,13 +94,10 @@ class ImportRockTheVoteRecordTest extends TestCase
                 ],
             ],
         ]);
-
         $this->rogueMock->shouldNotReceive('createPost');
-
         $this->northstarMock->shouldReceive('updateUser')->with($userId, [
             'voter_registration_status' => 'registration_complete',
         ]);
-
         $this->rogueMock->shouldReceive('updatePost')->with($postId, [
             'status' => 'register-OVR',
         ]);
@@ -120,21 +115,26 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testDoesNotUpdatesUserIfShouldNotChangeStatus()
     {
-        $user = (object) [
-            'id' => $this->faker->northstar_id,
+        $this->mockGetNorthstarUser([
             'voter_registration_status' => 'registration_complete',
-        ];
+        ]);
+        $this->rogueMock->shouldNotReceive('createUser');
+        $this->northstarMock->shouldNotReceive('updateUser');
+        $this->rogueMock->shouldReceive('getPost')->andReturn([
+            'data' => [
+                0 => [
+                    'id' => $this->faker->randomDigitNotNull,
+                    'status' => 'register-OVR',
+                ],
+            ],
+        ]);
+        $this->rogueMock->shouldNotReceive('createPost');
+        $this->rogueMock->shouldNotReceive('updatePost');
 
-        $job = new ImportRockTheVoteRecord($this->faker->rockTheVoteReportRow([
+        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow([
             'Status' => 'Step 1',
             'Finish with State' => 'No',
         ]), $this->faker->randomDigitNotNull);
-
-        $params = $job->getParameters();
-
-        $this->northstarMock->shouldNotReceive('updateUser');
-
-        $job->updateUserIfChanged($user);
     }
 
     /**
@@ -144,7 +144,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testShouldUpdateStatus()
     {
-        $priority = [
+        $statusHierarchy = [
             'uncertain',
             'ineligible',
             'unregistered',
@@ -154,16 +154,16 @@ class ImportRockTheVoteRecordTest extends TestCase
             'registration_complete',
         ];
 
-        for ($i = 0; $i < count($priority); $i++) {
-            $firstValue = $priority[$i];
+        for ($i = 0; $i < count($statusHierarchy); $i++) {
+            $firstValue = $statusHierarchy[$i];
 
-            for ($j = 0; $j < count($priority); $j++) {
-                $secondValue = $priority[$j];
+            for ($j = 0; $j < count($statusHierarchy); $j++) {
+                $secondValue = $statusHierarchy[$j];
 
                 if ($j > $i) {
-                    $this->assertTrue(ImportRockTheVoteRecord::shouldUpdateStatus($firstValue, $priority[$j]));
+                    $this->assertTrue(ImportRockTheVoteRecord::shouldUpdateStatus($firstValue, $statusHierarchy[$j]));
                 } else {
-                    $this->assertFalse(ImportRockTheVoteRecord::shouldUpdateStatus($firstValue, $priority[$j]));
+                    $this->assertFalse(ImportRockTheVoteRecord::shouldUpdateStatus($firstValue, $statusHierarchy[$j]));
                 }
             }
         }

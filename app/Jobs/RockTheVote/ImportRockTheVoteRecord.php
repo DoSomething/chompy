@@ -180,9 +180,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
     /**
      * Update Northstar user with record data.
      *
-     * @param object $user
+     * @param NorthstarUser $user
      */
-    public function updateUserIfChanged($user)
+    private function updateUserIfChanged($user)
     {
         $payload = [];
 
@@ -206,7 +206,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     /**
      * Send Northstar user a password reset email.
      *
-     * @param object $user
+     * @param NorthstarUser $user
      */
     private function sendUserPasswordResetIfSubscribed($user)
     {
@@ -241,9 +241,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function getParameters()
     {
-        return [
-            'userData' => $this->userData,
-            'postData' => $this->postData,
-        ];
+        return get_object_vars($this->record);
     }
 }
