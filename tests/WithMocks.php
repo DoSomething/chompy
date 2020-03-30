@@ -49,7 +49,8 @@ trait WithMocks
     /**
      * Mock the getUser Northstar call.
      *
-     * @return user
+     * @param array $data
+     * @return NorthstarUser
      */
     public function mockGetNorthstarUser($data = [])
     {
@@ -68,7 +69,7 @@ trait WithMocks
     /**
      * Mock the createUser Northstar call.
      *
-     * @return user
+     * @return NorthstarUser
      */
     public function mockCreateNorthstarUser()
     {
