@@ -49,13 +49,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $user = $this->getUser($this->userData['id'], $this->userData['email'], $this->userData['mobile']);
 
         if ($user && $user->id) {
-            $newStatus = $this->getVoterRegistrationStatusChange($user->voter_registration_status, $this->userData['voter_registration_status']);
-
-            if ($newStatus) {
-                $this->updateUser($user, ['voter_registration_status' => $newStatus]);
-            }
+            $this->updateUserIfChanged($user);
         } else {
-            $user = $this->createUser($this->userData);
+            $user = $this->createUser();
 
             info('Created user', ['user' => $user->id]);
 
@@ -81,11 +77,15 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         info('Found post', ['post' => $post['id'], 'user' => $user->id]);
 
-        $newStatus = $this->getVoterRegistrationStatusChange($post['status'], $this->postData['status']);
+        if (! self::shouldUpdateStatus($post['status'], $this->postData['status'])) {
+            info('No changes to update for post', ['post' => $post['id']]);
 
-        if ($newStatus) {
-            $rogue->updatePost($post['id'], ['status' => $newStatus]);
+            return;
         }
+
+        $rogue->updatePost($post['id'], ['status' => $this->postData['status']]);
+
+        info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
     }
 
     /**
@@ -134,14 +134,14 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Creates new user with given data.
+     * Creates new user with record user data.
      *
      * @param array $data
      * @return NorthstarUser
      */
-    private function createUser($data)
+    private function createUser()
     {
-        $user = gateway('northstar')->asClient()->createUser($data);
+        $user = gateway('northstar')->asClient()->createUser($this->userData);
 
         if (! $user->id) {
             throw new Exception(500, 'Unable to create user');
@@ -151,13 +151,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Determines if a status should be changed and what it should be changed to.
+     * Determines if a current status should be changed to given value.
      *
      * @param string $currentStatus
      * @param string $newStatus
-     * @return string|null
+     * @return bool
      */
-    private function getVoterRegistrationStatusChange($currentStatus, $newStatus)
+    public static function shouldUpdateStatus($currentStatus, $newStatus)
     {
         // List includes status values expected from RTV as well as
         // values potentially assigned from within Northstar.
@@ -174,25 +174,39 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $indexOfCurrentStatus = array_search($currentStatus, $statusHierarchy);
         $indexOfNewStatus = array_search($newStatus, $statusHierarchy);
 
-        return $indexOfCurrentStatus < $indexOfNewStatus ? $newStatus : null;
+        return $indexOfCurrentStatus < $indexOfNewStatus;
     }
 
     /**
-     * Update Northstar user with given data.
+     * Update Northstar user with record data.
      *
-     * @param object $user
-     * @param array $data
+     * @param NorthstarUser $user
      */
-    private function updateUser($user, $data)
+    private function updateUserIfChanged($user)
     {
-        gateway('northstar')->asClient()->updateUser($user->id, $data);
-        info('Updated user', ['user' => $user->id]);
+        $payload = [];
+
+        if (self::shouldUpdateStatus($user->voter_registration_status, $this->userData['voter_registration_status'])) {
+            $payload['voter_registration_status'] = $this->userData['voter_registration_status'];
+        }
+
+        // @TODO: Check for SMS status change.
+
+        if (! count($payload)) {
+            info('No changes to update for user', ['user' => $user->id]);
+
+            return;
+        }
+
+        gateway('northstar')->asClient()->updateUser($user->id, $payload);
+
+        info('Updated user', ['user' => $user->id, 'voter_registration_status' => $this->userData['voter_registration_status']]);
     }
 
     /**
      * Send Northstar user a password reset email.
      *
-     * @param object $user
+     * @param NorthstarUser $user
      */
     private function sendUserPasswordResetIfSubscribed($user)
     {

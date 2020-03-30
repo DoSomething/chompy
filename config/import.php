@@ -41,6 +41,7 @@ return [
         ],
         'user' => [
             'email_subscription_topics' => env('ROCK_THE_VOTE_EMAIL_SUBSCRIPTION_TOPICS', 'community'),
+            'sms_subscription_topics' => env('ROCK_THE_VOTE_SMS_SUBSCRIPTION_TOPICS', 'voting'),
             'source_detail' => env('ROCK_THE_VOTE_USER_SOURCE_DETAIL', 'rock-the-vote'),
         ],
     ],

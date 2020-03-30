@@ -32,6 +32,7 @@ class RockTheVoteRecordTest extends TestCase
         $this->assertEquals($record->userData['mobile'], $exampleRow['Phone']);
         $this->assertEquals($record->userData['referrer_user_id'], null);
         $this->assertEquals($record->userData['sms_status'], 'active');
+        $this->assertEquals($record->userData['sms_subscription_topics'], explode(',', $config['user']['sms_subscription_topics']));
         $this->assertEquals($record->userData['source'], config('services.northstar.client_credentials.client_id'));
         $this->assertEquals($record->userData['source_detail'], $config['user']['source_detail']);
 
@@ -67,6 +68,7 @@ class RockTheVoteRecordTest extends TestCase
         $this->assertEquals($record->userData['email_subscription_status'], false);
         $this->assertEquals($record->userData['email_subscription_topics'], []);
         $this->assertEquals($record->userData['sms_status'], 'stop');
+        $this->assertEquals($record->userData['sms_subscription_topics'], []);
     }
 
     /**
@@ -85,6 +87,7 @@ class RockTheVoteRecordTest extends TestCase
 
         $this->assertEquals($record->userData['mobile'], null);
         $this->assertFalse(isset($record->userData['sms_status']));
+        $this->assertFalse(isset($record->userData['sms_subscription_topics']));
     }
 
     /**
@@ -103,6 +106,7 @@ class RockTheVoteRecordTest extends TestCase
 
         $this->assertEquals($record->userData['mobile'], null);
         $this->assertFalse(isset($record->userData['sms_status']));
+        $this->assertFalse(isset($record->userData['sms_subscription_topics']));
     }
 
     /**
