@@ -163,21 +163,23 @@ class RockTheVoteRecord
      */
     private function parsePostDetails($record)
     {
-        $details = [];
+        $config = ImportType::getConfig(ImportType::$rockTheVote);
+        $result = [];
 
-        $importantKeys = [
-            'Tracking Source',
-            'Started registration',
-            'Finish with State',
-            'Status',
-            'Pre-Registered',
-            'Home zip code',
-        ];
-
-        foreach ($importantKeys as $key) {
-            $details[$key] = $record[$key];
+        foreach ($config['post']['details'] as $key) {
+            $result[$key] = $record[$key];
         }
 
-        return json_encode($details);
+        return json_encode($result);
+    }
+
+    /**
+     * Returns decoded post details as an array.
+     *
+     * @return array
+     */
+    public function getPostDetails()
+    {
+        return get_object_vars(json_decode($this->postData['details']));
     }
 }

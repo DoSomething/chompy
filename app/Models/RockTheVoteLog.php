@@ -41,7 +41,7 @@ class RockTheVoteLog extends Model
      */
     public static function createFromRecord(RockTheVoteRecord $record, NorthstarUser $user, $importFileId)
     {
-        $info = get_object_vars(json_decode($record->postData['details']));
+        $info = $record->getPostDetails();
 
         return self::create([
             'import_file_id' => $importFileId,
@@ -59,7 +59,7 @@ class RockTheVoteLog extends Model
      */
     public static function getByRecord(RockTheVoteRecord $record, NorthstarUser $user)
     {
-        $info = get_object_vars(json_decode($record->postData['details']));
+        $info = $record->getPostDetails();
 
         return self::where([
             'started_registration' => $info['Started registration'],
