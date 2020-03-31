@@ -3,6 +3,7 @@
 namespace Tests\Jobs\RockTheVote;
 
 use Tests\TestCase;
+use Chompy\Models\RockTheVoteLog;
 use Chompy\Jobs\ImportRockTheVoteRecord;
 
 class ImportRockTheVoteRecordTest extends TestCase
@@ -135,6 +136,31 @@ class ImportRockTheVoteRecordTest extends TestCase
             'Status' => 'Step 1',
             'Finish with State' => 'No',
         ]), $this->faker->randomDigitNotNull);
+    }
+
+    /**
+     * Test that record is not imported if its log already exists.
+     */
+    public function testDoesNotProcessRecordIfLogExists()
+    {
+        $row = $this->faker->rockTheVoteReportRow();
+        $userId = $this->faker->northstar_id;
+        $log = factory(RockTheVoteLog::class)->create([
+            'user_id' => $userId,
+            'started_registration' => $row['Started registration'],
+            'status' => $row['Status'],
+        ]);
+
+        $this->mockGetNorthstarUser([
+            'id' => $userId,
+        ]);
+
+        $this->northstarMock->shouldNotReceive('updateUser');
+        $this->rogueMock->shouldNotReceive('getPost');
+        $this->rogueMock->shouldNotReceive('createPost');
+        $this->rogueMock->shouldNotReceive('updatePost');
+
+        ImportRockTheVoteRecord::dispatch($row, $this->faker->randomDigitNotNull);
     }
 
     /**
