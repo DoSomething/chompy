@@ -52,7 +52,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return $this->handleNewUser();
         }
 
-        // @TODO: Check if we've already imported this record before proceeding.
+        if (RockTheVoteLog::getByRecord($this->record, $user)) {
+            info('Skipping record that has already been imported', ['user' => $user->id, 'details' => $this->postData['details']]);
+
+            return;
+        }
 
         $this->updateUserIfChanged($user);
 
@@ -71,7 +75,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $this->updatePostIfChanged($post);
         }
 
-        // @TODO: Update log with imported_at.
+        RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
     }
 
     /**
@@ -136,7 +140,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         $this->createPost($user);
 
-        // @TODO: Pass imported_at
         RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
 
         $this->sendUserPasswordResetIfSubscribed($user);

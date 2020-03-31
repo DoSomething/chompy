@@ -43,7 +43,7 @@ class RockTheVoteLog extends Model
     {
         $info = get_object_vars(json_decode($record->postData['details']));
 
-        return static::firstOrCreate([
+        return static::create([
             'import_file_id' => $importFileId,
             'finish_with_state' => $info['Finish with State'],
             'pre_registered' => $info['Pre-Registered'],
@@ -52,5 +52,19 @@ class RockTheVoteLog extends Model
             'tracking_source' => $info['Tracking Source'],
             'user_id' => $user->id,
         ]);
+    }
+
+    /**
+     * Find a log for given record and user.
+     */
+    public static function getByRecord(RockTheVoteRecord $record, NorthstarUser $user)
+    {
+        $info = get_object_vars(json_decode($record->postData['details']));
+
+        return static::find([
+            'started_registration' => $info['Started registration'],
+            'status' => $info['Status'],
+            'user_id' => $user->id,
+        ])->first();
     }
 }
