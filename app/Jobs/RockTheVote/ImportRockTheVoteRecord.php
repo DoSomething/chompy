@@ -62,26 +62,14 @@ class ImportRockTheVoteRecord implements ShouldQueue
         ]);
 
         if (! $existingPosts['data']) {
-            $post = $rogue->createPost(array_merge(['northstar_id' => $user->id], $this->postData));
+            $this->createPost($user);
+        } else {
+            $post = $existingPosts['data'][0];
 
-            info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
+            info('Found post', ['post' => $post['id'], 'user' => $user->id]);
 
-            return;
+            $this->updatePostIfChanged($post);
         }
-
-        $post = $existingPosts['data'][0];
-
-        info('Found post', ['post' => $post['id'], 'user' => $user->id]);
-
-        if (! self::shouldUpdateStatus($post['status'], $this->postData['status'])) {
-            info('No changes to update for post', ['post' => $post['id']]);
-
-            return;
-        }
-
-        $rogue->updatePost($post['id'], ['status' => $this->postData['status']]);
-
-        info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
 
         // @TODO: Update log with imported_at.
     }
@@ -146,16 +134,27 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         info('Created user', ['user' => $user->id]);
 
-        $post = app(Rogue::class)->createPost(array_merge([
-            'northstar_id' => $user->id,
-        ], $this->postData));
-
-        info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
+        $this->createPost($user);
 
         // @TODO: Pass imported_at
         RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
 
         $this->sendUserPasswordResetIfSubscribed($user);
+    }
+
+    /**
+     * Creates new post with given Northstar user and record post data.
+     *
+     * @param NorthstarUser
+     * @return void
+     */
+    private function createPost($user)
+    {
+        $post = app(Rogue::class)->createPost(array_merge([
+            'northstar_id' => $user->id,
+        ], $this->postData));
+
+        info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
     }
 
     /**
@@ -209,6 +208,23 @@ class ImportRockTheVoteRecord implements ShouldQueue
         gateway('northstar')->asClient()->updateUser($user->id, $payload);
 
         info('Updated user', ['user' => $user->id, 'voter_registration_status' => $this->userData['voter_registration_status']]);
+    }
+
+    /**
+     * @param array $post
+     * @return void
+     */
+    private function updatePostIfChanged($post)
+    {
+        if (! self::shouldUpdateStatus($post['status'], $this->postData['status'])) {
+            info('No changes to update for post', ['post' => $post['id']]);
+
+            return;
+        }
+
+        app(Rogue::class)->updatePost($post['id'], ['status' => $this->postData['status']]);
+
+        info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
     }
 
     /**
