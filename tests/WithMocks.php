@@ -69,14 +69,15 @@ trait WithMocks
     /**
      * Mock the createUser Northstar call.
      *
+     * @param string $id
      * @return NorthstarUser
      */
-    public function mockCreateNorthstarUser()
+    public function mockCreateNorthstarUser($id)
     {
         $this->northstarMock
             ->shouldReceive('createUser')
             ->andReturn(new NorthstarUser([
-                'id' => $this->faker->northstar_id,
+                'id' => $id ? $id : $this->faker->northstar_id,
                 'first_name' => $this->faker->firstName,
                 'last_name' => $this->faker->lastName,
                 'birthdate' => $this->faker->date,
