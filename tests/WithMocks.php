@@ -69,21 +69,21 @@ trait WithMocks
     /**
      * Mock the createUser Northstar call.
      *
-     * @param string $id
+     * @param array $data
      * @return NorthstarUser
      */
-    public function mockCreateNorthstarUser($id)
+    public function mockCreateNorthstarUser($data = [])
     {
         $this->northstarMock
             ->shouldReceive('createUser')
-            ->andReturn(new NorthstarUser([
-                'id' => $id ? $id : $this->faker->northstar_id,
+            ->andReturn(new NorthstarUser(array_merge([
+                'id' => $this->faker->northstar_id,
                 'first_name' => $this->faker->firstName,
                 'last_name' => $this->faker->lastName,
                 'birthdate' => $this->faker->date,
                 'email' => $this->faker->email,
                 'mobile' => $this->faker->phoneNumber,
-            ]));
+            ], $data)));
     }
 
     /**

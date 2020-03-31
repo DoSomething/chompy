@@ -20,7 +20,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $importFileId = $this->faker->randomDigitNotNull;
 
         $this->northstarMock->shouldReceive('getUser')->andReturn(null);
-        $this->mockCreateNorthstarUser($userId);
+        $this->mockCreateNorthstarUser(['id' => $userId]);
         $this->northstarMock->shouldReceive('sendPasswordReset');
         $this->rogueMock->shouldReceive('getPost')->andReturn(null);
         $this->rogueMock->shouldReceive('createPost')->andReturn([
