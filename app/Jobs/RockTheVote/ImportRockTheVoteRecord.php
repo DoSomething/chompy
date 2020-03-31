@@ -48,17 +48,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         $user = $this->getUser($this->userData['id'], $this->userData['email'], $this->userData['mobile']);
 
-        if ($user && $user->id) {
-            $this->updateUserIfChanged($user);
-        } else {
-            $user = $this->createUser();
-
-            info('Created user', ['user' => $user->id]);
-
-            $this->sendUserPasswordResetIfSubscribed($user);
+        if (! $user) {
+            return $this->handleNewUser();
         }
 
-        RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
+        // @TODO: Check if we've already imported this record before proceeding.
+
+        $this->updateUserIfChanged($user);
 
         $existingPosts = $rogue->getPost([
             'action_id' => $this->postData['action_id'],
@@ -86,6 +82,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $rogue->updatePost($post['id'], ['status' => $this->postData['status']]);
 
         info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
+
+        // @TODO: Update log with imported_at.
     }
 
     /**
@@ -134,12 +132,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Creates new user with record user data.
+     * Creates new user and post with record data.
      *
-     * @param array $data
-     * @return NorthstarUser
+     * @return void
      */
-    private function createUser()
+    private function handleNewUser()
     {
         $user = gateway('northstar')->asClient()->createUser($this->userData);
 
@@ -147,7 +144,18 @@ class ImportRockTheVoteRecord implements ShouldQueue
             throw new Exception(500, 'Unable to create user');
         }
 
-        return $user;
+        info('Created user', ['user' => $user->id]);
+
+        $post = app(Rogue::class)->createPost(array_merge([
+            'northstar_id' => $user->id,
+        ], $this->postData));
+
+        info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
+
+        // @TODO: Pass imported_at
+        RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
+
+        $this->sendUserPasswordResetIfSubscribed($user);
     }
 
     /**
