@@ -53,7 +53,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
         }
 
         if (RockTheVoteLog::getByRecord($this->record, $user)) {
-            info('Skipping record that has already been imported', ['user' => $user->id, 'details' => $this->postData['details']]);
+            $details = $this->record->getPostDetails();
+
+            info('Skipping record that has already been imported', [
+                'user' => $user->id,
+                'status' => $details['Status'],
+                'started_registration' => $details['Started registration'],
+            ]);
 
             return;
         }
