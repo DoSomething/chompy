@@ -220,7 +220,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Updates Rogue post with record data if it should be updated. 
+     * Updates Rogue post with record data if it should be updated.
      *
      * @param array $post
      * @return void
