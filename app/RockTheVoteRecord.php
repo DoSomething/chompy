@@ -163,10 +163,9 @@ class RockTheVoteRecord
      */
     private function parsePostDetails($record)
     {
-        $config = ImportType::getConfig(ImportType::$rockTheVote);
         $result = [];
 
-        foreach ($config['post']['details'] as $key) {
+        foreach (config('import.rock_the_vote.post.details') as $key) {
             $result[$key] = $record[$key];
         }
 

@@ -223,13 +223,12 @@ class RockTheVoteRecordTest extends TestCase
      */
     public function testGetPostDetails()
     {
-        $config = ImportType::getConfig(ImportType::$rockTheVote);
         $row = $this->faker->rockTheVoteReportRow();
         $record = new RockTheVoteRecord($row);
 
         $result = $record->getPostDetails();
 
-        foreach ($config['post']['details'] as $key) {
+        foreach (config('import.rock_the_vote.post.details') as $key) {
             $this->assertEquals($result[$key], $row[$key]);
         }
     }
