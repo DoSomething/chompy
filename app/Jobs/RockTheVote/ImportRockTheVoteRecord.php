@@ -138,7 +138,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Creates new user with record data.
+     * Creates new user with record user data.
      *
      * @return NorthstarUser
      */
