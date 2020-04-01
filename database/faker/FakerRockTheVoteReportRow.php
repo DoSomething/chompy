@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Faker\Provider\Base;
 
 class FakerRockTheVoteReportRow extends Base
@@ -24,7 +25,7 @@ class FakerRockTheVoteReportRow extends Base
             'Phone' => $this->generator->phoneNumber,
             'Finish with State' => 'Yes',
             'Pre-Registered' => 'No',
-            'Started registration' => '2020-02-22 19:16:32 -0500',
+            'Started registration' => Carbon::now()->format('Y-m-d H:i:s O'),
             'Status' => 'Step 1',
             'Tracking Source' => 'ads',
             'Opt-in to Partner email?' => 'Yes',

@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Faker\Generator;
 use Chompy\Models\RockTheVoteLog;
 use Chompy\Models\RockTheVoteReport;
@@ -9,7 +10,7 @@ $factory->define(RockTheVoteLog::class, function (Generator $faker) {
         'finish_with_state' => 'No',
         'import_file_id' => $this->faker->randomDigitNotNull,
         'pre_registered' => 'No',
-        'started_registration' => '2020-02-22 19:16:32 -0500',
+        'started_registration' => Carbon::now()->format('Y-m-d H:i:s O'),
         'status' => 'Step 1',
         'tracking_source' => 'ads',
         'user_id' => $this->faker->northstar_id,
