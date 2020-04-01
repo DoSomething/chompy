@@ -11,6 +11,9 @@
     <p>
         <strong>{{$importFile->import_type}}</strong>
     </p>
+    @if ($importFile->options)
+        @include('pages.partials.import-files.import-options', ['options' => $importFile->options])
+    @endif
     <p>
         This file had a total of {{$importFile->row_count}} rows: <strong>{{$importFile->import_count}} imported, {{$importFile->skip_count}} skipped</strong>.
     </p>
