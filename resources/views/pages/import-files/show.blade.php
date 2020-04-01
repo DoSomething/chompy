@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Import details');
+@section('title', 'Import details')
 
 @section('main_content')
 
@@ -9,7 +9,10 @@
         {{$importFile->created_at}}
     </h1>
     <p>
-        <strong>{{$importFile->import_type}}</strong> ({{$importFile->row_count}} rows)
+        <strong>{{$importFile->import_type}}</strong>
+    </p>
+    <p>
+        This file had a total of {{$importFile->row_count}} rows: <strong>{{$importFile->import_count}} imported, {{$importFile->skip_count}} skipped</strong>.
     </p>
     @if ($importFile->import_type === \Chompy\ImportType::$rockTheVote)
         @include('pages.partials.rock-the-vote.logs', ['rows' => $rows, 'user_id' => null])
