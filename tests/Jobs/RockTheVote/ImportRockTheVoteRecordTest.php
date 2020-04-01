@@ -217,6 +217,11 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->rogueMock->shouldNotReceive('updatePost');
 
         ImportRockTheVoteRecord::dispatch($row, $importFile);
+
+        $this->assertDatabaseHas('import_files', [
+            'id' => $importFile->id,
+            'skip_count' => 1,
+        ]);
     }
 
     /**

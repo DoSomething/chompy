@@ -4,11 +4,41 @@ namespace Tests\Http;
 
 use Tests\TestCase;
 use Chompy\RockTheVoteRecord;
+use Chompy\Models\ImportFile;
 use Chompy\Models\RockTheVoteLog;
 use DoSomething\Gateway\Resources\NorthstarUser;
 
 class RockTheVoteLogTest extends TestCase
 {
+    /**
+     * Test that createFromRecord returns a RockTheVoteLog and increments given ImportFile.
+     *
+     * @return void
+     */
+    public function testCreateFromRecord()
+    {
+        $user = new NorthstarUser(['id' => $this->faker->northstar_id]);
+        $row = $this->faker->rockTheVoteReportRow();
+        $importFile = factory(ImportFile::class)->create([
+            'import_count' => 5,
+        ]);
+
+        $log = RockTheVoteLog::createFromRecord(new RockTheVoteRecord($row), $user, $importFile);
+
+        $this->assertEquals($log->finish_with_state, $row['Finish with State']);
+        $this->assertEquals($log->import_file_id, $importFile->id);
+        $this->assertEquals($log->pre_registered, $row['Pre-Registered']);
+        $this->assertEquals($log->started_registration, $row['Started registration']);
+        $this->assertEquals($log->status, $row['Status']);
+        $this->assertEquals($log->tracking_source, $row['Tracking Source']);
+        $this->assertEquals($log->user_id, $user->id);
+
+        $this->assertDatabaseHas('import_files', [
+            'id' => $importFile->id,
+            'import_count' => 6,
+        ]);
+    }
+
     /**
      * Test that getByRecord returns a RockTheVoteLog when record and user found.
      *
