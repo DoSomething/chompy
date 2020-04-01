@@ -49,7 +49,15 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $user = $this->getUser($this->userData['id'], $this->userData['email'], $this->userData['mobile']);
 
         if (! $user) {
-            return $this->handleNewUser();
+            $user = $this->createUser();
+
+            $this->createPost($user);
+
+            RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
+
+            $this->sendUserPasswordResetIfSubscribed($user);
+
+            return;
         }
 
         if (RockTheVoteLog::getByRecord($this->record, $user)) {
@@ -130,11 +138,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Creates new user and post with record data.
+     * Creates new user with record data.
      *
-     * @return void
+     * @return NorthstarUser
      */
-    private function handleNewUser()
+    private function createUser()
     {
         $user = gateway('northstar')->asClient()->createUser($this->userData);
 
@@ -144,18 +152,14 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         info('Created user', ['user' => $user->id]);
 
-        $this->createPost($user);
-
-        RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
-
-        $this->sendUserPasswordResetIfSubscribed($user);
+        return $user;
     }
 
     /**
      * Creates new post with given Northstar user and record post data.
      *
      * @param NorthstarUser
-     * @return void
+     * @return array
      */
     private function createPost($user)
     {
@@ -164,6 +168,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
         ], $this->postData));
 
         info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
+
+        return $post;
     }
 
     /**
