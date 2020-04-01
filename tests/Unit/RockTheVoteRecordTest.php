@@ -215,4 +215,21 @@ class RockTheVoteRecordTest extends TestCase
         $this->assertEquals($record->userData['voter_registration_status'], 'ineligible');
         $this->assertEquals($record->postData['status'], 'ineligible');
     }
+
+    /**
+     * Test expected value for getPostDetails result.
+     *
+     * @return void
+     */
+    public function testGetPostDetails()
+    {
+        $row = $this->faker->rockTheVoteReportRow();
+        $record = new RockTheVoteRecord($row);
+
+        $result = $record->getPostDetails();
+
+        foreach (config('import.rock_the_vote.post.details') as $key) {
+            $this->assertEquals($result[$key], $row[$key]);
+        }
+    }
 }

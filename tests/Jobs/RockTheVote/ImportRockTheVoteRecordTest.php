@@ -3,6 +3,7 @@
 namespace Tests\Jobs\RockTheVote;
 
 use Tests\TestCase;
+use Chompy\Models\RockTheVoteLog;
 use Chompy\Jobs\ImportRockTheVoteRecord;
 
 class ImportRockTheVoteRecordTest extends TestCase
@@ -14,8 +15,12 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testCreatesUserIfUserNotFound()
     {
+        $userId = $this->faker->northstar_id;
+        $row = $this->faker->rockTheVoteReportRow();
+        $importFileId = $this->faker->randomDigitNotNull;
+
         $this->northstarMock->shouldReceive('getUser')->andReturn(null);
-        $this->mockCreateNorthstarUser();
+        $this->mockCreateNorthstarUser(['id' => $userId]);
         $this->northstarMock->shouldReceive('sendPasswordReset');
         $this->rogueMock->shouldReceive('getPost')->andReturn(null);
         $this->rogueMock->shouldReceive('createPost')->andReturn([
@@ -24,7 +29,14 @@ class ImportRockTheVoteRecordTest extends TestCase
             ],
         ]);
 
-        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow(), $this->faker->randomDigitNotNull);
+        ImportRockTheVoteRecord::dispatch($row, $importFileId);
+
+        $this->assertDatabaseHas('rock_the_vote_logs', [
+            'user_id' => $userId,
+            'status' => $row['Status'],
+            'started_registration' => $row['Started registration'],
+            'import_file_id' => $importFileId,
+        ]);
     }
 
     /**
@@ -34,7 +46,11 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testDoesNotCreateUserIfUserFound()
     {
-        $this->mockGetNorthstarUser();
+        $userId = $this->faker->northstar_id;
+        $row = $this->faker->rockTheVoteReportRow();
+        $importFileId = $this->faker->randomDigitNotNull;
+
+        $this->mockGetNorthstarUser(['id' => $userId]);
         $this->northstarMock->shouldNotReceive('createUser');
         $this->northstarMock->shouldNotReceive('sendPasswordReset');
         $this->rogueMock->shouldReceive('getPost')->andReturn(null);
@@ -44,7 +60,14 @@ class ImportRockTheVoteRecordTest extends TestCase
             ],
         ]);
 
-        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow(), $this->faker->randomDigitNotNull);
+        ImportRockTheVoteRecord::dispatch($row, $importFileId);
+
+        $this->assertDatabaseHas('rock_the_vote_logs', [
+            'user_id' => $userId,
+            'status' => $row['Status'],
+            'started_registration' => $row['Started registration'],
+            'import_file_id' => $importFileId,
+        ]);
     }
 
     /**
@@ -54,7 +77,11 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testDoesNotCreateOrUpdatePostIfCompletedPostFound()
     {
-        $this->mockGetNorthstarUser();
+        $userId = $this->faker->northstar_id;
+        $row = $this->faker->rockTheVoteReportRow();
+        $importFileId = $this->faker->randomDigitNotNull;
+
+        $this->mockGetNorthstarUser(['id' => $userId]);
         $this->northstarMock->shouldNotReceive('createUser');
         $this->northstarMock->shouldNotReceive('sendPasswordReset');
         $this->rogueMock->shouldReceive('getPost')->andReturn([
@@ -68,7 +95,14 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->rogueMock->shouldNotReceive('createPost');
         $this->rogueMock->shouldNotReceive('updatePost');
 
-        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow(), $this->faker->randomDigitNotNull);
+        ImportRockTheVoteRecord::dispatch($row, $importFileId);
+
+        $this->assertDatabaseHas('rock_the_vote_logs', [
+            'user_id' => $userId,
+            'status' => $row['Status'],
+            'started_registration' => $row['Started registration'],
+            'import_file_id' => $importFileId,
+        ]);
     }
 
     /**
@@ -80,6 +114,11 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $userId = $this->faker->northstar_id;
         $postId = $this->faker->randomDigitNotNull;
+        $row = $this->faker->rockTheVoteReportRow([
+            'Status' => 'Complete',
+            'Finish with State' => 'Yes',
+        ]);
+        $importFileId = $this->faker->randomDigitNotNull;
 
         $this->mockGetNorthstarUser([
             'id' => $userId,
@@ -102,10 +141,14 @@ class ImportRockTheVoteRecordTest extends TestCase
             'status' => 'register-OVR',
         ]);
 
-        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow([
-            'Status' => 'Complete',
-            'Finish with State' => 'Yes',
-        ]), $this->faker->randomDigitNotNull);
+        ImportRockTheVoteRecord::dispatch($row, $importFileId);
+
+        $this->assertDatabaseHas('rock_the_vote_logs', [
+            'user_id' => $userId,
+            'status' => $row['Status'],
+            'started_registration' => $row['Started registration'],
+            'import_file_id' => $importFileId,
+        ]);
     }
 
     /**
@@ -115,7 +158,15 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testDoesNotUpdatesUserIfShouldNotChangeStatus()
     {
+        $userId = $this->faker->northstar_id;
+        $row = $this->faker->rockTheVoteReportRow([
+            'Status' => 'Step 1',
+            'Finish with State' => 'No',
+        ]);
+        $importFileId = $this->faker->randomDigitNotNull;
+
         $this->mockGetNorthstarUser([
+            'id' => $userId,
             'voter_registration_status' => 'registration_complete',
         ]);
         $this->northstarMock->shouldNotReceive('createUser');
@@ -131,10 +182,39 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->rogueMock->shouldNotReceive('createPost');
         $this->rogueMock->shouldNotReceive('updatePost');
 
-        ImportRockTheVoteRecord::dispatch($this->faker->rockTheVoteReportRow([
-            'Status' => 'Step 1',
-            'Finish with State' => 'No',
-        ]), $this->faker->randomDigitNotNull);
+        ImportRockTheVoteRecord::dispatch($row, $importFileId);
+
+        $this->assertDatabaseHas('rock_the_vote_logs', [
+            'user_id' => $userId,
+            'status' => $row['Status'],
+            'started_registration' => $row['Started registration'],
+            'import_file_id' => $importFileId,
+        ]);
+    }
+
+    /**
+     * Test that record is not imported if its log already exists.
+     */
+    public function testDoesNotProcessRecordIfLogExists()
+    {
+        $row = $this->faker->rockTheVoteReportRow();
+        $userId = $this->faker->northstar_id;
+        $log = factory(RockTheVoteLog::class)->create([
+            'user_id' => $userId,
+            'started_registration' => $row['Started registration'],
+            'status' => $row['Status'],
+        ]);
+
+        $this->mockGetNorthstarUser([
+            'id' => $userId,
+        ]);
+
+        $this->northstarMock->shouldNotReceive('updateUser');
+        $this->rogueMock->shouldNotReceive('getPost');
+        $this->rogueMock->shouldNotReceive('createPost');
+        $this->rogueMock->shouldNotReceive('updatePost');
+
+        ImportRockTheVoteRecord::dispatch($row, $this->faker->randomDigitNotNull);
     }
 
     /**

@@ -34,6 +34,15 @@ return [
             'action_id' => env('ROCK_THE_VOTE_POST_ACTION_ID', 954),
             'type' => env('ROCK_THE_VOTE_POST_TYPE', 'voter-reg'),
             'source' => env('ROCK_THE_VOTE_POST_SOURCE', 'rock-the-vote'),
+            // These correspond to column names in a Rock The Vote report.
+            'details' => [
+                'Tracking Source',
+                'Started registration',
+                'Finish with State',
+                'Status',
+                'Pre-Registered',
+                'Home zip code',
+            ],
         ],
         'reset' => [
             'enabled' => env('ROCK_THE_VOTE_RESET_ENABLED', 'true'),

@@ -48,17 +48,31 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         $user = $this->getUser($this->userData['id'], $this->userData['email'], $this->userData['mobile']);
 
-        if ($user && $user->id) {
-            $this->updateUserIfChanged($user);
-        } else {
+        if (! $user) {
             $user = $this->createUser();
 
-            info('Created user', ['user' => $user->id]);
+            $this->createPost($user);
+
+            RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
 
             $this->sendUserPasswordResetIfSubscribed($user);
+
+            return;
         }
 
-        RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
+        if (RockTheVoteLog::getByRecord($this->record, $user)) {
+            $details = $this->record->getPostDetails();
+
+            info('Skipping record that has already been imported', [
+                'user' => $user->id,
+                'status' => $details['Status'],
+                'started_registration' => $details['Started registration'],
+            ]);
+
+            return;
+        }
+
+        $this->updateUserIfChanged($user);
 
         $existingPosts = $rogue->getPost([
             'action_id' => $this->postData['action_id'],
@@ -66,26 +80,16 @@ class ImportRockTheVoteRecord implements ShouldQueue
         ]);
 
         if (! $existingPosts['data']) {
-            $post = $rogue->createPost(array_merge(['northstar_id' => $user->id], $this->postData));
+            $this->createPost($user);
+        } else {
+            $post = $existingPosts['data'][0];
 
-            info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
+            info('Found post', ['post' => $post['id'], 'user' => $user->id]);
 
-            return;
+            $this->updatePostIfChanged($post);
         }
 
-        $post = $existingPosts['data'][0];
-
-        info('Found post', ['post' => $post['id'], 'user' => $user->id]);
-
-        if (! self::shouldUpdateStatus($post['status'], $this->postData['status'])) {
-            info('No changes to update for post', ['post' => $post['id']]);
-
-            return;
-        }
-
-        $rogue->updatePost($post['id'], ['status' => $this->postData['status']]);
-
-        info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
+        RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
     }
 
     /**
@@ -136,7 +140,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
     /**
      * Creates new user with record user data.
      *
-     * @param array $data
      * @return NorthstarUser
      */
     private function createUser()
@@ -147,7 +150,26 @@ class ImportRockTheVoteRecord implements ShouldQueue
             throw new Exception(500, 'Unable to create user');
         }
 
+        info('Created user', ['user' => $user->id]);
+
         return $user;
+    }
+
+    /**
+     * Creates new post with given Northstar user and record post data.
+     *
+     * @param NorthstarUser
+     * @return array
+     */
+    private function createPost($user)
+    {
+        $post = app(Rogue::class)->createPost(array_merge([
+            'northstar_id' => $user->id,
+        ], $this->postData));
+
+        info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
+
+        return $post;
     }
 
     /**
@@ -201,6 +223,25 @@ class ImportRockTheVoteRecord implements ShouldQueue
         gateway('northstar')->asClient()->updateUser($user->id, $payload);
 
         info('Updated user', ['user' => $user->id, 'voter_registration_status' => $this->userData['voter_registration_status']]);
+    }
+
+    /**
+     * Updates Rogue post with record data if it should be updated.
+     *
+     * @param array $post
+     * @return void
+     */
+    private function updatePostIfChanged($post)
+    {
+        if (! self::shouldUpdateStatus($post['status'], $this->postData['status'])) {
+            info('No changes to update for post', ['post' => $post['id']]);
+
+            return;
+        }
+
+        app(Rogue::class)->updatePost($post['id'], ['status' => $this->postData['status']]);
+
+        info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
     }
 
     /**
