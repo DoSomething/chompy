@@ -2,8 +2,19 @@
 
 use Carbon\Carbon;
 use Faker\Generator;
+use Chompy\ImportType;
+use Chompy\Models\ImportFile;
 use Chompy\Models\RockTheVoteLog;
 use Chompy\Models\RockTheVoteReport;
+
+$factory->define(ImportFile::class, function (Generator $faker) {
+    return [
+        'id' => $this->faker->randomDigitNotNull,
+        'filepath' => $this->faker->imageUrl,
+        'import_type' => ImportType::$rockTheVote,
+        'row_count' => $this->faker->numberBetween(10, 1250),
+    ];
+});
 
 $factory->define(RockTheVoteLog::class, function (Generator $faker) {
     return [
