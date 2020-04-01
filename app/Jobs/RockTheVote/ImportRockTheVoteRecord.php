@@ -7,6 +7,7 @@ use Chompy\ImportType;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
 use Chompy\RockTheVoteRecord;
+use Chompy\Models\ImportFile;
 use Chompy\Models\RockTheVoteLog;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -28,13 +29,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($record, $importFileId)
+    public function __construct($record, ImportFile $importFile)
     {
         $this->config = ImportType::getConfig(ImportType::$rockTheVote);
         $this->record = new RockTheVoteRecord($record, $this->config);
         $this->userData = $this->record->userData;
         $this->postData = $this->record->postData;
-        $this->importFileId = $importFileId;
+        $this->importFile = $importFile;
     }
 
     /**
@@ -53,7 +54,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
             $this->createPost($user);
 
-            RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
+            RockTheVoteLog::createFromRecord($this->record, $user, $this->importFile);
 
             $this->sendUserPasswordResetIfSubscribed($user);
 
@@ -68,6 +69,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
                 'status' => $details['Status'],
                 'started_registration' => $details['Started registration'],
             ]);
+
+            $this->importFile->incrementSkipCount();
 
             return;
         }
@@ -89,7 +92,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $this->updatePostIfChanged($post);
         }
 
-        RockTheVoteLog::createFromRecord($this->record, $user, $this->importFileId);
+        RockTheVoteLog::createFromRecord($this->record, $user, $this->importFile);
     }
 
     /**

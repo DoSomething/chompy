@@ -10,7 +10,7 @@
           <tr class="row">
             <th class="col-md-3">Created</th>
             <th class="col-md-3">Import type</th>
-            <th class="col-md-3">Row count</th>
+            <th class="col-md-3">Import count</th>
             <th class="col-md-3">Created by</th>
           </tr>
         </thead>
@@ -40,7 +40,7 @@
                 @endif
               </td> 
               <td class="col-md-3">
-                {{$importFile->row_count}}
+                {{$importFile->import_count}}
               </td>
               <td class="col-md-3">
                 {{$importFile->user_id ? $importFile->user_id : 'Console'}}

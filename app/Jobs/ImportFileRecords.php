@@ -106,7 +106,7 @@ class ImportFileRecords implements ShouldQueue
 
         foreach ($records as $offset => $record) {
             if ($this->importType === ImportType::$rockTheVote) {
-                ImportRockTheVoteRecord::dispatch($record, $importFile->id);
+                ImportRockTheVoteRecord::dispatch($record, $importFile);
             } elseif ($this->importType === ImportType::$emailSubscription) {
                 ImportEmailSubscription::dispatch($record, $this->importOptions['source_detail'], $this->importOptions['email_subscription_topic']);
             }

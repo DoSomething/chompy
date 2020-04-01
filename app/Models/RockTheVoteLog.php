@@ -39,12 +39,12 @@ class RockTheVoteLog extends Model
     /**
      * Log sanitized Rock The Vote data for given user and import file.
      */
-    public static function createFromRecord(RockTheVoteRecord $record, NorthstarUser $user, $importFileId)
+    public static function createFromRecord(RockTheVoteRecord $record, NorthstarUser $user, ImportFile $importFile)
     {
         $info = $record->getPostDetails();
 
-        return self::create([
-            'import_file_id' => $importFileId,
+        $rockTheVoteLog = self::create([
+            'import_file_id' => $importFile->id,
             'finish_with_state' => $info['Finish with State'],
             'pre_registered' => $info['Pre-Registered'],
             'started_registration' => $info['Started registration'],
@@ -52,6 +52,10 @@ class RockTheVoteLog extends Model
             'tracking_source' => $info['Tracking Source'],
             'user_id' => $user->id,
         ]);
+
+        $importFile->incrementImportCount();
+
+        return $rockTheVoteLog;
     }
 
     /**
