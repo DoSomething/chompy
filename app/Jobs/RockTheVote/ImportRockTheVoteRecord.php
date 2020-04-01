@@ -70,6 +70,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
                 'started_registration' => $details['Started registration'],
             ]);
 
+            $this->importFile->incrementSkipCount();
+
             return;
         }
 

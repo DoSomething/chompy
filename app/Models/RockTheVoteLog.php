@@ -43,7 +43,7 @@ class RockTheVoteLog extends Model
     {
         $info = $record->getPostDetails();
 
-        return self::create([
+        $rockTheVoteLog = self::create([
             'import_file_id' => $importFile->id,
             'finish_with_state' => $info['Finish with State'],
             'pre_registered' => $info['Pre-Registered'],
@@ -52,6 +52,10 @@ class RockTheVoteLog extends Model
             'tracking_source' => $info['Tracking Source'],
             'user_id' => $user->id,
         ]);
+
+        $importFile->incrementImportCount();
+
+        return $rockTheVoteLog;
     }
 
     /**
