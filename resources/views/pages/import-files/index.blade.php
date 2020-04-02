@@ -24,19 +24,7 @@
               <td class="col-md-3">
                 {{$importFile->import_type}}
                 @if ($importFile->options)
-                  <ul>
-                  @foreach (json_decode($importFile->options) as $key => $value)
-                    @if ($key === 'report_id')
-                      <li>
-                        <a href="/rock-the-vote-reports/{{$value}}">
-                          <strong>#{{$value}}</strong>
-                        </a>
-                      </li>
-                    @else
-                      <li>{{$key}}: <strong>{{$value}}</strong></li>
-                    @endif
-                  @endforeach
-                  </ul>
+                  @include('pages.partials.import-files.import-options', ['options' => $importFile->options])
                 @endif
               </td> 
               <td class="col-md-3">

@@ -4,6 +4,7 @@ namespace Chompy\Jobs;
 
 use Exception;
 use Chompy\ImportType;
+use Chompy\Models\ImportFile;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -42,16 +43,17 @@ class ImportEmailSubscription implements ShouldQueue
      * Create a new job instance.
      *
      * @param array $record
-     * @param string $sourceDetail
-     * @param array $emailSubscriptionTopics
+     * @param ImportFile $importFile
+     * @param array $importOptions
      * @return void
      */
-    public function __construct($record, $sourceDetail, $emailSubscriptionTopic)
+    public function __construct($record, ImportFile $importFile, $importOptions)
     {
         $this->email = $record['email'];
         $this->first_name = isset($record['first_name']) ? $record['first_name'] : null;
-        $this->source_detail = $sourceDetail;
-        $this->email_subscription_topic = $emailSubscriptionTopic;
+        $this->source_detail = $importOptions['source_detail'];
+        $this->email_subscription_topic = $importOptions['email_subscription_topic'];
+        $this->importFile = $importFile;
     }
 
     /**
@@ -69,6 +71,8 @@ class ImportEmailSubscription implements ShouldQueue
             $user = $this->createUser();
             $this->sendUserPasswordReset($user);
         }
+
+        $this->importFile->incrementImportCount();
     }
 
     /**
