@@ -259,10 +259,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
         }
 
         /**
-         * @TODO: If the RTV status is Complete: check whether we have a log for Step 3/Step 4.
-         * It would mean we've already processed this user's subscription preferences, and
-         * shouldn't update them again.
+         * If we have a log for this registration that contains phone, we've already
+         * updated user's subscription for this registration and should not proceed.
          */
+        if (RockTheVoteLog::hasSubmittedPhone($this->record, $user)) {
+            return [];
+        }
+
         $result = array_only($this->userData, ['sms_status', 'sms_subscription_topics']);
 
         // Save mobile if we don't have it currently stored on the user.

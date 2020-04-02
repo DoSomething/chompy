@@ -73,4 +73,22 @@ class RockTheVoteLog extends Model
             'user_id' => $user->id,
         ])->first();
     }
+
+    /**
+     * Find whether a log exists for this registration containing user's phone number.
+     *
+     * @return bool
+     */
+    public static function hasSubmittedPhone(RockTheVoteRecord $record, NorthstarUser $user)
+    {
+        $info = $record->getPostDetails();
+
+        $rockTheVoteLog = self::where([
+            'started_registration' => $info['Started registration'],
+            'user_id' => $user->id,
+            'contains_phone' => true,
+        ])->first();
+
+        return isset($rockTheVoteLog);
+    }
 }
