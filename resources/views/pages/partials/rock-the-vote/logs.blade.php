@@ -4,9 +4,10 @@
             <th class="col-md-2">Started Registration</th>
             <th class="col-md-2">{{$user_id ? 'Import File' : 'User'}}</th>
             <th class="col-md-1">Status</th>
-            <th class="col-md-3">Tracking Source</th>
-            <th class="col-md-2">Finish With State</th>
-            <th class="col-md-2">Pre-Registered</th>
+            <th class="col-md-4">Tracking Source</th>
+            <th class="col-md-1">Finish With State</th>
+            <th class="col-md-1">Pre-Registered</th>
+            <th class="col-md-1">Contains Phone</th>
         </tr>
     </thead>
     @foreach($rows as $key => $row)
@@ -22,18 +23,21 @@
             <td class="col-md-1">
                 {{$row->status}}
             </td>
-            <td class="col-md-3">
+            <td class="col-md-4">
                 <ul>
                     @foreach(explode(',', $row->tracking_source) as $attribute)
                         <li>{{$attribute}}</li>
                     @endforeach
                 </ul>
             </td>
-            <td class="col-md-2">
+            <td class="col-md-1">
                 {{$row->finish_with_state}}
             </td>
-            <td class="col-md-2">
+            <td class="col-md-1">
                 {{$row->pre_registered}}
+            </td>
+            <td class="col-md-1">
+                {{$row->contains_phone ? 'Yes' : 'No'}}
             </td> 
         </tr>
     @endforeach
