@@ -15,7 +15,7 @@ class RockTheVoteLogTest extends TestCase
      *
      * @return void
      */
-    public function testCreateFromRecord()
+    public function testCreateFromRecordThatContainsPhone()
     {
         $user = new NorthstarUser(['id' => $this->faker->northstar_id]);
         $row = $this->faker->rockTheVoteReportRow();
@@ -25,6 +25,7 @@ class RockTheVoteLogTest extends TestCase
 
         $log = RockTheVoteLog::createFromRecord(new RockTheVoteRecord($row), $user, $importFile);
 
+        $this->assertEquals($log->contains_phone, true);
         $this->assertEquals($log->finish_with_state, $row['Finish with State']);
         $this->assertEquals($log->import_file_id, $importFile->id);
         $this->assertEquals($log->pre_registered, $row['Pre-Registered']);
@@ -37,6 +38,24 @@ class RockTheVoteLogTest extends TestCase
             'id' => $importFile->id,
             'import_count' => 6,
         ]);
+    }
+
+    /**
+     * Test that false is saved for contains_phone if row does not contain phone.
+     *
+     * @return void
+     */
+    public function testCreateFromRecordThatDoesNotContainPhone()
+    {
+        $user = new NorthstarUser(['id' => $this->faker->northstar_id]);
+        $row = $this->faker->rockTheVoteReportRow([
+            'Phone' => null,
+        ]);
+        $importFile = factory(ImportFile::class)->create();
+
+        $log = RockTheVoteLog::createFromRecord(new RockTheVoteRecord($row), $user, $importFile);
+
+        $this->assertEquals($log->contains_phone, false);
     }
 
     /**

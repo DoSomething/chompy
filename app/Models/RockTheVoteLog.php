@@ -14,6 +14,7 @@ class RockTheVoteLog extends Model
      * @var array
      */
     protected $fillable = [
+        'contains_phone',
         'finish_with_state',
         'import_file_id',
         'pre_registered',
@@ -44,6 +45,7 @@ class RockTheVoteLog extends Model
         $info = $record->getPostDetails();
 
         $rockTheVoteLog = self::create([
+            'contains_phone' => isset($record->userData['mobile']),
             'import_file_id' => $importFile->id,
             'finish_with_state' => $info['Finish with State'],
             'pre_registered' => $info['Pre-Registered'],
