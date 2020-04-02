@@ -18,7 +18,7 @@ class RockTheVoteLogTest extends TestCase
     public function testCreateFromRecordThatContainsPhone()
     {
         $user = new NorthstarUser(['id' => $this->faker->northstar_id]);
-        $row = $this->faker->rockTheVoteReportRow([]);
+        $row = $this->faker->rockTheVoteReportRow();
         $importFile = factory(ImportFile::class)->create([
             'import_count' => 5,
         ]);
