@@ -22,14 +22,14 @@ class FakerRockTheVoteReportRow extends Base
             'Email address' => $this->generator->email,
             'First name' => $this->generator->firstName,
             'Last name' => $this->generator->lastName,
-            'Phone' => $this->generator->phoneNumber,
+            'Phone' => null,
             'Finish with State' => 'Yes',
             'Pre-Registered' => 'No',
             'Started registration' => $this->daysAgoInRockTheVoteFormat(),
             'Status' => 'Step 1',
             'Tracking Source' => 'ads',
             'Opt-in to Partner email?' => 'Yes',
-            'Opt-in to Partner SMS/robocall' => 'Yes',
+            'Opt-in to Partner SMS/robocall' => 'No',
         ], $data);
     }
 

@@ -76,7 +76,14 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return;
         }
 
-        $this->updateUserIfChanged($user);
+        $updateUserPayload = $this->getUpdateUserPayload($user);
+
+        if (count($updateUserPayload)) {
+            gateway('northstar')->asClient()->updateUser($user->id, $updateUserPayload);
+            info('Updated user', ['user' => $user->id]);
+        } else {
+            info('No changes to update for user', ['user' => $user->id]);
+        }
 
         if ($post = $this->getPost($user)) {
             $this->updatePostIfChanged($post);
@@ -228,25 +235,42 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @param NorthstarUser $user
      */
-    private function updateUserIfChanged($user)
+    private function getUpdateUserPayload($user)
     {
         $payload = [];
 
         if (self::shouldUpdateStatus($user->voter_registration_status, $this->userData['voter_registration_status'])) {
-            $payload['voter_registration_status'] = $this->userData['voter_registration_status'];
+            $payload = array_only($this->userData, ['voter_registration_status']);
         }
 
-        // @TODO: Check for SMS status change.
+        return array_merge($payload, $this->getUpdateUserSmsSubscriptionPayload($user));
+    }
 
-        if (! count($payload)) {
-            info('No changes to update for user', ['user' => $user->id]);
-
-            return;
+    /**
+     * Get fields and values to update if user SMS preferences have changed.
+     *
+     * @return array
+     */
+    private function getUpdateUserSmsSubscriptionPayload($user)
+    {
+        // If we don't have a mobile, nothing to update.
+        if (! $this->userData['mobile']) {
+            return [];
         }
 
-        gateway('northstar')->asClient()->updateUser($user->id, $payload);
+        /**
+         * @TODO: If the RTV status is Complete: check whether we have a log for Step 3/Step 4.
+         * It would mean we've already processed this user's subscription preferences, and
+         * shouldn't update them again.
+         */
+        $result = array_only($this->userData, ['sms_status', 'sms_subscription_topics']);
 
-        info('Updated user', ['user' => $user->id, 'voter_registration_status' => $this->userData['voter_registration_status']]);
+        // Save mobile if we don't have it currently stored on the user.
+        if (! $user->mobile) {
+            $result['mobile'] = $this->userData['mobile'];
+        }
+
+        return $result;
     }
 
     /**

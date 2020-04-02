@@ -132,6 +132,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             'Started registration' => $startedRegistration,
             'Status' => 'Complete',
             'Finish with State' => 'Yes',
+            'Opt-in to Partner SMS/robocall' => 'No',
         ]);
         $existingInProgressPost = $this->faker->rogueVoterRegPost([
             'id' => $postId,
