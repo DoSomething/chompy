@@ -166,7 +166,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
     }
 
-
     /**
      * Test that user is not updated if their voter registration status should not change.
      *
@@ -347,7 +346,24 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateUserSmsSubscriptionPayloadIsEmptyIfNoMobile()
+    public function testSmsSubscriptionPayloadIsEmptyIfMobileIsNull()
+    {
+        $row = $this->faker->rockTheVoteReportRow();
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->getUpdateUserSmsSubscriptionPayload(new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+        ]));
+
+        $this->assertEquals([], $result);
+    }
+
+    /**
+     * Test that update SMS payload is empty if a mobile is not provided.
+     *
+     * @return void
+     */
+    public function testSmsSubscriptionPayloadIsEmptyIfAlreadyUpdatedSmsSubscription()
     {
         $row = $this->faker->rockTheVoteReportRow();
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());

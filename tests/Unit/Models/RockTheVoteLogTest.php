@@ -98,11 +98,11 @@ class RockTheVoteLogTest extends TestCase
     }
 
     /**
-     * Test that getByRecord returns null when record and user not found.
+     * Test expected result when log exists for record and user that contains mobile.
      *
      * @return void
      */
-    public function testHasSubmittedPhoneWhenFound()
+    public function testHasAlreadyUpdatedSmsSubscription()
     {
         $user = new NorthstarUser(['id' => $this->faker->northstar_id]);
         $row = $this->faker->rockTheVoteReportRow();
@@ -113,7 +113,7 @@ class RockTheVoteLogTest extends TestCase
             'contains_phone' => true,
         ]);
 
-        $result = RockTheVoteLog::hasSubmittedPhone($record, $user);
+        $result = RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($record, $user);
 
         $this->assertEquals($result, true);
     }

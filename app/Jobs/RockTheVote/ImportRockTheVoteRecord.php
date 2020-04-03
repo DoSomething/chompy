@@ -262,7 +262,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
          * If we have a log for this registration that contains phone, we've already
          * updated user's subscription for this registration and should not proceed.
          */
-        if (RockTheVoteLog::hasSubmittedPhone($this->record, $user)) {
+        if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
             return [];
         }
 

@@ -64,7 +64,7 @@ class RockTheVoteLog extends Model
 
     /**
      * Find a log for given record and user.
-     * 
+     *
      * @return RockTheVoteLog
      */
     public static function getByRecord(RockTheVoteRecord $record, NorthstarUser $user)
@@ -83,7 +83,7 @@ class RockTheVoteLog extends Model
      *
      * @return bool
      */
-    public static function hasSubmittedPhone(RockTheVoteRecord $record, NorthstarUser $user)
+    public static function hasAlreadyUpdatedSmsSubscription(RockTheVoteRecord $record, NorthstarUser $user)
     {
         $info = $record->getPostDetails();
 
