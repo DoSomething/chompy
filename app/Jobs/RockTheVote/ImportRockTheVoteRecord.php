@@ -12,6 +12,7 @@ use Chompy\Models\RockTheVoteLog;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use DoSomething\Gateway\Resources\NorthstarUser;
 
 class ImportRockTheVoteRecord implements ShouldQueue
 {
@@ -77,19 +78,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         $this->updateUserIfChanged($user);
 
-        $existingPosts = $rogue->getPost([
-            'action_id' => $this->postData['action_id'],
-            'northstar_id' => $user->id,
-        ]);
-
-        if (! $existingPosts['data']) {
-            $this->createPost($user);
-        } else {
-            $post = $existingPosts['data'][0];
-
-            info('Found post', ['post' => $post['id'], 'user' => $user->id]);
-
+        if ($post = $this->getPost($user)) {
             $this->updatePostIfChanged($post);
+        } else {
+            $this->createPost($user);
         }
 
         RockTheVoteLog::createFromRecord($this->record, $user, $this->importFile);
@@ -156,6 +148,30 @@ class ImportRockTheVoteRecord implements ShouldQueue
         info('Created user', ['user' => $user->id]);
 
         return $user;
+    }
+
+    /**
+     * Returns post for user if exists.
+     *
+     * @param NorthstarUser $user
+     * @return array
+     */
+    public function getPost(NorthstarUser $user)
+    {
+        $result = app(Rogue::class)->getPosts([
+            'action_id' => $this->postData['action_id'],
+            'northstar_id' => $user->id,
+        ]);
+
+        if (! $result['data']) {
+            return null;
+        }
+
+        $post = $result['data'][0];
+
+        info('Found post', ['post' => $post['id'], 'user' => $user->id]);
+
+        return $post;
     }
 
     /**
