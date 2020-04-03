@@ -39,6 +39,8 @@ class RockTheVoteLog extends Model
 
     /**
      * Log sanitized Rock The Vote data for given user and import file.
+     *
+     * @return RockTheVoteLog
      */
     public static function createFromRecord(RockTheVoteRecord $record, NorthstarUser $user, ImportFile $importFile)
     {
@@ -62,6 +64,8 @@ class RockTheVoteLog extends Model
 
     /**
      * Find a log for given record and user.
+     * 
+     * @return RockTheVoteLog
      */
     public static function getByRecord(RockTheVoteRecord $record, NorthstarUser $user)
     {
