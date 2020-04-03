@@ -45,20 +45,15 @@ class Rogue extends RestApiClient
     }
 
     /**
-     * Get a post from Rogue give a set of filters.
-     * TODO: Rename this as getPosts, or refactor it to return the first array item.
-     * @see https://github.com/DoSomething/chompy/pull/58/files#r258543126
+     * Executes posts index API request with given filters.
+     * @see https://github.com/DoSomething/rogue/blob/master/docs/endpoints/posts.md
      *
      * @param array $inputs - The filters to use to grab the post.
-     * @return array $post - The found post.
+     * @return array
      */
-    public function getPost($inputs)
+    public function getPosts($inputs)
     {
-        $post = $this->asClient()->get('v3/posts', [
-            'filter' => $inputs,
-        ]);
-
-        return $post;
+        return $this->asClient()->get('v3/posts', ['filter' => $inputs]);
     }
 
     /**

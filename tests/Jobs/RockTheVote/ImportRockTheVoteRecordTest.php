@@ -23,7 +23,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->northstarMock->shouldReceive('getUser')->andReturn(null);
         $this->mockCreateNorthstarUser(['id' => $userId]);
         $this->northstarMock->shouldReceive('sendPasswordReset');
-        $this->rogueMock->shouldReceive('getPost')->andReturn(null);
+        $this->rogueMock->shouldReceive('getPosts')->andReturn(null);
         $this->rogueMock->shouldReceive('createPost')->andReturn([
             'data' => [
                 'id' => $this->faker->randomDigitNotNull,
@@ -54,7 +54,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->mockGetNorthstarUser(['id' => $userId]);
         $this->northstarMock->shouldNotReceive('createUser');
         $this->northstarMock->shouldNotReceive('sendPasswordReset');
-        $this->rogueMock->shouldReceive('getPost')->andReturn(null);
+        $this->rogueMock->shouldReceive('getPosts')->andReturn(null);
         $this->rogueMock->shouldReceive('createPost')->andReturn([
             'data' => [
                 'id' => $this->faker->randomDigitNotNull,
@@ -85,7 +85,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->mockGetNorthstarUser(['id' => $userId]);
         $this->northstarMock->shouldNotReceive('createUser');
         $this->northstarMock->shouldNotReceive('sendPasswordReset');
-        $this->rogueMock->shouldReceive('getPost')->andReturn([
+        $this->rogueMock->shouldReceive('getPosts')->andReturn([
             'data' => [
                 0 => [
                     'id' => $this->faker->randomDigitNotNull,
@@ -126,7 +126,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             'voter_registration_status' => 'uncertain',
         ]);
         $this->northstarMock->shouldNotReceive('createUser');
-        $this->rogueMock->shouldReceive('getPost')->andReturn([
+        $this->rogueMock->shouldReceive('getPosts')->andReturn([
             'data' => [
                 0 => [
                     'id' => $postId,
@@ -172,7 +172,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $this->northstarMock->shouldNotReceive('createUser');
         $this->northstarMock->shouldNotReceive('updateUser');
-        $this->rogueMock->shouldReceive('getPost')->andReturn([
+        $this->rogueMock->shouldReceive('getPosts')->andReturn([
             'data' => [
                 0 => [
                     'id' => $this->faker->randomDigitNotNull,
@@ -212,7 +212,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
 
         $this->northstarMock->shouldNotReceive('updateUser');
-        $this->rogueMock->shouldNotReceive('getPost');
+        $this->rogueMock->shouldNotReceive('getPosts');
         $this->rogueMock->shouldNotReceive('createPost');
         $this->rogueMock->shouldNotReceive('updatePost');
 
