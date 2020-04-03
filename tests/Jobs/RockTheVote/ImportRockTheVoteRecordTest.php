@@ -342,6 +342,23 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->assertEquals($result, null);
     }
 
+    /*
+     * Test that update SMS payload is empty if a mobile is not provided.
+     *
+     * @return void
+     */
+    public function testUpdateUserSmsSubscriptionPayloadIsEmptyIfNoMobile()
+    {
+        $row = $this->faker->rockTheVoteReportRow();
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->getUpdateUserSmsSubscriptionPayload(new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+        ]));
+
+        $this->assertEquals([], $result);
+    }
+
     /**
      * Test that status should update when update value has higher priority than the current.
      *

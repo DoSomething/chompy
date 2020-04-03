@@ -251,7 +251,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @return array
      */
-    private function getUpdateUserSmsSubscriptionPayload($user)
+    public function getUpdateUserSmsSubscriptionPayload($user)
     {
         // If we don't have a mobile, nothing to update.
         if (! $this->userData['mobile']) {
