@@ -50,11 +50,17 @@ class ImportRockTheVoteRecordTest extends TestCase
     public function testDoesNotCreateUserIfUserFound()
     {
         $userId = $this->faker->northstar_id;
-        $row = $this->faker->rockTheVoteReportRow();
+        $row = $this->faker->rockTheVoteReportRow([
+            'Status' => 'Step 1',
+        ]);
         $importFile = factory(ImportFile::class)->create();
 
-        $this->mockGetNorthstarUser(['id' => $userId]);
+        $this->mockGetNorthstarUser([
+            'id' => $userId,
+            'voter_registration_status' => 'step-1',
+        ]);
         $this->northstarMock->shouldNotReceive('createUser');
+        $this->northstarMock->shouldNotReceive('updateUser');
         $this->northstarMock->shouldNotReceive('sendPasswordReset');
         $this->rogueMock->shouldReceive('getPosts')->andReturn(null);
         $this->rogueMock->shouldReceive('createPost')->andReturn([
@@ -84,14 +90,18 @@ class ImportRockTheVoteRecordTest extends TestCase
         $row = $this->faker->rockTheVoteReportRow();
         $importFile = factory(ImportFile::class)->create();
 
-        $this->mockGetNorthstarUser(['id' => $userId]);
+        $this->mockGetNorthstarUser([
+            'id' => $userId,
+            'voter_registration_status' => 'registration_complete',
+        ]);
         $this->northstarMock->shouldNotReceive('createUser');
+        $this->northstarMock->shouldNotReceive('updateUser');
         $this->northstarMock->shouldNotReceive('sendPasswordReset');
         $this->rogueMock->shouldReceive('getPosts')->andReturn([
             'data' => [
                 0 => [
                     'id' => $this->faker->randomDigitNotNull,
-                    'status' => 'registration_complete',
+                    'status' => 'register-form',
                 ],
             ],
         ]);

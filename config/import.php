@@ -48,6 +48,26 @@ return [
             'enabled' => env('ROCK_THE_VOTE_RESET_ENABLED', 'true'),
             'type' => env('ROCK_THE_VOTE_RESET_TYPE', 'rock-the-vote-activate-account'),
         ],
+        /**
+         * This list includes status values we import from Rock The Vote, values we once
+         * translated from Rock the Vote (e.g. uncertain, ineligible), or values that a user
+         * may set via the web (e.g. unregistered).
+         */
+        'status_hierarchy' => [
+            'uncertain',
+            'ineligible',
+            'under-18',
+            'rejected',
+            'unregistered',
+            'step-1',
+            'step-2',
+            'step-3',
+            'step-4',
+            'confirmed',
+            'register-OVR',
+            'register-form',
+            'registration_complete',
+        ],
         'user' => [
             'email_subscription_topics' => env('ROCK_THE_VOTE_EMAIL_SUBSCRIPTION_TOPICS', 'community'),
             'sms_subscription_topics' => env('ROCK_THE_VOTE_SMS_SUBSCRIPTION_TOPICS', 'voting'),
