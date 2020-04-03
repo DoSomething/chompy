@@ -12,6 +12,7 @@ use Chompy\Models\RockTheVoteLog;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use DoSomething\Gateway\Resources\NorthstarUser;
 
 class ImportRockTheVoteRecord implements ShouldQueue
 {
@@ -155,7 +156,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
      * @param NorthstarUser $user
      * @return array
      */
-    private function getPost($user) {
+    public function getPost(NorthstarUser $user)
+    {
         $result = app(Rogue::class)->getPosts([
             'action_id' => $this->postData['action_id'],
             'northstar_id' => $user->id,

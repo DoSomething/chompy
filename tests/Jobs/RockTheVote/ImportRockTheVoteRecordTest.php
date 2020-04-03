@@ -3,9 +3,11 @@
 namespace Tests\Jobs\RockTheVote;
 
 use Tests\TestCase;
+use Chompy\RockTheVoteRecord;
 use Chompy\Models\ImportFile;
 use Chompy\Models\RockTheVoteLog;
 use Chompy\Jobs\ImportRockTheVoteRecord;
+use DoSomething\Gateway\Resources\NorthstarUser;
 
 class ImportRockTheVoteRecordTest extends TestCase
 {
@@ -222,6 +224,64 @@ class ImportRockTheVoteRecordTest extends TestCase
             'id' => $importFile->id,
             'skip_count' => 1,
         ]);
+    }
+
+    /**
+     * Test that an array is returned when a post is found.
+     *
+     * @return void
+     */
+    public function testGetPostWhenPostIsFound()
+    {
+        $row = $this->faker->rockTheVoteReportRow();
+        $record = new RockTheVoteRecord($row);
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+        ]);
+        $post = [
+            'id' => $this->faker->randomDigitNotNull,
+            'status' => 'register-OVR',
+        ];
+
+        $this->rogueMock->shouldReceive('getPosts')
+            ->with([
+                'northstar_id' => $user->id,
+                'action_id' => $record->postData['action_id'],
+            ])
+            ->andReturn(['data' => [0 => $post]]);
+
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->getPost($user);
+
+        $this->assertEquals($result, $post);
+    }
+
+    /**
+     * Test that null is returned when a post is not found.
+     *
+     * @return void
+     */
+    public function testGetPostWhenPostIsNotFound()
+    {
+        $row = $this->faker->rockTheVoteReportRow();
+        $record = new RockTheVoteRecord($row);
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+        ]);
+
+        $this->rogueMock->shouldReceive('getPosts')
+            ->with([
+                'northstar_id' => $user->id,
+                'action_id' => $record->postData['action_id'],
+            ])
+            ->andReturn(['data' => null]);
+
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->getPost($user);
+
+        $this->assertEquals($result, null);
     }
 
     /**
