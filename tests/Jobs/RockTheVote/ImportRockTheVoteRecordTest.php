@@ -243,15 +243,14 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testGetPostWhenPostIsFound()
     {
-        $row = $this->faker->rockTheVoteReportRow();
-        $record = new RockTheVoteRecord($row);
-        $user = new NorthstarUser([
-            'id' => $this->faker->northstar_id,
+        $userId = $this->faker->northstar_id;
+        $startedRegistration = '1/23/19 20:22';
+        $row = $this->faker->rockTheVoteReportRow([
+            'Started registration' => $startedRegistration,
         ]);
-        $post = [
-            'id' => $this->faker->randomDigitNotNull,
-            'status' => 'register-OVR',
-        ];
+        $record = new RockTheVoteRecord($row);
+        $user = new NorthstarUser(['id' => $userId]);
+        $post = $this->faker->rogueVoterRegPost($userId, $startedRegistration, 'register-OVR');
 
         $this->rogueMock->shouldReceive('getPosts')
             ->with([

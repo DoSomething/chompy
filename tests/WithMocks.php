@@ -33,6 +33,7 @@ trait WithMocks
         $this->faker = app(\Faker\Generator::class);
         $this->faker->addProvider(new \FakerNorthstarId($this->faker));
         $this->faker->addProvider(new \FakerRockTheVoteReportRow($this->faker));
+        $this->faker->addProvider(new \FakerRogueVoterRegPost($this->faker));
 
         // Northstar Mock
         $this->northstarMock = $this->mock(Northstar::class);

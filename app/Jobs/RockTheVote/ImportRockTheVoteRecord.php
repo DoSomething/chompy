@@ -167,11 +167,25 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return null;
         }
 
-        $post = $result['data'][0];
+        $key = 'Started registration';
+        $recordPostDetails = $this->record->getPostDetails();
+        $recordStartedRegistration = $recordPostDetails[$key];
 
-        info('Found post', ['post' => $post['id'], 'user' => $user->id]);
+        foreach ($result['data'] as $post) {
+            if (! isset($post['details'])) {
+                continue;
+            }
 
-        return $post;
+            $details = json_decode($post['details']);
+
+            if ($details->{$key} === $recordStartedRegistration) {
+                info('Found post', ['post' => $post['id'], 'user' => $user->id]);
+
+                return $post;
+            }
+        }
+
+        return null;
     }
 
     /**
