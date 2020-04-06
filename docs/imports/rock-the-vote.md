@@ -12,21 +12,33 @@ As another example, if a user registers to vote twice in 2020 (e.g. change of ad
 
 ## Voter Registration Status
 
-Ultimately, there are 4 `post` statuses we want to capture for `voter-reg` posts for Rock the Vote (**Note** RTV doesn't have a `confirmed` status like TurboVote did):
+As of [April 2020](https://github.com/DoSomething/chompy/pull/153), we save the status provided by Rock The Vote on `voter-reg` posts for Rock the Vote, with the exception of using two different statuses for the `Complete` status:
 
-- `register-form` - User completed the registration form
-- `register-OVR` - User completed the registration form on their state's Online Voter Registration platform
-- `ineligible` - User is ineligible to register for whatever reason
-- `uncertain` - We can not be certain about this user registration status
+- `register-form` - User completed the registration form (`Finish with State` is `No`)
 
-This is the import logic used to determine what the `post` status should be, looking at the following RTV columns.
+- `register-OVR` - User completed the registration form on their state's Online Voter Registration platform (`Finish with State` is `Yes`)
 
-- If `status` is `complete` and `finish with state` is `no` --> `register-form`
-- If `status` is `complete` and `finish with state` is `yes` --> `register-OVR`
-- If `status` is any of the `step`s --> `uncertain`
-- If `status` is `rejected` --> `ineligible`
+From [RTV docs](https://www.rockthevote.org/programs-and-partner-resources/tech-for-civic-engagement/partner-ovr-tool-faqs/partner-ovr-tool-faqs/):
 
-Because we're pulling some of the columns into the post details, data will then be able to know if they, for example, pre-registered or why their registration was ineligible.
+- `rejected`: a person was either not old enough to (pre-)register or did not check the box affirming they were a US citizen, and stopped the process
+
+- `step-1`: a person entered email/ZIP code on the first page, then stopped.
+
+  - Note -- we've seen PII entered in rows that are on Step 1, and TBD why this happens sometimes.
+
+- `step-2`: user got to the second page to start filling out their personal info, but did not finish
+
+- `step-3`/`step-4`: a person finished entering their registration information, but either (1) did not click to open/print their paper registration form, or (2) were eligible to finish on their state website, but did not click through
+
+- `under-18`: a person was not old enough to (pre-)register in their state, but requested an automated 18th birthday reminder to register
+
+### Historical values
+
+- We used to save all of the `step-*` status values as `uncertain`.
+
+- We used to save `rejected` and `under-18` values as `ineligible`.
+
+- The TurboVote data (which we imported before Rock The Vote), would supply a `confirmed` status - similar to the Rock the Vote `Completed` status.
 
 ### Status Hierarchy
 
@@ -43,7 +55,7 @@ For example: If a user has a `confirmed` status already from a TV import, and th
 We’ve established this hierarchy because each time a user interacts with the RTV form, a new row is created in the CSV. There are the edge cases when a user is chased to finish their registration that they would be interacting with the same row (thus the "steps"). Here’s one example:
 
 - User A completes the RTV form —> `register-form` status
-- User A, for whatever reason, starts the RTV form again and drops off --> `uncertain` status
+- User A, for whatever reason, starts the RTV form again and drops off --> `step-2` status
 
 In this case, we would want to count the form completion (`register-form`). It’s important to note that the hierarchy is for internal reporting and doesn’t prevent the user from interacting with the RTV form if they want to do so.
 
