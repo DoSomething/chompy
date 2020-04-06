@@ -200,17 +200,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public static function shouldUpdateStatus($currentStatus, $newStatus)
     {
-        // List includes status values expected from RTV as well as
-        // values potentially assigned from within Northstar.
-        $statusHierarchy = [
-            'uncertain',
-            'ineligible',
-            'unregistered',
-            'confirmed',
-            'register-OVR',
-            'register-form',
-            'registration_complete',
-        ];
+        $statusHierarchy = config('import.rock_the_vote.status_hierarchy');
 
         $indexOfCurrentStatus = array_search($currentStatus, $statusHierarchy);
         $indexOfNewStatus = array_search($newStatus, $statusHierarchy);

@@ -144,15 +144,7 @@ class RockTheVoteRecord
             return str_to_boolean($rtvFinishWithState) ? 'register-OVR' : 'register-form';
         }
 
-        if (str_contains($rtvStatus, 'step')) {
-            return 'uncertain';
-        }
-
-        if ($rtvStatus === 'rejected' || $rtvStatus === 'under 18') {
-            return 'ineligible';
-        }
-
-        return '';
+        return str_replace(' ', '-', $rtvStatus);
     }
 
     /**

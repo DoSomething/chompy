@@ -17,4 +17,5 @@ References [Pivotal #]().
 ### Checklist
 
 - [ ] This PR has been added to the relevant Pivotal card.
+- [ ] Documentation added for new features/changed endpoints.
 - [ ] Added appropriate feature/unit tests.
