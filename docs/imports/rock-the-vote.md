@@ -16,7 +16,9 @@ As of [April 2020](https://github.com/DoSomething/chompy/pull/153), we save the 
 
 - `register-OVR` - User completed the registration form on their state's Online Voter Registration platform (`Finish with State` is `Yes`)
 
-From [RTV docs](https://www.rockthevote.org/programs-and-partner-resources/tech-for-civic-engagement/partner-ovr-tool-faqs/partner-ovr-tool-faqs/):
+We count `voter-reg` posts with these two `register-*` statuses as registrations (and reportbacks) within reporting.
+
+The other status values returned from are:
 
 - `rejected`: a person was either not old enough to (pre-)register or did not check the box affirming they were a US citizen, and stopped the process
 
@@ -30,6 +32,8 @@ From [RTV docs](https://www.rockthevote.org/programs-and-partner-resources/tech-
 
 - `under-18`: a person was not old enough to (pre-)register in their state, but requested an automated 18th birthday reminder to register
 
+These definitions can be found in the [RTV docs](https://www.rockthevote.org/programs-and-partner-resources/tech-for-civic-engagement/partner-ovr-tool-faqs/partner-ovr-tool-faqs/).
+
 ### Historical values
 
 - We used to save all of the `step-*` status values as `uncertain`.
@@ -40,15 +44,21 @@ From [RTV docs](https://www.rockthevote.org/programs-and-partner-resources/tech-
 
 ### Status Hierarchy
 
-Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy to determine which status should be reported on their Rogue post if a user post already exists for the import Action and its `Started registration` datetime.
+Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy, from lowest to highest, to determine which status should be reported on their Rogue post if a user post already exists for the import Action and its `Started registration` datetime:
 
-1. `register-form`
-2. `register-OVR`
-3. `confirmed`
-4. `ineligible`
-5. `uncertain`
+- `uncertain`
+- `ineligible`
+- `under-18`
+- `rejected`
+- `step-1`
+- `step-2`
+- `step-3`
+- `step-4`
+- `confirmed`
+- `register-OVR`
+- `register-form`
 
-For example: If a user has a `confirmed` status already from a TV import, and the RTV file suggests that it should be `uncertain`, do not update.
+For example: If a user has a `confirmed` status already from a TV import, and the RTV file suggests that it should be `step-1`, do not update.
 
 We’ve established this hierarchy because each time a user interacts with the RTV form, a new row is created in the CSV. There are the edge cases when a user is chased to finish their registration that they would be interacting with the same row (thus the "steps"). Here’s one example:
 
@@ -67,13 +77,21 @@ If there's an existing status on the user, we follow the same hierarchy rules es
 
 - `registration_complete` -- set from our RTV import if the record's status is either `register-form` or `register-ovr`.
 
-So the full hierarchy order taken into account when updating the profile is:
+So the full hierarchy order taken into account when updating the profile from lowest to highest is:
 
-1. `registration_complete`
-2. `confirmed`
-3. `unregistered`
-4. `ineligible`
-5. `uncertain`
+- `uncertain`
+- `ineligible`
+- `under-18`
+- `rejected`
+- `unregistered`
+- `step-1`
+- `step-2`
+- `step-3`
+- `step-4`
+- `confirmed`
+- `registration_complete`
+
+```
 
 ### Dealing with Non-Member Registrants
 
@@ -94,24 +112,6 @@ We've added `referral=true` to the link so that we can know to not attribute the
 
 If the referral column has `referral=true` in it, then proceed with the logic with dealing w/ non-member registrants above.
 
-### How to count these as impact
-
-Based on the above statuses, some should be counted as a RB and some should not. This determination was made by the executive team and allows us to report internally progress towards the organization's report back goal. Here's what counts as a reportback from the RTV export:
-
-- `register-form`
-- `register-OVR`
-
-Note: `register-form` and `register-OVR` are the only statuses that count as _registrations_.
-
-Rogue will NOT store this information, but will return a derived value in the JSON response when the voter registration post is created or read that holds this information. The logic to determine this is as follows:
-
-```php
-if (in_array($rogueStatus, ['confirmed', 'register-form', 'register-OVR'])) {
-    $reportbackStatus = 'T';
-} else {
-    $reportbackStatus = 'F';
-}
-```
 
 ## Notes
 
@@ -122,3 +122,4 @@ if (in_array($rogueStatus, ['confirmed', 'register-form', 'register-OVR'])) {
 - In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a `voter-reg` post.
 - If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants:
   See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
+```
