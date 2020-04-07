@@ -10,7 +10,7 @@ class FakerRogueVoterRegPost extends Base
      * @param array $data
      * @return array
      */
-    public function rogueVoterRegPost($data = [], $startedRegistration)
+    public function rogueVoterRegPost($data, $startedRegistration)
     {
         $result = array_merge([
             'id' => $this->generator->randomDigitNotNull,

@@ -133,10 +133,10 @@ class ImportRockTheVoteRecordTest extends TestCase
             'Status' => 'Complete',
             'Finish with State' => 'Yes',
         ]);
-        $existingPost  = $this->faker->rogueVoterRegPost([
+        $existingPost = $this->faker->rogueVoterRegPost([
             'id' => $postId,
             'northstar_id' => $userId,
-            'status' => 'step-1'
+            'status' => 'step-1',
         ], $startedRegistration);
         $importFile = factory(ImportFile::class)->create();
 
@@ -182,7 +182,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $existingPost = $this->faker->rogueVoterRegPost([
             'northstar_id' => $userId,
-            'status' => 'register-OVR'
+            'status' => 'register-OVR',
         ], $startedRegistration);
         $importFile = factory(ImportFile::class)->create();
 

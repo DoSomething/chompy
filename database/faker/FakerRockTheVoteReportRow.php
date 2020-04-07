@@ -34,7 +34,9 @@ class FakerRockTheVoteReportRow extends Base
     }
 
     /**
+     * Return a mock Started registration field value.
      *
+     * @return string
      */
     public function rockTheVoteStartedRegistration()
     {
