@@ -58,7 +58,7 @@ Because RTV CSVs may contain multiple records _for a single user_, we use the fo
 - `register-OVR`
 - `register-form`
 
-For example: If a user has a `confirmed` status already from a TV import, and the RTV file suggests that it should be `step-1`, do not update.
+For example: If a user has a `confirmed` status already from a previous TurboVote import, and the RTV file suggests that it should be `step-1`, do not update.
 
 We’ve established this hierarchy because each time a user interacts with the RTV form, a new row is created in the CSV. There are the edge cases when a user is chased to finish their registration that they would be interacting with the same row (thus the "steps"). Here’s one example:
 
@@ -91,8 +91,6 @@ So the full hierarchy order taken into account when updating the profile from lo
 - `confirmed`
 - `registration_complete`
 
-```
-
 ### Dealing with Non-Member Registrants
 
 If the referral column doesn't have a NS ID, we should do what we do with the TV import.
@@ -112,7 +110,6 @@ We've added `referral=true` to the link so that we can know to not attribute the
 
 If the referral column has `referral=true` in it, then proceed with the logic with dealing w/ non-member registrants above.
 
-
 ## Notes
 
 - Data uses the post `details` to determine `source` and `source_detail` used in voter registration reporting.
@@ -122,4 +119,3 @@ If the referral column has `referral=true` in it, then proceed with the logic wi
 - In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a `voter-reg` post.
 - If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants:
   See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
-```
