@@ -264,6 +264,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             ->with([
                 'northstar_id' => $user->id,
                 'action_id' => $record->postData['action_id'],
+                'type' => config('import.rock_the_vote.post.type'),
             ])
             ->andReturn(['data' => [0 => $post]]);
 
@@ -301,6 +302,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             ->with([
                 'northstar_id' => $user->id,
                 'action_id' => $record->postData['action_id'],
+                'type' => config('import.rock_the_vote.post.type'),
             ])
             ->andReturn(['data' => [0 => $firstPost, 1 => $secondPost]]);
 
@@ -328,6 +330,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             ->with([
                 'northstar_id' => $user->id,
                 'action_id' => $record->postData['action_id'],
+                'type' => config('import.rock_the_vote.post.type'),
             ])
             ->andReturn(['data' => null]);
 

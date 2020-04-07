@@ -151,7 +151,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Returns post for user if exists.
+     * Returns voter-reg post for given user and the record "Started registration", if exists.
      *
      * @param NorthstarUser $user
      * @return array
@@ -161,6 +161,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $result = app(Rogue::class)->getPosts([
             'action_id' => $this->postData['action_id'],
             'northstar_id' => $user->id,
+            'type' => config('import.rock_the_vote.post.type'),
         ]);
 
         if (! $result['data']) {
