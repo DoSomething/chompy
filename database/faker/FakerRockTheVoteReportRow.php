@@ -25,11 +25,19 @@ class FakerRockTheVoteReportRow extends Base
             'Phone' => $this->generator->phoneNumber,
             'Finish with State' => 'Yes',
             'Pre-Registered' => 'No',
-            'Started registration' => Carbon::now()->format('Y-m-d H:i:s O'),
+            'Started registration' => $this->rockTheVoteStartedRegistration(),
             'Status' => 'Step 1',
             'Tracking Source' => 'ads',
             'Opt-in to Partner email?' => 'Yes',
             'Opt-in to Partner SMS/robocall' => 'Yes',
         ], $data);
+    }
+
+    /**
+     *
+     */
+    public function rockTheVoteStartedRegistration()
+    {
+        return Carbon::now()->format('Y-m-d H:i:s O');
     }
 }

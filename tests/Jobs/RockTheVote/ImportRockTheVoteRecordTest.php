@@ -87,7 +87,10 @@ class ImportRockTheVoteRecordTest extends TestCase
     public function testDoesNotCreateOrUpdatePostIfCompletedPostFound()
     {
         $userId = $this->faker->northstar_id;
-        $row = $this->faker->rockTheVoteReportRow();
+        $startedRegistration = $this->faker->rockTheVoteStartedRegistration();
+        $row = $this->faker->rockTheVoteReportRow([
+            'Started registration' => $startedRegistration,
+        ]);
         $importFile = factory(ImportFile::class)->create();
 
         $this->mockGetNorthstarUser([
@@ -99,10 +102,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->northstarMock->shouldNotReceive('sendPasswordReset');
         $this->rogueMock->shouldReceive('getPosts')->andReturn([
             'data' => [
-                0 => [
-                    'id' => $this->faker->randomDigitNotNull,
-                    'status' => 'register-form',
-                ],
+                0 => $this->faker->rogueVoterRegPost(['northstar_id' => $userId, 'status' => 'register-form'], $startedRegistration),
             ],
         ]);
         $this->rogueMock->shouldNotReceive('createPost');
@@ -126,25 +126,27 @@ class ImportRockTheVoteRecordTest extends TestCase
     public function testUpdatesUserIfShouldChangeStatus()
     {
         $userId = $this->faker->northstar_id;
+        $startedRegistration = $this->faker->rockTheVoteStartedRegistration();
         $postId = $this->faker->randomDigitNotNull;
         $row = $this->faker->rockTheVoteReportRow([
+            'Started registration' => $startedRegistration,
             'Status' => 'Complete',
             'Finish with State' => 'Yes',
         ]);
+        $existingPost  = $this->faker->rogueVoterRegPost([
+            'id' => $postId,
+            'northstar_id' => $userId,
+            'status' => 'step-1'
+        ], $startedRegistration);
         $importFile = factory(ImportFile::class)->create();
 
         $this->mockGetNorthstarUser([
             'id' => $userId,
-            'voter_registration_status' => 'uncertain',
+            'voter_registration_status' => 'step-1',
         ]);
         $this->northstarMock->shouldNotReceive('createUser');
         $this->rogueMock->shouldReceive('getPosts')->andReturn([
-            'data' => [
-                0 => [
-                    'id' => $postId,
-                    'status' => 'uncertain',
-                ],
-            ],
+            'data' => [0 => $existingPost],
         ]);
         $this->rogueMock->shouldNotReceive('createPost');
         $this->northstarMock->shouldReceive('updateUser')->with($userId, [
@@ -169,13 +171,19 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testDoesNotUpdatesUserIfShouldNotChangeStatus()
+    public function testDoesNotUpdateUserIfShouldNotChangeStatus()
     {
         $userId = $this->faker->northstar_id;
+        $startedRegistration = $this->faker->rockTheVoteStartedRegistration();
         $row = $this->faker->rockTheVoteReportRow([
+            'Started registration' => $startedRegistration,
             'Status' => 'Step 1',
             'Finish with State' => 'No',
         ]);
+        $existingPost = $this->faker->rogueVoterRegPost([
+            'northstar_id' => $userId,
+            'status' => 'register-OVR'
+        ], $startedRegistration);
         $importFile = factory(ImportFile::class)->create();
 
         $this->mockGetNorthstarUser([
@@ -185,12 +193,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->northstarMock->shouldNotReceive('createUser');
         $this->northstarMock->shouldNotReceive('updateUser');
         $this->rogueMock->shouldReceive('getPosts')->andReturn([
-            'data' => [
-                0 => [
-                    'id' => $this->faker->randomDigitNotNull,
-                    'status' => 'register-OVR',
-                ],
-            ],
+            'data' => [0 => $existingPost],
         ]);
         $this->rogueMock->shouldNotReceive('createPost');
         $this->rogueMock->shouldNotReceive('updatePost');
@@ -250,7 +253,10 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $record = new RockTheVoteRecord($row);
         $user = new NorthstarUser(['id' => $userId]);
-        $post = $this->faker->rogueVoterRegPost($userId, $startedRegistration, 'register-OVR');
+        $post = $this->faker->rogueVoterRegPost([
+            'northstar_id' => $userId,
+            'status' => 'register-OVR',
+        ], $startedRegistration);
 
         $this->rogueMock->shouldReceive('getPosts')
             ->with([

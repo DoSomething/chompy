@@ -1,6 +1,5 @@
 <?php
 
-use Carbon\Carbon;
 use Faker\Provider\Base;
 
 class FakerRogueVoterRegPost extends Base
@@ -11,16 +10,19 @@ class FakerRogueVoterRegPost extends Base
      * @param array $data
      * @return array
      */
-    public function rogueVoterRegPost($userId, $startedRegistration, $status)
+    public function rogueVoterRegPost($data = [], $startedRegistration)
     {
-        return [
+        $result = array_merge([
             'id' => $this->generator->randomDigitNotNull,
-            'northstar_id' => $userId ? $userId : $this->generator->northstar_id,
-            'status' => $status,
+            'northstar_id' => $this->generator->northstar_id,
+            'status' => 'step-1',
             'type' => 'voter-reg',
-            'details' => json_encode((object)[
-                'Started registration' => $startedRegistration,
-            ]),
-        ];
+        ], $data);
+
+        $result['details'] = json_encode((object) [
+            'Started registration' => $startedRegistration,
+        ]);
+
+        return $result;
     }
 }
