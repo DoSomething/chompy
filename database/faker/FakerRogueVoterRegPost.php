@@ -16,7 +16,7 @@ class FakerRogueVoterRegPost extends Base
             'id' => $this->generator->randomDigitNotNull,
             'northstar_id' => $this->generator->northstar_id,
             'status' => 'step-1',
-            'type' => 'voter-reg',
+            'type' => config('import.rock_the_vote.post.type'),
         ], $data);
 
         $result['details'] = json_encode((object) [
