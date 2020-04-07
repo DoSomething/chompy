@@ -240,14 +240,14 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that an array is returned when a post is found.
+     * Test that an array is returned when a post with same Started Registration is found.
      *
      * @return void
      */
-    public function testGetPostWhenPostIsFound()
+    public function testGetPostWhenPostWithSameStartedRegistrationIsFound()
     {
         $userId = $this->faker->northstar_id;
-        $startedRegistration = '1/23/19 20:22';
+        $startedRegistration = $this->faker->rockTheVoteStartedRegistration();
         $row = $this->faker->rockTheVoteReportRow([
             'Started registration' => $startedRegistration,
         ]);
@@ -273,11 +273,48 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
+     * Test that an array is returned when a post with same Started Registration is found.
+     *
+     * @return void
+     */
+    public function testGetPostWhenPostWithSameStartedRegistrationIsNotFound()
+    {
+        $userId = $this->faker->northstar_id;
+        $startedRegistration = $this->faker->rockTheVoteStartedRegistration();
+        $row = $this->faker->rockTheVoteReportRow([
+            'Started registration' => $startedRegistration,
+        ]);
+        $record = new RockTheVoteRecord($row);
+        $user = new NorthstarUser(['id' => $userId]);
+        $firstPost = $this->faker->rogueVoterRegPost([
+            'northstar_id' => $userId,
+            'status' => 'register-OVR',
+        ], $this->faker->rockTheVoteStartedRegistration(2));
+        $secondPost = $this->faker->rogueVoterRegPost([
+            'northstar_id' => $userId,
+            'status' => 'step-1',
+        ], $this->faker->rockTheVoteStartedRegistration(4));
+
+        $this->rogueMock->shouldReceive('getPosts')
+            ->with([
+                'northstar_id' => $user->id,
+                'action_id' => $record->postData['action_id'],
+            ])
+            ->andReturn(['data' => [0 => $firstPost, 1 => $secondPost]]);
+
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->getPost($user);
+
+        $this->assertEquals($result, null);
+    }
+
+    /**
      * Test that null is returned when a post is not found.
      *
      * @return void
      */
-    public function testGetPostWhenPostIsNotFound()
+    public function testGetPostWhenNoPostsAreNotFound()
     {
         $row = $this->faker->rockTheVoteReportRow();
         $record = new RockTheVoteRecord($row);

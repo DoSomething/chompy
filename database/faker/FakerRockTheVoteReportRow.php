@@ -38,8 +38,8 @@ class FakerRockTheVoteReportRow extends Base
      *
      * @return string
      */
-    public function rockTheVoteStartedRegistration()
+    public function rockTheVoteStartedRegistration($numDaysToSubtract = 0)
     {
-        return Carbon::now()->format('Y-m-d H:i:s O');
+        return Carbon::now()->subDays($numDaysToSubtract)->format('Y-m-d H:i:s O');
     }
 }
