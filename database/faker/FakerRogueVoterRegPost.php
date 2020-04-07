@@ -10,7 +10,7 @@ class FakerRogueVoterRegPost extends Base
      * @param array $data
      * @return array
      */
-    public function rogueVoterRegPost($data, $startedRegistration)
+    public function rogueVoterRegPost($data = [], $startedRegistration = null)
     {
         $result = array_merge([
             'id' => $this->generator->randomDigitNotNull,
@@ -20,7 +20,7 @@ class FakerRogueVoterRegPost extends Base
         ], $data);
 
         $result['details'] = json_encode((object) [
-            'Started registration' => $startedRegistration,
+            'Started registration' => $startedRegistration ? $startedRegistration : $this->generator->rockTheVoteStartedRegistration(),
         ]);
 
         return $result;
