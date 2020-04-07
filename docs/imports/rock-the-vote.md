@@ -4,11 +4,9 @@ We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` po
 
 ## Overview
 
-The import is coded to upsert a single `voter-reg` type post for a user voter registration -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
+The import will upsert a `voter-reg` type post for each unique "Started registration" datetime we receive for the user -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
 
-For example, if a user registered to vote through DS in 2016, 2018, and 2020, they will have three different posts created because our import was configured for three different Action IDs in each of those election years.
-
-As another example, if a user registers to vote twice in 2020 (e.g. change of address), a single post is upserted for this year's action (two posts are not created).
+If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action. Prior to changes made in April 2020, the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
 
 ## Voter Registration Status
 
@@ -42,7 +40,7 @@ From [RTV docs](https://www.rockthevote.org/programs-and-partner-resources/tech-
 
 ### Status Hierarchy
 
-Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy to determine which status should be reported on their Rogue post if a user post already exists for the import Action:
+Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy to determine which status should be reported on their Rogue post if a user post already exists for the import Action and its `Started registration` datetime.
 
 1. `register-form`
 2. `register-OVR`

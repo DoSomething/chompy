@@ -180,7 +180,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             'Status' => 'Step 1',
             'Finish with State' => 'No',
         ]);
-        $existingCompletedPost = $this->faker->rogueVoterRegPost([
+        $olderExistingCompletedPost = $this->faker->rogueVoterRegPost([
             'northstar_id' => $userId,
             'status' => 'register-OVR',
         ], $this->faker->rockTheVoteStartedRegistration(1));
@@ -194,7 +194,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         // We shouldn't update the user's status to the row status, which has lower priority.
         $this->northstarMock->shouldNotReceive('updateUser');
         $this->rogueMock->shouldReceive('getPosts')->andReturn([
-            'data' => [0 => $existingCompletedPost],
+            'data' => [0 => $olderExistingCompletedPost],
         ]);
         // But we do create a new post, since we don't have one for this row's Started registration.
         $this->rogueMock->shouldReceive('createPost');
