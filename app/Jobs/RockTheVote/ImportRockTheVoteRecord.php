@@ -151,7 +151,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Returns post for user if exists.
+     * Returns a post for given user and the record "Started registration", if it exists.
      *
      * @param NorthstarUser $user
      * @return array
@@ -161,17 +161,32 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $result = app(Rogue::class)->getPosts([
             'action_id' => $this->postData['action_id'],
             'northstar_id' => $user->id,
+            'type' => config('import.rock_the_vote.post.type'),
         ]);
 
         if (! $result['data']) {
             return null;
         }
 
-        $post = $result['data'][0];
+        $key = 'Started registration';
+        $recordPostDetails = $this->record->getPostDetails();
+        $recordStartedRegistration = $recordPostDetails[$key];
 
-        info('Found post', ['post' => $post['id'], 'user' => $user->id]);
+        foreach ($result['data'] as $post) {
+            if (! isset($post['details'])) {
+                continue;
+            }
 
-        return $post;
+            $details = json_decode($post['details']);
+
+            if ($details->{$key} === $recordStartedRegistration) {
+                info('Found post', ['post' => $post['id'], 'user' => $user->id]);
+
+                return $post;
+            }
+        }
+
+        return null;
     }
 
     /**

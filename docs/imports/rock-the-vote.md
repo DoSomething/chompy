@@ -4,21 +4,21 @@ We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` po
 
 ## Overview
 
-The import is coded to upsert a single `voter-reg` type post for a user voter registration -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
+The import upserts a `voter-reg` type post for each unique "Started registration" datetime we receive for a user -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
 
-For example, if a user registered to vote through DS in 2016, 2018, and 2020, they will have three different posts created because our import was configured for three different Action IDs in each of those election years.
-
-As another example, if a user registers to vote twice in 2020 (e.g. change of address), a single post is upserted for this year's action (two posts are not created).
+If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action. Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
 
 ## Voter Registration Status
 
 As of [April 2020](https://github.com/DoSomething/chompy/pull/153), we save the status provided by Rock The Vote on `voter-reg` posts for Rock the Vote, with the exception of using two different statuses for the `Complete` status:
 
-- `register-form` - User completed the registration form (`Finish with State` is `No`)
+- `register-form` - User completed the registration form (the row `Finish with State` column is set to `No`)
 
-- `register-OVR` - User completed the registration form on their state's Online Voter Registration platform (`Finish with State` is `Yes`)
+- `register-OVR` - User completed the registration form on their state's Online Voter Registration platform (the row `Finish with State` column is set to `Yes`)
 
-From [RTV docs](https://www.rockthevote.org/programs-and-partner-resources/tech-for-civic-engagement/partner-ovr-tool-faqs/partner-ovr-tool-faqs/):
+We count `voter-reg` posts with these two `register-*` statuses as registrations (and reportbacks) within reporting. We also count the historical `confirmed` status imported from TurboVote as a registration.
+
+The other status values returned from RTV are:
 
 - `rejected`: a person was either not old enough to (pre-)register or did not check the box affirming they were a US citizen, and stopped the process
 
@@ -32,6 +32,8 @@ From [RTV docs](https://www.rockthevote.org/programs-and-partner-resources/tech-
 
 - `under-18`: a person was not old enough to (pre-)register in their state, but requested an automated 18th birthday reminder to register
 
+These definitions can be found in the [RTV docs](https://www.rockthevote.org/programs-and-partner-resources/tech-for-civic-engagement/partner-ovr-tool-faqs/partner-ovr-tool-faqs/).
+
 ### Historical values
 
 - We used to save all of the `step-*` status values as `uncertain`.
@@ -42,15 +44,21 @@ From [RTV docs](https://www.rockthevote.org/programs-and-partner-resources/tech-
 
 ### Status Hierarchy
 
-Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy to determine which status should be reported on their Rogue post if a user post already exists for the import Action:
+Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy, from lowest to highest, to determine which status should be reported on their Rogue post if a user post already exists for the import Action and its `Started registration` datetime:
 
-1. `register-form`
-2. `register-OVR`
-3. `confirmed`
-4. `ineligible`
-5. `uncertain`
+- `uncertain`
+- `ineligible`
+- `under-18`
+- `rejected`
+- `step-1`
+- `step-2`
+- `step-3`
+- `step-4`
+- `confirmed`
+- `register-OVR`
+- `register-form`
 
-For example: If a user has a `confirmed` status already from a TV import, and the RTV file suggests that it should be `uncertain`, do not update.
+For example: If a user has a `confirmed` status already from a previous TurboVote import, and the RTV file suggests that it should be `step-1`, do not update.
 
 We’ve established this hierarchy because each time a user interacts with the RTV form, a new row is created in the CSV. There are the edge cases when a user is chased to finish their registration that they would be interacting with the same row (thus the "steps"). Here’s one example:
 
@@ -59,7 +67,7 @@ We’ve established this hierarchy because each time a user interacts with the R
 
 In this case, we would want to count the form completion (`register-form`). It’s important to note that the hierarchy is for internal reporting and doesn’t prevent the user from interacting with the RTV form if they want to do so.
 
-### Dealing with Member Registrants
+### Existing Users
 
 If an existing User is found using the NS ID, email, or number, we attempt to update the user's `voter_registration_status` profile field based on the new status from the record.
 
@@ -69,24 +77,25 @@ If there's an existing status on the user, we follow the same hierarchy rules es
 
 - `registration_complete` -- set from our RTV import if the record's status is either `register-form` or `register-ovr`.
 
-So the full hierarchy order taken into account when updating the profile is:
+So the full hierarchy order taken into account when updating the profile from lowest to highest is:
 
-1. `registration_complete`
-2. `confirmed`
-3. `unregistered`
-4. `ineligible`
-5. `uncertain`
+- `uncertain`
+- `ineligible`
+- `under-18`
+- `rejected`
+- `unregistered`
+- `step-1`
+- `step-2`
+- `step-3`
+- `step-4`
+- `confirmed`
+- `registration_complete`
 
-### Dealing with Non-Member Registrants
+### New Users
 
-If the referral column doesn't have a NS ID, we should do what we do with the TV import.
+If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with the PII provided from Rock The Vote.
 
-1. Try to match to a member on number
-2. Try to match to a member on email
-
-If those don't work, then create a NS account for them with the relevant information (First name, last name, contact information) like we do with TurboVote. For the `sms_status` we should populate it for the time being with what's in the partner SMS opt-in column.
-
-### Special Case: Referral Links
+### Online Drives
 
 Online drives is one of the tactics we have for getting people to get their friends registered to vote. For example, someone would sign up for the campaign and they have their own personal registration page (w/ a RTV form on it w/ the same kind of tracking) that they share with their friends/family. The appeal for them is that on their campaign action page, it will show how many people has viewed their personal registration page (v2 feature enhancement might be upping this to show who has registered).
 
@@ -95,25 +104,6 @@ So, the Alpha sends their page to a Beta and they register. The Alpha's referral
 We've added `referral=true` to the link so that we can know to not attribute the registration to the NS ID that is present in the URL. In this case, this NS ID is the referrer and not the registrant.
 
 If the referral column has `referral=true` in it, then proceed with the logic with dealing w/ non-member registrants above.
-
-### How to count these as impact
-
-Based on the above statuses, some should be counted as a RB and some should not. This determination was made by the executive team and allows us to report internally progress towards the organization's report back goal. Here's what counts as a reportback from the RTV export:
-
-- `register-form`
-- `register-OVR`
-
-Note: `register-form` and `register-OVR` are the only statuses that count as _registrations_.
-
-Rogue will NOT store this information, but will return a derived value in the JSON response when the voter registration post is created or read that holds this information. The logic to determine this is as follows:
-
-```php
-if (in_array($rogueStatus, ['confirmed', 'register-form', 'register-OVR'])) {
-    $reportbackStatus = 'T';
-} else {
-    $reportbackStatus = 'F';
-}
-```
 
 ## Notes
 
