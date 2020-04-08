@@ -25,7 +25,7 @@ class FakerRockTheVoteReportRow extends Base
             'Phone' => $this->generator->phoneNumber,
             'Finish with State' => 'Yes',
             'Pre-Registered' => 'No',
-            'Started registration' => $this->rockTheVoteStartedRegistration(),
+            'Started registration' => $this->daysAgoInRockTheVoteFormat(),
             'Status' => 'Step 1',
             'Tracking Source' => 'ads',
             'Opt-in to Partner email?' => 'Yes',
@@ -38,7 +38,7 @@ class FakerRockTheVoteReportRow extends Base
      *
      * @return string
      */
-    public function rockTheVoteStartedRegistration($numDaysToSubtract = 0)
+    public function daysAgoInRockTheVoteFormat($numDaysToSubtract = 0)
     {
         return Carbon::now()->subDays($numDaysToSubtract)->format('Y-m-d H:i:s O');
     }

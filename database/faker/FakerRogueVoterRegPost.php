@@ -20,7 +20,7 @@ class FakerRogueVoterRegPost extends Base
         ], $data);
 
         $result['details'] = json_encode((object) [
-            'Started registration' => $startedRegistration ? $startedRegistration : $this->generator->rockTheVoteStartedRegistration(),
+            'Started registration' => $startedRegistration ? $startedRegistration : $this->generator->daysAgoInRockTheVoteFormat(),
         ]);
 
         return $result;

@@ -83,7 +83,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     public function testDoesNotCreateOrUpdatePostIfCompletedPostFound()
     {
         $userId = $this->faker->northstar_id;
-        $startedRegistration = $this->faker->rockTheVoteStartedRegistration();
+        $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
         $row = $this->faker->rockTheVoteReportRow([
             'Started registration' => $startedRegistration,
         ]);
@@ -126,7 +126,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     public function testUpdatesUserIfShouldChangeStatus()
     {
         $userId = $this->faker->northstar_id;
-        $startedRegistration = $this->faker->rockTheVoteStartedRegistration();
+        $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
         $postId = $this->faker->randomDigitNotNull;
         $row = $this->faker->rockTheVoteReportRow([
             'Started registration' => $startedRegistration,
@@ -174,7 +174,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     public function testDoesNotUpdateUserIfShouldNotChangeStatus()
     {
         $userId = $this->faker->northstar_id;
-        $startedRegistration = $this->faker->rockTheVoteStartedRegistration();
+        $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
         $row = $this->faker->rockTheVoteReportRow([
             'Started registration' => $startedRegistration,
             'Status' => 'Step 1',
@@ -183,7 +183,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $olderExistingCompletedPost = $this->faker->rogueVoterRegPost([
             'northstar_id' => $userId,
             'status' => 'register-OVR',
-        ], $this->faker->rockTheVoteStartedRegistration(1));
+        ], $this->faker->daysAgoInRockTheVoteFormat(1));
         $importFile = factory(ImportFile::class)->create();
 
         $this->mockGetNorthstarUser([
@@ -249,7 +249,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     public function testGetPostWhenPostWithSameStartedRegistrationIsFound()
     {
         $userId = $this->faker->northstar_id;
-        $startedRegistration = $this->faker->rockTheVoteStartedRegistration();
+        $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
         $row = $this->faker->rockTheVoteReportRow([
             'Started registration' => $startedRegistration,
         ]);
@@ -283,7 +283,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     public function testGetPostWhenPostWithSameStartedRegistrationIsNotFound()
     {
         $userId = $this->faker->northstar_id;
-        $startedRegistration = $this->faker->rockTheVoteStartedRegistration();
+        $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
         $row = $this->faker->rockTheVoteReportRow([
             'Started registration' => $startedRegistration,
         ]);
@@ -292,11 +292,11 @@ class ImportRockTheVoteRecordTest extends TestCase
         $firstPost = $this->faker->rogueVoterRegPost([
             'northstar_id' => $userId,
             'status' => 'register-OVR',
-        ], $this->faker->rockTheVoteStartedRegistration(2));
+        ], $this->faker->daysAgoInRockTheVoteFormat(2));
         $secondPost = $this->faker->rogueVoterRegPost([
             'northstar_id' => $userId,
             'status' => 'step-1',
-        ], $this->faker->rockTheVoteStartedRegistration(4));
+        ], $this->faker->daysAgoInRockTheVoteFormat(4));
 
         $this->rogueMock->shouldReceive('getPosts')
             ->with([
