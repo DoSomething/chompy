@@ -4,7 +4,7 @@ We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` po
 
 ## Overview
 
-The import will upsert a `voter-reg` type post for each unique "Started registration" datetime we receive for the user -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
+The import upserts a `voter-reg` type post for each unique "Started registration" datetime we receive for a user -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
 
 If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action. Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
 
@@ -12,13 +12,13 @@ If a user registers to vote twice in 2020 (e.g. change of address), two `voter-r
 
 As of [April 2020](https://github.com/DoSomething/chompy/pull/153), we save the status provided by Rock The Vote on `voter-reg` posts for Rock the Vote, with the exception of using two different statuses for the `Complete` status:
 
-- `register-form` - User completed the registration form (`Finish with State` is `No`)
+- `register-form` - User completed the registration form (the row `Finish with State` column is set to `No`)
 
-- `register-OVR` - User completed the registration form on their state's Online Voter Registration platform (`Finish with State` is `Yes`)
+- `register-OVR` - User completed the registration form on their state's Online Voter Registration platform (the row `Finish with State` column is set to `Yes`)
 
 We count `voter-reg` posts with these two `register-*` statuses as registrations (and reportbacks) within reporting. We also count the historical `confirmed` status imported from TurboVote as a registration.
 
-The other status values returned from are:
+The other status values returned from RTV are:
 
 - `rejected`: a person was either not old enough to (pre-)register or did not check the box affirming they were a US citizen, and stopped the process
 
@@ -67,7 +67,7 @@ We’ve established this hierarchy because each time a user interacts with the R
 
 In this case, we would want to count the form completion (`register-form`). It’s important to note that the hierarchy is for internal reporting and doesn’t prevent the user from interacting with the RTV form if they want to do so.
 
-### Dealing with Member Registrants
+### Existing Users
 
 If an existing User is found using the NS ID, email, or number, we attempt to update the user's `voter_registration_status` profile field based on the new status from the record.
 
@@ -91,16 +91,11 @@ So the full hierarchy order taken into account when updating the profile from lo
 - `confirmed`
 - `registration_complete`
 
-### Dealing with Non-Member Registrants
+### New Users
 
-If the referral column doesn't have a NS ID, we should do what we do with the TV import.
+If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with the PII provided from Rock The Vote.
 
-1. Try to match to a member on number
-2. Try to match to a member on email
-
-If those don't work, then create a NS account for them with the relevant information (First name, last name, contact information) like we do with TurboVote. For the `sms_status` we should populate it for the time being with what's in the partner SMS opt-in column.
-
-### Special Case: Referral Links
+### Online Drives
 
 Online drives is one of the tactics we have for getting people to get their friends registered to vote. For example, someone would sign up for the campaign and they have their own personal registration page (w/ a RTV form on it w/ the same kind of tracking) that they share with their friends/family. The appeal for them is that on their campaign action page, it will show how many people has viewed their personal registration page (v2 feature enhancement might be upping this to show who has registered).
 
