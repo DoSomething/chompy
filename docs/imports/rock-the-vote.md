@@ -6,7 +6,7 @@ We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` po
 
 The import will upsert a `voter-reg` type post for each unique "Started registration" datetime we receive for the user -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
 
-If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action. Prior to changes made in April 2020, the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
+If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action. Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
 
 ## Voter Registration Status
 
@@ -16,7 +16,7 @@ As of [April 2020](https://github.com/DoSomething/chompy/pull/153), we save the 
 
 - `register-OVR` - User completed the registration form on their state's Online Voter Registration platform (`Finish with State` is `Yes`)
 
-We count `voter-reg` posts with these two `register-*` statuses as registrations (and reportbacks) within reporting.
+We count `voter-reg` posts with these two `register-*` statuses as registrations (and reportbacks) within reporting. We also count the historical `confirmed` status imported from TurboVote as a registration.
 
 The other status values returned from are:
 

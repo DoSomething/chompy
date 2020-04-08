@@ -151,7 +151,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Returns voter-reg post for given user and the record "Started registration", if exists.
+     * Returns a post for given user and the record "Started registration", if it exists.
      *
      * @param NorthstarUser $user
      * @return array
