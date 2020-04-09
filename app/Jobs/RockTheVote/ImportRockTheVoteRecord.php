@@ -231,7 +231,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Update Northstar user with record data.
+     * Get fields and values to update given user with.
      *
      * @param NorthstarUser $user
      */
@@ -251,8 +251,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Get fields and values to update if user SMS preferences have changed.
+     * Get fields and values to update given user with if their SMS subscription has changed.
      *
+     * @param NorthstarUser $user
      * @return array
      */
     public function getUpdateUserSmsSubscriptionPayload($user)
@@ -265,8 +266,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
         }
 
         /**
-         * If we have a log for this registration that contains phone, we've already
-         * updated user's subscription for this registration and should not proceed.
+         * If we have a log for this registration that contains phone, we've already updated the
+         * user's subscription for this registration, and should not proceed.
          */
         if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
             return $result;
@@ -274,7 +275,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         // @TODO: Check for changes to user's SMS status and subscription topics.
 
-        // Save mobile if we don't have it currently stored on the user.
+        // Update user's mobile only if we currently don't have one saved.
         if (! $user->mobile) {
             $result['mobile'] = $this->userData['mobile'];
         }

@@ -129,6 +129,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
         $postId = $this->faker->randomDigitNotNull;
         $row = $this->faker->rockTheVoteReportRow([
+            'Phone' => $this->faker->phoneNumber,
             'Started registration' => $startedRegistration,
             'Status' => 'Complete',
             'Finish with State' => 'Yes',
@@ -150,6 +151,10 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $this->rogueMock->shouldNotReceive('createPost');
         $this->northstarMock->shouldReceive('updateUser')->with($userId, [
+            /**
+             * Note: If the ROCK_THE_VOTE_UPDATE_USER_SMS_ENABLED config var is set to true, we'd
+             * additionally update the user mobile field here too.
+             */
             'voter_registration_status' => 'registration_complete',
         ]);
         $this->rogueMock->shouldReceive('updatePost')->with($postId, [
@@ -381,8 +386,8 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUpdateUserSmsSubscriptionPayload($user);;
-   
+        $result = $job->getUpdateUserSmsSubscriptionPayload($user);
+
         $this->assertEquals([], $result);
     }
 
@@ -403,8 +408,8 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUpdateUserSmsSubscriptionPayload($user);;
-   
+        $result = $job->getUpdateUserSmsSubscriptionPayload($user);
+
         $this->assertEquals(['mobile' => $phoneNumber], $result);
     }
 
@@ -425,8 +430,8 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUpdateUserSmsSubscriptionPayload($user);;
-   
+        $result = $job->getUpdateUserSmsSubscriptionPayload($user);
+
         $this->assertEquals([], $result);
     }
 
