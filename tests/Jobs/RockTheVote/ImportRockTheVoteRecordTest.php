@@ -172,6 +172,38 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
+     * Test that update user payload contains mobile if the update user SMS feature flag is enabled,
+     * and if user has opted-in to SMS and does not have an existing mobile number.
+     *
+     * @return void
+     */
+    public function testUpdateUserPayloadContainsMobileIfUpdateUserSmsConfigIsEnabled()
+    {
+        putenv('ROCK_THE_VOTE_UPDATE_USER_SMS_ENABLED=true');
+
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+            'voter_registration_status' => 'step-1',
+        ]);
+        $phoneNumber = $this->faker->phoneNumber;
+        $row = $this->faker->rockTheVoteReportRow([
+            'Opt-in to Partner SMS/robocall' => 'Yes',
+            'Phone' =>  $phoneNumber,
+            'Status' => 'Step 2',
+        ]);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->getUpdateUserPayload($user);
+
+        $this->assertEquals([
+            'mobile' => $phoneNumber,
+            'voter_registration_status' => 'step-2',
+        ], $result);
+
+        putenv('ROCK_THE_VOTE_UPDATE_USER_SMS_ENABLED=false');
+    }
+
+    /**
      * Test that user is not updated if their voter registration status should not change.
      *
      * @return void

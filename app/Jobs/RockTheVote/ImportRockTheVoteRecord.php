@@ -233,9 +233,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
     /**
      * Get fields and values to update given user with.
      *
-     * @param NorthstarUser $user
+     * @return array
      */
-    private function getUpdateUserPayload($user)
+    public function getUpdateUserPayload(NorthstarUser $user)
     {
         $payload = [];
 
@@ -253,10 +253,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
     /**
      * Get fields and values to update given user with if their SMS subscription has changed.
      *
-     * @param NorthstarUser $user
      * @return array
      */
-    public function getUpdateUserSmsSubscriptionPayload($user)
+    public function getUpdateUserSmsSubscriptionPayload(NorthstarUser $user)
     {
         $result = [];
 
@@ -265,10 +264,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return $result;
         }
 
-        /**
-         * If we have a log for this registration that contains phone, we've already updated the
-         * user's subscription for this registration, and should not proceed.
-         */
+        // We don't need to update user's SMS subscription if we already did for this registration.
         if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
             return $result;
         }

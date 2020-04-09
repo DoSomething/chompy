@@ -79,7 +79,7 @@ class RockTheVoteLog extends Model
     }
 
     /**
-     * Find whether a log exists for this registration containing user's phone number.
+     * Find whether a log exists for this registration and user that contains a phone number.
      *
      * @return bool
      */
