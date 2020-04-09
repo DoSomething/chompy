@@ -243,6 +243,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $payload = array_only($this->userData, ['voter_registration_status']);
         }
 
+        if (config('rock_the_vote.update_user_sms_enabled') === 'false') {
+            return $payload;
+        }
+
         return array_merge($payload, $this->getUpdateUserSmsSubscriptionPayload($user));
     }
 
@@ -253,9 +257,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function getUpdateUserSmsSubscriptionPayload($user)
     {
-        // If we don't have a mobile, nothing to update.
+        $result = [];
+
+        // If registration does not have a mobile provided, there is nothing to update.
         if (! $this->userData['mobile']) {
-            return [];
+            return $result;
         }
 
         /**
@@ -263,10 +269,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
          * updated user's subscription for this registration and should not proceed.
          */
         if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
-            return [];
+            return $result;
         }
 
-        $result = array_only($this->userData, ['sms_status', 'sms_subscription_topics']);
+        // @TODO: Check for changes to user's SMS status and subscription topics.
 
         // Save mobile if we don't have it currently stored on the user.
         if (! $user->mobile) {

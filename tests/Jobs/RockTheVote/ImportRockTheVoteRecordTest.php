@@ -359,19 +359,74 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that update SMS payload is empty if a mobile is not provided.
+     * Test that update SMS payload is empty if we've already processed the registration's phone
+     * number.
      *
      * @return void
      */
     public function testSmsSubscriptionPayloadIsEmptyIfAlreadyUpdatedSmsSubscription()
     {
-        $row = $this->faker->rockTheVoteReportRow();
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+        ]);
+        $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
+        $row = $this->faker->rockTheVoteReportRow([
+            'Phone' => $this->faker->phoneNumber,
+            'Started registration' => $startedRegistration,
+        ]);
+        $log = factory(RockTheVoteLog::class)->create([
+            'user_id' => $user->id,
+            'started_registration' => $startedRegistration,
+            'contains_phone' => true,
+        ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUpdateUserSmsSubscriptionPayload(new NorthstarUser([
-            'id' => $this->faker->northstar_id,
-        ]));
+        $result = $job->getUpdateUserSmsSubscriptionPayload($user);;
+   
+        $this->assertEquals([], $result);
+    }
 
+    /**
+     * Test that update SMS payload contains mobile if we haven't processed the registration's
+     * phone number, and the user doesn't have a mobile set.
+     *
+     * @return void
+     */
+    public function testSmsSubscriptionPayloadContainsMobileIfHaveNotUpdatedSmsSubscription()
+    {
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+        ]);
+        $phoneNumber = $this->faker->phoneNumber;
+        $row = $this->faker->rockTheVoteReportRow([
+            'Phone' => $phoneNumber,
+        ]);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->getUpdateUserSmsSubscriptionPayload($user);;
+   
+        $this->assertEquals(['mobile' => $phoneNumber], $result);
+    }
+
+    /**
+     * Test that update SMS payload is empty if we haven't processed the registration's phone
+     * number, but the user already has a mobile set.
+     *
+     * @return void
+     */
+    public function testSmsSubscriptionPayloadIsEmptyIfUserAlreadyHasMobile()
+    {
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+            'mobile' => $this->faker->phoneNumber,
+        ]);
+        $row = $this->faker->rockTheVoteReportRow([
+            'Phone' => $this->faker->phoneNumber,
+        ]);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->getUpdateUserSmsSubscriptionPayload($user);;
+   
         $this->assertEquals([], $result);
     }
 

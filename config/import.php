@@ -30,6 +30,7 @@ return [
         ],
     ],
     'rock_the_vote' => [
+        // Constants to use when creating a post.
         'post' => [
             'action_id' => env('ROCK_THE_VOTE_POST_ACTION_ID', 954),
             'type' => env('ROCK_THE_VOTE_POST_TYPE', 'voter-reg'),
@@ -44,6 +45,7 @@ return [
                 'Home zip code',
             ],
         ],
+        // Configuration for sending the Activate Account password reset email to new users.
         'reset' => [
             'enabled' => env('ROCK_THE_VOTE_RESET_ENABLED', 'true'),
             'type' => env('ROCK_THE_VOTE_RESET_TYPE', 'rock-the-vote-activate-account'),
@@ -68,6 +70,9 @@ return [
             'register-form',
             'registration_complete',
         ],
+        // Whether to update SMS profile information for an existing user.
+        'update_user_sms_enabled' => env('ROCK_THE_VOTE_UPDATE_USER_SMS_ENABLED', 'false'),
+        // Constants to use when creating a new user.
         'user' => [
             'email_subscription_topics' => env('ROCK_THE_VOTE_EMAIL_SUBSCRIPTION_TOPICS', 'community'),
             'sms_subscription_topics' => env('ROCK_THE_VOTE_SMS_SUBSCRIPTION_TOPICS', 'voting'),
