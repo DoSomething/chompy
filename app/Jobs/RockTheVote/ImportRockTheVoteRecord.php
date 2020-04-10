@@ -76,10 +76,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return;
         }
 
-        $updateUserPayload = $this->getUpdateUserPayload($user);
+        $userUpdatePayload = $this->getUserUpdatePayload($user);
 
-        if (count($updateUserPayload)) {
-            gateway('northstar')->asClient()->updateUser($user->id, $updateUserPayload);
+        if (count($userUpdatePayload)) {
+            gateway('northstar')->asClient()->updateUser($user->id, $userUpdatePayload);
             info('Updated user', ['user' => $user->id]);
         } else {
             info('No changes to update for user', ['user' => $user->id]);
@@ -235,7 +235,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @return array
      */
-    public function getUpdateUserPayload(NorthstarUser $user)
+    public function getUserUpdatePayload(NorthstarUser $user)
     {
         $payload = [];
 

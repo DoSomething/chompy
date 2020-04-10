@@ -177,7 +177,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateUserPayloadContainsMobileIfUpdateUserSmsConfigIsEnabled()
+    public function testUserUpdatePayloadContainsMobileIfUpdateUserSmsConfigIsEnabled()
     {
         putenv('ROCK_THE_VOTE_UPDATE_USER_SMS_ENABLED=true');
 
@@ -193,7 +193,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUpdateUserPayload($user);
+        $result = $job->getUserUpdatePayload($user);
 
         $this->assertEquals([
             'mobile' => $phoneNumber,
