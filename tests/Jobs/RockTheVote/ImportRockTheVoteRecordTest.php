@@ -388,7 +388,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $row = $this->faker->rockTheVoteReportRow();
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUpdateUserSmsSubscriptionPayload(new NorthstarUser([
+        $result = $job->getUserSmsSubscriptionUpdatePayload(new NorthstarUser([
             'id' => $this->faker->northstar_id,
         ]));
 
@@ -418,7 +418,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUpdateUserSmsSubscriptionPayload($user);
+        $result = $job->getUserSmsSubscriptionUpdatePayload($user);
 
         $this->assertEquals([], $result);
     }
@@ -440,7 +440,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUpdateUserSmsSubscriptionPayload($user);
+        $result = $job->getUserSmsSubscriptionUpdatePayload($user);
 
         $this->assertEquals(['mobile' => $phoneNumber], $result);
     }
@@ -462,7 +462,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUpdateUserSmsSubscriptionPayload($user);
+        $result = $job->getUserSmsSubscriptionUpdatePayload($user);
 
         $this->assertEquals([], $result);
     }

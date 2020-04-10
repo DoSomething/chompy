@@ -247,7 +247,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return $payload;
         }
 
-        return array_merge($payload, $this->getUpdateUserSmsSubscriptionPayload($user));
+        return array_merge($payload, $this->getUserSmsSubscriptionUpdatePayload($user));
     }
 
     /**
@@ -255,7 +255,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @return array
      */
-    public function getUpdateUserSmsSubscriptionPayload(NorthstarUser $user)
+    public function getUserSmsSubscriptionUpdatePayload(NorthstarUser $user)
     {
         $result = [];
 
