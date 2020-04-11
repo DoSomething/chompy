@@ -172,7 +172,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that user mobile is not updated when row has a phone, user does not have a mobile, and  * update_user_sms_enabled config is false. 
+     * Test that user mobile is not updated when row has a phone, user does not have a mobile, and
+     * update_user_sms_enabled config is false.
      *
      * @return void
      */
@@ -199,7 +200,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
     /**
      * Test that user mobile is updated when row has a phone, user does not have a mobile, and
-     * update_user_sms_enabled config is true. 
+     * update_user_sms_enabled config is true.
      *
      * @return void
      */

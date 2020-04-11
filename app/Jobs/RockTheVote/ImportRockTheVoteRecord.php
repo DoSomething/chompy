@@ -224,22 +224,22 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Get fields and values to update given user with.
+     * Update Northstar user with record data.
      *
-     * @return array
+     * @return void
      */
     public function updateUserIfChanged(NorthstarUser $user)
     {
         $payload = [];
 
         if (self::shouldUpdateStatus($user->voter_registration_status, $this->userData['voter_registration_status'])) {
-            $payload = array_only($this->userData, ['voter_registration_status']);
+            $payload['voter_registration_status'] = $this->userData['voter_registration_status'];
         }
 
         if (config('import.rock_the_vote.update_user_sms_enabled') == 'true') {
             $payload = array_merge($payload, $this->getUserSmsSubscriptionUpdatePayload($user));
         }
-        
+
         if (! count($payload)) {
             info('No changes to update for user', ['user' => $user->id]);
 
