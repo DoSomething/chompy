@@ -76,14 +76,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return;
         }
 
-        $userUpdatePayload = $this->getUserUpdatePayload($user);
-
-        if (count($userUpdatePayload)) {
-            gateway('northstar')->asClient()->updateUser($user->id, $userUpdatePayload);
-            info('Updated user', ['user' => $user->id]);
-        } else {
-            info('No changes to update for user', ['user' => $user->id]);
-        }
+        $this->updateUserIfChanged($user);
 
         if ($post = $this->getPost($user)) {
             $this->updatePostIfChanged($post);
@@ -235,7 +228,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @return array
      */
-    public function getUserUpdatePayload(NorthstarUser $user)
+    public function updateUserIfChanged(NorthstarUser $user)
     {
         $payload = [];
 
@@ -243,11 +236,19 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $payload = array_only($this->userData, ['voter_registration_status']);
         }
 
-        if (config('rock_the_vote.update_user_sms_enabled') === 'false') {
-            return $payload;
+        if (config('import.rock_the_vote.update_user_sms_enabled') == 'true') {
+            $payload = array_merge($payload, $this->getUserSmsSubscriptionUpdatePayload($user));
+        }
+        
+        if (! count($payload)) {
+            info('No changes to update for user', ['user' => $user->id]);
+
+            return;
         }
 
-        return array_merge($payload, $this->getUserSmsSubscriptionUpdatePayload($user));
+        gateway('northstar')->asClient()->updateUser($user->id, $payload);
+
+        info('Updated user', ['user' => $user->id]);
     }
 
     /**

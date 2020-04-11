@@ -172,14 +172,40 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that update user payload contains mobile if the update user SMS feature flag is enabled,
-     * and if user has opted-in to SMS and does not have an existing mobile number.
+     * Test that user mobile is not updated when row has a phone, user does not have a mobile, and  * update_user_sms_enabled config is false. 
+     *
+     * @return void
+     */
+    public function testUserUpdatePayloadDoesNotContainsMobileIfUpdateUserSmsConfigIsDisabled()
+    {
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+            'voter_registration_status' => 'step-1',
+        ]);
+        $phoneNumber = $this->faker->phoneNumber;
+        $row = $this->faker->rockTheVoteReportRow([
+            'Opt-in to Partner SMS/robocall' => 'Yes',
+            'Phone' =>  $phoneNumber,
+            'Status' => 'Step 2',
+        ]);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
+            'voter_registration_status' => 'step-2',
+        ]);
+
+        $job->updateUserIfChanged($user);
+    }
+
+    /**
+     * Test that user mobile is updated when row has a phone, user does not have a mobile, and
+     * update_user_sms_enabled config is true. 
      *
      * @return void
      */
     public function testUserUpdatePayloadContainsMobileIfUpdateUserSmsConfigIsEnabled()
     {
-        putenv('ROCK_THE_VOTE_UPDATE_USER_SMS_ENABLED=true');
+        \Config::set('import.rock_the_vote.update_user_sms_enabled', 'true');
 
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -193,14 +219,14 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserUpdatePayload($user);
-
-        $this->assertEquals([
+        $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
             'mobile' => $phoneNumber,
             'voter_registration_status' => 'step-2',
-        ], $result);
+        ]);
 
-        putenv('ROCK_THE_VOTE_UPDATE_USER_SMS_ENABLED=false');
+        $job->updateUserIfChanged($user);
+
+        \Config::set('import.rock_the_vote.update_user_sms_enabled', 'false');
     }
 
     /**
