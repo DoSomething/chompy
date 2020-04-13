@@ -177,7 +177,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testUserUpdatePayloadDoesNotContainsMobileIfUpdateUserSmsConfigIsDisabled()
+    public function testUserUpdatePayloadDoesNotContainMobileIfUpdateUserSmsConfigIsDisabled()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
