@@ -271,15 +271,27 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return $payload;
         }
 
+        $payload = array_merge($payload, $this->parseMobileChangeForUser($user));
         $payload = array_merge($payload, $this->parseSmsSubscriptionTopicsChangeForUser($user));
         $payload = array_merge($payload, $this->parseSmsStatusChangeForUser($user));
 
-        // Update user's mobile only if we currently don't have one saved.
-        if (! $user->mobile) {
-            $payload['mobile'] = $this->userData['mobile'];
+        return $payload;
+    }
+
+    /**
+     * Returns payload to update mobile if user does not currently have one saved.
+     *
+     * @return array
+     */
+    public function parseMobileChangeForUser(NorthstarUser $user)
+    {
+        $key = 'mobile';
+
+        if ($user->{$key}) {
+            return [];
         }
 
-        return $payload;
+        return [$key => $this->userData[$key]];
     }
 
     /**
@@ -291,27 +303,34 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         $result = [];
         $key = 'sms_subscription_topics';
-        $currentTopics = ! empty($user->{$key}) ? $user->{$key} : [];
+        $currentSmsTopics = ! empty($user->{$key}) ? $user->{$key} : [];
+        $importSmsTopics = $this->userData[$key];
 
         // If user opted in to SMS:
         if ($this->record->smsOptIn) {
-            $result[$key] = array_unique(array_merge($currentTopics, $this->userData[$key]));
+            $result[$key] = array_unique(array_merge($currentSmsTopics, $importSmsTopics));
 
             return $result;
         }
 
-        if (! count($currentTopics)) {
+        // Nothing to remove if current subscription topics in empty.
+        if (! count($currentSmsTopics)) {
             return [];
         }
 
-        // If user hasn't opted-in and has current subscription topics, remove if present.
-        $indexOfTopicToRemove = array_search(Arr::first($this->userData[$key]), $currentTopics);
+        /**
+         * If user hasn't opted-in and has current subscription topics, remove if present.
+         *
+         * Note: we can get away with just checking for the first import topic since we only have one.
+         */
 
-        if ($indexOfTopicToRemove !== false) {
-            unset($currentTopics[$indexOfTopicToRemove]);
+        $importSmsTopicIndex = array_search(Arr::first($this->$importSmsTopics), $currentSmsTopics);
+
+        if ($importSmsTopicIndex !== false) {
+            unset($currentSmsTopics[$importSmsTopicIndex]);
         }
 
-        $result[$key] = $currentTopics;
+        $result[$key] = $currentSmsTopics;
 
         return $result;
     }
@@ -325,27 +344,28 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         $result = [];
         $key = 'sms_status';
-        $currentStatus = $user->{$key};
+        $currentSmsStatus = $user->{$key};
+        $importSmsStatus = $this->userData[$key];
 
         /**
          * If user is currently undeliverable, update status per whether they opted in via RTV form.
          *
-         * This is the only edge-case for when we'd want to change the sms_status to STOP.
+         * This is an edge case for when we want to change an existing user's status to STOP.
          */
-        if ($currentStatus == SmsStatus::$undeliverableStatus || ! $currentStatus) {
-            $result[$key] = $this->userData[$key];
+        if ($currentSmsStatus == SmsStatus::$undeliverableStatus || ! $currentSmsStatus) {
+            $result[$key] = $importSmsStatus;
 
             return $result;
         }
 
-        // If user opted in via RTV form and was previously opted out, opt them in.
-        if ($this->record->smsOptIn && in_array($currentStatus, [SmsStatus::$pendingStatus, SmsStatus::$stopStatus])) {
-            $result[$key] = $this->userData[$key];
+        // If user opted in via RTV form and is currently pending or opted out, opt them in.
+        if ($this->record->smsOptIn && in_array($currentSmsStatus, [SmsStatus::$pendingStatus, SmsStatus::$stopStatus])) {
+            $result[$key] = $importSmsStatus;
 
             return $result;
         }
 
-        // If we've made it this far, no changes to make to sms_status.
+        // If we've made it this far, nothing to update.
         return $result;
     }
 
