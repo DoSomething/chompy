@@ -39,6 +39,8 @@ class RockTheVoteLog extends Model
 
     /**
      * Log sanitized Rock The Vote data for given user and import file.
+     *
+     * @return RockTheVoteLog
      */
     public static function createFromRecord(RockTheVoteRecord $record, NorthstarUser $user, ImportFile $importFile)
     {
@@ -62,6 +64,8 @@ class RockTheVoteLog extends Model
 
     /**
      * Find a log for given record and user.
+     *
+     * @return RockTheVoteLog
      */
     public static function getByRecord(RockTheVoteRecord $record, NorthstarUser $user)
     {
@@ -72,5 +76,23 @@ class RockTheVoteLog extends Model
             'status' => $info['Status'],
             'user_id' => $user->id,
         ])->first();
+    }
+
+    /**
+     * Find whether a log exists for this registration and user that contains a phone number.
+     *
+     * @return bool
+     */
+    public static function hasAlreadyUpdatedSmsSubscription(RockTheVoteRecord $record, NorthstarUser $user)
+    {
+        $info = $record->getPostDetails();
+
+        $rockTheVoteLog = self::where([
+            'started_registration' => $info['Started registration'],
+            'user_id' => $user->id,
+            'contains_phone' => true,
+        ])->first();
+
+        return isset($rockTheVoteLog);
     }
 }

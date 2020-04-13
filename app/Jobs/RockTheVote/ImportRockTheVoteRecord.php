@@ -226,9 +226,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
     /**
      * Update Northstar user with record data.
      *
-     * @param NorthstarUser $user
+     * @return void
      */
-    private function updateUserIfChanged($user)
+    public function updateUserIfChanged(NorthstarUser $user)
     {
         $payload = [];
 
@@ -236,7 +236,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
             $payload['voter_registration_status'] = $this->userData['voter_registration_status'];
         }
 
-        // @TODO: Check for SMS status change.
+        if (config('import.rock_the_vote.update_user_sms_enabled') == 'true') {
+            $payload = array_merge($payload, $this->getUserSmsSubscriptionUpdatePayload($user));
+        }
 
         if (! count($payload)) {
             info('No changes to update for user', ['user' => $user->id]);
@@ -246,7 +248,36 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         gateway('northstar')->asClient()->updateUser($user->id, $payload);
 
-        info('Updated user', ['user' => $user->id, 'voter_registration_status' => $this->userData['voter_registration_status']]);
+        info('Updated user', ['user' => $user->id]);
+    }
+
+    /**
+     * Get fields and values to update given user with if their SMS subscription has changed.
+     *
+     * @return array
+     */
+    public function getUserSmsSubscriptionUpdatePayload(NorthstarUser $user)
+    {
+        $result = [];
+
+        // If registration does not have a mobile provided, there is nothing to update.
+        if (! $this->userData['mobile']) {
+            return $result;
+        }
+
+        // We don't need to update user's SMS subscription if we already did for this registration.
+        if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
+            return $result;
+        }
+
+        // @TODO: Check for changes to user's SMS status and subscription topics.
+
+        // Update user's mobile only if we currently don't have one saved.
+        if (! $user->mobile) {
+            $result['mobile'] = $this->userData['mobile'];
+        }
+
+        return $result;
     }
 
     /**

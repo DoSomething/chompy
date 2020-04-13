@@ -25,7 +25,7 @@ class RockTheVoteLogTest extends TestCase
 
         $log = RockTheVoteLog::createFromRecord(new RockTheVoteRecord($row), $user, $importFile);
 
-        $this->assertEquals($log->contains_phone, true);
+        $this->assertEquals($log->contains_phone, isset($this->userData['mobile']));
         $this->assertEquals($log->finish_with_state, $row['Finish with State']);
         $this->assertEquals($log->import_file_id, $importFile->id);
         $this->assertEquals($log->pre_registered, $row['Pre-Registered']);
@@ -95,5 +95,26 @@ class RockTheVoteLogTest extends TestCase
         $result = RockTheVoteLog::getByRecord($record, $user);
 
         $this->assertEquals($result, null);
+    }
+
+    /**
+     * Test expected result when log exists for record and user that contains mobile.
+     *
+     * @return void
+     */
+    public function testHasAlreadyUpdatedSmsSubscription()
+    {
+        $user = new NorthstarUser(['id' => $this->faker->northstar_id]);
+        $row = $this->faker->rockTheVoteReportRow();
+        $record = new RockTheVoteRecord($row);
+        $log = factory(RockTheVoteLog::class)->create([
+            'user_id' => $user->id,
+            'started_registration' => $row['Started registration'],
+            'contains_phone' => true,
+        ]);
+
+        $result = RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($record, $user);
+
+        $this->assertEquals($result, true);
     }
 }

@@ -15,7 +15,10 @@ class RockTheVoteRecordTest extends TestCase
      */
     public function testSetsUserDataAndPostData()
     {
-        $exampleRow = $this->faker->rockTheVoteReportRow();
+        $exampleRow = $this->faker->rockTheVoteReportRow([
+            'Phone' => $this->faker->phoneNumber,
+            'Opt-in to Partner SMS/robocall' => 'Yes',
+        ]);
         $config = ImportType::getConfig(ImportType::$rockTheVote);
 
         $record = new RockTheVoteRecord($exampleRow, $config);
@@ -59,6 +62,7 @@ class RockTheVoteRecordTest extends TestCase
     public function testDidNotOptIn()
     {
         $exampleRow = $this->faker->rockTheVoteReportRow([
+            'Phone' => $this->faker->phoneNumber,
             'Opt-in to Partner email?' => 'No',
             'Opt-in to Partner SMS/robocall' => 'No',
         ]);
