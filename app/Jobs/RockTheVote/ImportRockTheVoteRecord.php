@@ -3,6 +3,7 @@
 namespace Chompy\Jobs;
 
 use Exception;
+use Chompy\SmsStatus;
 use Chompy\ImportType;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
@@ -258,25 +259,93 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function getUserSmsSubscriptionUpdatePayload(NorthstarUser $user)
     {
-        $result = [];
+        $payload = [];
 
         // If registration does not have a mobile provided, there is nothing to update.
         if (! $this->userData['mobile']) {
-            return $result;
+            return $payload;
         }
 
         // We don't need to update user's SMS subscription if we already did for this registration.
         if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
-            return $result;
+            return $payload;
         }
 
-        // @TODO: Check for changes to user's SMS status and subscription topics.
+        $payload = array_merge($payload, $this->parseSmsSubscriptionTopicsChangeForUser($user));
+        $payload = array_merge($payload, $this->parseSmsStatusChangeForUser($user));
 
         // Update user's mobile only if we currently don't have one saved.
         if (! $user->mobile) {
-            $result['mobile'] = $this->userData['mobile'];
+            $payload['mobile'] = $this->userData['mobile'];
         }
 
+        return $payload;
+    }
+
+    /**
+     * Returns payload to update SMS subscription topics if they have changed.
+     *
+     * @return array
+     */
+    public function parseSmsSubscriptionTopicsChangeForUser(NorthstarUser $user)
+    {
+        $result = [];
+        $key = 'sms_subscription_topics';
+        $currentTopics = ! empty($user->{$key}) ? $user->{$key} : [];
+
+        // If user opted in to SMS:
+        if ($this->record->smsOptIn) {
+            $result[$key] = array_unique(array_merge($currentTopics, $this->userData[$key]));
+
+            return $result;
+        }
+
+        if (! count($currentTopics)) {
+            return [];
+        }
+
+        // If user hasn't opted-in and has current subscription topics, remove if present.
+        $indexOfTopicToRemove = array_search(Arr::first($this->userData[$key]), $currentTopics);
+
+        if ($indexOfTopicToRemove !== false) {
+            unset($currentTopics[$indexOfTopicToRemove]);
+        }
+
+        $result[$key] = $currentTopics;
+
+        return $result;
+    }
+
+    /**
+     * Returns payload to update SMS status if it has changed.
+     *
+     * @return array
+     */
+    public function parseSmsStatusChangeForUser(NorthstarUser $user)
+    {
+        $result = [];
+        $key = 'sms_status';
+        $currentStatus = $user->{$key};
+
+        /**
+         * If user is currently undeliverable, update status per whether they opted in via RTV form.
+         *
+         * This is the only edge-case for when we'd want to change the sms_status to STOP.
+         */
+        if ($currentStatus == SmsStatus::$undeliverableStatus || ! $currentStatus) {
+            $result[$key] = $this->userData[$key];
+
+            return $result;
+        }
+
+        // If user opted in via RTV form and was previously opted out, opt them in.
+        if ($this->record->smsOptIn && in_array($currentStatus, [SmsStatus::$pendingStatus, SmsStatus::$stopStatus])) {
+            $result[$key] = $this->userData[$key];
+
+            return $result;
+        }
+
+        // If we've made it this far, no changes to make to sms_status.
         return $result;
     }
 

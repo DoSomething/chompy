@@ -3,6 +3,7 @@
 namespace Tests\Jobs\RockTheVote;
 
 use Tests\TestCase;
+use Chompy\SmsStatus;
 use Chompy\RockTheVoteRecord;
 use Chompy\Models\ImportFile;
 use Chompy\Models\RockTheVoteLog;
@@ -222,6 +223,8 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
             'mobile' => $phoneNumber,
+            'sms_status' => SmsStatus::$activeStatus,
+            'sms_subscription_topics' => ['voting'],
             'voter_registration_status' => 'step-2',
         ]);
 
@@ -469,7 +472,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $result = $job->getUserSmsSubscriptionUpdatePayload($user);
 
-        $this->assertEquals(['mobile' => $phoneNumber], $result);
+        $this->assertEquals(['mobile' => $phoneNumber, 'sms_status' => SmsStatus::$stopStatus], $result);
     }
 
     /**
@@ -483,6 +486,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
             'mobile' => $this->faker->phoneNumber,
+            'sms_status' => SmsStatus::$lessStatus,
         ]);
         $row = $this->faker->rockTheVoteReportRow([
             'Phone' => $this->faker->phoneNumber,
