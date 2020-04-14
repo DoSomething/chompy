@@ -342,18 +342,20 @@ class ImportRockTheVoteRecord implements ShouldQueue
          * If current status is null or undeliverable, update status per whether they opted in
          * via the RTV form.
          *
-         * This is the only scenario when we want to change an existing user's status to STOP.
+         * This is the only scenario when we want to change an existing user's status to stop.
          */
         if ($currentSmsStatus == SmsStatus::$undeliverable || ! $currentSmsStatus) {
             return [$fieldName => $importSmsStatus];
         }
 
-        // If user opted in via RTV form and is currently pending or opted out, opt them in.
-        if ($this->smsOptIn && in_array($currentSmsStatus, [SmsStatus::$pending, SmsStatus::$stop])) {
+        if ($this->smsOptIn && in_array($currentSmsStatus, [
+            SmsStatus::$less,
+            SmsStatus::$pending,
+            SmsStatus::$stop,
+        ])) {
             return [$fieldName => $importSmsStatus];
         }
 
-        // If we've made it this far, nothing to update.
         return [];
     }
 
