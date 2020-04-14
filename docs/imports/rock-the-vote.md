@@ -106,7 +106,7 @@ If an existing user has a null `mobile` profile field and provides a phone numbe
 
 If an existing user **opts-in** to voting-related SMS messaging from DS via RTV form, we update `sms_status` as `active` if current value is either null, `less`, `stop`, or `undeliverable`.
 
-If an existing user **opts-out** of voting-related SMS messaging from DS via RTV form, we udate `sms_status` as `stop` if current value is null or `undeliverable`.
+If an existing user **opts-out** of voting-related SMS messaging from DS via RTV form, we update `sms_status` as `stop` if current value is null or `undeliverable`.
 
 ### SMS Subscription Topics
 

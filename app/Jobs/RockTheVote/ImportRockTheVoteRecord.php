@@ -260,19 +260,17 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function getUserSmsSubscriptionUpdatePayload(NorthstarUser $user)
     {
-        $payload = [];
-
         // If registration does not have a mobile provided, there is nothing to update.
         if (! $this->userData['mobile']) {
-            return $payload;
+            return [];
         }
 
         // We don't need to update user's SMS subscription if we already did for this registration.
         if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
-            return $payload;
+            return [];
         }
 
-        $payload = array_merge($payload, $this->parseMobileChangeForUser($user));
+        $payload = $this->parseMobileChangeForUser($user);
         $payload = array_merge($payload, $this->parseSmsSubscriptionTopicsChangeForUser($user));
         $payload = array_merge($payload, $this->parseSmsStatusChangeForUser($user));
 
