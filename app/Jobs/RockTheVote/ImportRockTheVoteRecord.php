@@ -285,13 +285,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function parseMobileChangeForUser(NorthstarUser $user)
     {
-        $key = 'mobile';
+        $fieldName = 'mobile';
 
-        if ($user->{$key}) {
+        if ($user->{$fieldName}) {
             return [];
         }
 
-        return [$key => $this->userData[$key]];
+        return [$fieldName => $this->userData[$fieldName]];
     }
 
     /**
@@ -301,36 +301,29 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function parseSmsSubscriptionTopicsChangeForUser(NorthstarUser $user)
     {
-        $result = [];
-        $key = 'sms_subscription_topics';
-        $currentSmsTopics = ! empty($user->{$key}) ? $user->{$key} : [];
-        $importSmsTopics = $this->userData[$key];
+        $fieldName = 'sms_subscription_topics';
+        $currentSmsTopics = ! empty($user->{$fieldName}) ? $user->{$fieldName} : [];
 
-        // If user opted in to SMS:
+        // If user opted in to SMS, add the import topics to current topics.
         if ($this->record->smsOptIn) {
-            $result[$key] = array_unique(array_merge($currentSmsTopics, $importSmsTopics));
-
-            return $result;
+            return [$fieldName => array_unique(array_merge($currentSmsTopics, $this->userData[$fieldName]))];
         }
 
-        // Nothing to remove if current subscription topics in empty.
+        // Nothing to remove if current topics in empty.
         if (! count($currentSmsTopics)) {
             return [];
         }
 
-        /**
-         * If user hasn't opted-in and has current subscription topics, remove any import topics
-         * from user's current subscription topics.
-         */
-        $result[$key] = [];
+        // If user hasn't opted-in and has current topics, remove all import topics from current.
+        $updatedSmsTopics = [];
 
         foreach ($currentSmsTopics as $topic) {
             if (! in_array($topic, explode(',', config('import.rock_the_vote.user.sms_subscription_topics')))) {
-                array_push($result[$key], $topic);
+                array_push($updatedSmsTopics, $topic);
             }
         }
 
-        return $result;
+        return [$fieldName => $updatedSmsTopics];
     }
 
     /**
@@ -340,10 +333,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function parseSmsStatusChangeForUser(NorthstarUser $user)
     {
-        $result = [];
-        $key = 'sms_status';
-        $currentSmsStatus = $user->{$key};
-        $importSmsStatus = $this->userData[$key];
+        $fieldName = 'sms_status';
+        $currentSmsStatus = $user->{$fieldName};
+        $importSmsStatus = $this->userData[$fieldName];
 
         /**
          * If current status is null or undeliverable, update status per whether they opted in
@@ -352,20 +344,16 @@ class ImportRockTheVoteRecord implements ShouldQueue
          * This is the only scenario when we want to change an existing user's status to STOP.
          */
         if ($currentSmsStatus == SmsStatus::$undeliverable || ! $currentSmsStatus) {
-            $result[$key] = $importSmsStatus;
-
-            return $result;
+            return [$fieldName => $importSmsStatus];
         }
 
         // If user opted in via RTV form and is currently pending or opted out, opt them in.
         if ($this->record->smsOptIn && in_array($currentSmsStatus, [SmsStatus::$pending, SmsStatus::$stop])) {
-            $result[$key] = $importSmsStatus;
-
-            return $result;
+            return [$fieldName => $importSmsStatus];
         }
 
         // If we've made it this far, nothing to update.
-        return $result;
+        return [];
     }
 
     /**
