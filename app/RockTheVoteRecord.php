@@ -12,7 +12,7 @@ class RockTheVoteRecord
     public static $mobileFieldName = 'Phone';
 
     /**
-     * Note: Note: Not a typo, this column name does not have the trailing question mark.
+     * Note: Not a typo, this column name does not have the trailing question mark.
      *
      * @var string
      */

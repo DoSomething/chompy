@@ -522,6 +522,52 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
+     * Test that SMS status is updated to active if user with stop value opts-in to SMS.
+     *
+     * @return void
+     */
+    public function testParseSmsStatusChangeIfUserHasStopmsStatusAndOptsIn()
+    {
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+            'mobile' => $this->faker->phoneNumber,
+            'sms_status' => SmsStatus::$stop,
+        ]);
+        $row = $this->faker->rockTheVoteReportRow([
+            RockTheVoteRecord::$mobileFieldName => $this->faker->phoneNumber,
+            RockTheVoteRecord::$smsOptInFieldName => 'Yes',
+        ]);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->parseSmsStatusChangeForUser($user);
+
+        $this->assertEquals(['sms_status' => SmsStatus::$active], $result);
+    }
+
+    /**
+     * Tests SMS status is updated to active if user with null value opts-in to RTV SMS.
+     *
+     * @return void
+     */
+    public function testParseSmsStatusChangeIfUserHasNullSmsStatusAndOptsIn()
+    {
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+            'mobile' => $this->faker->phoneNumber,
+            'sms_status' => null,
+        ]);
+        $row = $this->faker->rockTheVoteReportRow([
+            RockTheVoteRecord::$mobileFieldName => $this->faker->phoneNumber,
+            RockTheVoteRecord::$smsOptInFieldName => 'Yes',
+        ]);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->parseSmsStatusChangeForUser($user);
+
+        $this->assertEquals(['sms_status' => SmsStatus::$active], $result);
+    }
+
+    /**
      * Tests SMS status is updated to active if user with undeliverable value opts-in to RTV SMS.
      *
      * @return void

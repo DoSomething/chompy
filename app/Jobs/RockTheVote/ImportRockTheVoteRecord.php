@@ -347,9 +347,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $importSmsStatus = $this->userData[$key];
 
         /**
-         * If user is currently undeliverable, update status per whether they opted in via RTV form.
+         * If current status is null or undeliverable, update status per whether they opted in
+         * via the RTV form.
          *
-         * This is an edge case for when we want to change an existing user's status to STOP.
+         * This is the only scenario when we want to change an existing user's status to STOP.
          */
         if ($currentSmsStatus == SmsStatus::$undeliverable || ! $currentSmsStatus) {
             $result[$key] = $importSmsStatus;
