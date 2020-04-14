@@ -32,8 +32,6 @@ class RockTheVoteRecord
 
         $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
 
-        $this->smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
-
         $rtvStatus = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
 
         $this->userData = [
@@ -54,8 +52,10 @@ class RockTheVoteRecord
         ];
 
         if ($this->userData['mobile']) {
-            $this->userData['sms_status'] = $this->smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
-            $this->userData['sms_subscription_topics'] = $this->smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
+            $smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
+    
+            $this->userData['sms_status'] = $smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
+            $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
         }
 
         $this->postData = [

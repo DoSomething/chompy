@@ -38,6 +38,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $this->userData = $this->record->userData;
         $this->postData = $this->record->postData;
         $this->importFile = $importFile;
+        $this->smsOptIn = isset($this->userData['sms_status']) && $this->userData['sms_status'] == SmsStatus::$active;
     }
 
     /**
@@ -305,7 +306,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $currentSmsTopics = ! empty($user->{$fieldName}) ? $user->{$fieldName} : [];
 
         // If user opted in to SMS, add the import topics to current topics.
-        if ($this->record->smsOptIn) {
+        if ($this->smsOptIn) {
             return [$fieldName => array_unique(array_merge($currentSmsTopics, $this->userData[$fieldName]))];
         }
 
@@ -348,7 +349,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         }
 
         // If user opted in via RTV form and is currently pending or opted out, opt them in.
-        if ($this->record->smsOptIn && in_array($currentSmsStatus, [SmsStatus::$pending, SmsStatus::$stop])) {
+        if ($this->smsOptIn && in_array($currentSmsStatus, [SmsStatus::$pending, SmsStatus::$stop])) {
             return [$fieldName => $importSmsStatus];
         }
 
