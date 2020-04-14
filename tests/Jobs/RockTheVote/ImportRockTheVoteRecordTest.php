@@ -10,6 +10,7 @@ use Chompy\Models\RockTheVoteLog;
 use Chompy\Jobs\ImportRockTheVoteRecord;
 use DoSomething\Gateway\Resources\NorthstarUser;
 
+// @TODO: Replace all hardcoded RTV field names with RockTheVoteRecord constants to DRY.
 class ImportRockTheVoteRecordTest extends TestCase
 {
     /**

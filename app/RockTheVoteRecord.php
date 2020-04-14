@@ -31,7 +31,6 @@ class RockTheVoteRecord
         }
 
         $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
-
         $rtvStatus = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
 
         $this->userData = [
