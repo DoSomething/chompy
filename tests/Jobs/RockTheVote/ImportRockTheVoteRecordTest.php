@@ -499,6 +499,12 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
+     * ---------------------------
+     * parseSmsStatusChangeForUser
+     * ---------------------------
+     */
+
+    /**
      * Test that SMS status is updated to active if user with pending value opts-in to SMS.
      *
      * @return void
@@ -635,6 +641,66 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $this->assertEquals([], $result);
     }
+
+    /**
+     * ---------------------------------------
+     * parseSmsSubscriptionTopicsChangeForUser
+     * ---------------------------------------
+     */
+
+    /**
+     * Tests that import topic is removed from SMS topics if user opts-out of RTV SMS.
+     *
+     * @return void
+     */
+    public function testParseSubscriptionTopicsChangeIfUserHasActiveSmsStatusAndOptsIn()
+    {
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+            'mobile' => $this->faker->phoneNumber,
+            'sms_status' => SmsStatus::$active,
+            'sms_subscription_topics' => ['general', 'voting', 'pizza'],
+        ]);
+        $row = $this->faker->rockTheVoteReportRow([
+            RockTheVoteRecord::$mobileFieldName => $this->faker->phoneNumber,
+            RockTheVoteRecord::$smsOptInFieldName => 'No',
+        ]);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->parseSmsSubscriptionTopicsChangeForUser($user);
+
+        $this->assertEquals(['sms_subscription_topics' => ['general', 'pizza']], $result);
+    }
+
+    /**
+     * Tests that import topic is added from SMS topics if user opts-in to RTV SMS.
+     *
+     * @return void
+     */
+    public function testParseSubscriptionTopicsChangeIfUserHasActiveSmsStatusAndOptsOut()
+    {
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+            'mobile' => $this->faker->phoneNumber,
+            'sms_status' => SmsStatus::$active,
+            'sms_subscription_topics' => ['general', 'sushi', 'batman'],
+        ]);
+        $row = $this->faker->rockTheVoteReportRow([
+            RockTheVoteRecord::$mobileFieldName => $this->faker->phoneNumber,
+            RockTheVoteRecord::$smsOptInFieldName => 'Yes',
+        ]);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->parseSmsSubscriptionTopicsChangeForUser($user);
+
+        $this->assertEquals(['sms_subscription_topics' => ['general', 'sushi', 'batman', 'voting']], $result);
+    }
+
+    /**
+     * ------------------
+     * shouldUpdateStatus
+     * ------------------
+     */
 
     /**
      * Test that status should update when update value has higher priority than the current.

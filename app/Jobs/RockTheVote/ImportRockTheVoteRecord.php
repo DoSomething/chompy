@@ -321,15 +321,16 @@ class ImportRockTheVoteRecord implements ShouldQueue
         /**
          * If user hasn't opted-in and has current subscription topics, remove if present.
          *
-         * Note: we can get away with just checking for the first import topic since we only have one.
+         * Note: we can get away with just checking for the config import topics because there we
+         * only have one.
          */
-        $importSmsTopicIndex = array_search(Arr::first($this->$importSmsTopics), $currentSmsTopics);
+        $result[$key] = [];
 
-        if ($importSmsTopicIndex !== false) {
-            unset($currentSmsTopics[$importSmsTopicIndex]);
+        foreach ($currentSmsTopics as $topic) {
+            if ($topic != config('import.rock_the_vote.user.sms_subscription_topics')) {
+                array_push($result[$key], $topic);
+            }
         }
-
-        $result[$key] = $currentSmsTopics;
 
         return $result;
     }
