@@ -53,7 +53,7 @@ class RockTheVoteRecord
 
         if ($this->userData['mobile']) {
             $smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
-    
+
             $this->userData['sms_status'] = $smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
             $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
         }
