@@ -223,7 +223,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
             'mobile' => $phoneNumber,
-            'sms_status' => SmsStatus::$activeStatus,
+            'sms_status' => SmsStatus::$active,
             'sms_subscription_topics' => ['voting'],
             'voter_registration_status' => 'step-2',
         ]);
@@ -472,7 +472,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $result = $job->getUserSmsSubscriptionUpdatePayload($user);
 
-        $this->assertEquals(['mobile' => $phoneNumber, 'sms_status' => SmsStatus::$stopStatus], $result);
+        $this->assertEquals(['mobile' => $phoneNumber, 'sms_status' => SmsStatus::$stop], $result);
     }
 
     /**
@@ -486,7 +486,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
             'mobile' => $this->faker->phoneNumber,
-            'sms_status' => SmsStatus::$lessStatus,
+            'sms_status' => SmsStatus::$less,
         ]);
         $row = $this->faker->rockTheVoteReportRow([
             'Phone' => $this->faker->phoneNumber,
@@ -496,6 +496,52 @@ class ImportRockTheVoteRecordTest extends TestCase
         $result = $job->getUserSmsSubscriptionUpdatePayload($user);
 
         $this->assertEquals([], $result);
+    }
+
+    /**
+     * Test that SMS status is updated to active if user with pending value opts-in to SMS.
+     *
+     * @return void
+     */
+    public function testParseSmsStatusChangeIfUserHasPendingSmsStatus()
+    {
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+            'mobile' => $this->faker->phoneNumber,
+            'sms_status' => SmsStatus::$pending,
+        ]);
+        $row = $this->faker->rockTheVoteReportRow([
+            RockTheVoteRecord::$mobileFieldName => $this->faker->phoneNumber,
+            RockTheVoteRecord::$smsOptInFieldName => 'Yes',
+        ]);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->parseSmsStatusChangeForUser($user);
+
+        $this->assertEquals(['sms_status' => SmsStatus::$active], $result);
+    }
+
+    /**
+     * Test that SMS status is updated to active if user with undeliverable value opts-in to SMS.
+     *
+     * @return void
+     */
+    public function testParseSmsStatusChangeIfUserHasUndeliverableSmsStatus()
+    {
+        $user = new NorthstarUser([
+            'id' => $this->faker->northstar_id,
+            'mobile' => $this->faker->phoneNumber,
+            'sms_status' => SmsStatus::$undeliverable,
+        ]);
+        $row = $this->faker->rockTheVoteReportRow([
+            RockTheVoteRecord::$mobileFieldName => $this->faker->phoneNumber,
+            RockTheVoteRecord::$smsOptInFieldName => 'Yes',
+        ]);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $result = $job->parseSmsStatusChangeForUser($user);
+
+        $this->assertEquals(['sms_status' => SmsStatus::$active], $result);
     }
 
     /**

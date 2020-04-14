@@ -7,25 +7,25 @@ class SmsStatus
     /**
      * @var string
      */
-    public static $activeStatus = 'active';
+    public static $active = 'active';
 
     /**
      * @var string
      */
-    public static $lessStatus = 'less';
+    public static $less = 'less';
 
     /**
      * @var string
      */
-    public static $pendingStatus = 'pending';
+    public static $pending = 'pending';
 
     /**
      * @var string
      */
-    public static $stopStatus = 'stop';
+    public static $stop = 'stop';
 
     /**
      * @var string
      */
-    public static $undeliverableStatus = 'undeliverable';
+    public static $undeliverable = 'undeliverable';
 }

@@ -323,7 +323,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
          *
          * Note: we can get away with just checking for the first import topic since we only have one.
          */
-
         $importSmsTopicIndex = array_search(Arr::first($this->$importSmsTopics), $currentSmsTopics);
 
         if ($importSmsTopicIndex !== false) {
@@ -352,14 +351,14 @@ class ImportRockTheVoteRecord implements ShouldQueue
          *
          * This is an edge case for when we want to change an existing user's status to STOP.
          */
-        if ($currentSmsStatus == SmsStatus::$undeliverableStatus || ! $currentSmsStatus) {
+        if ($currentSmsStatus == SmsStatus::$undeliverable || ! $currentSmsStatus) {
             $result[$key] = $importSmsStatus;
 
             return $result;
         }
 
         // If user opted in via RTV form and is currently pending or opted out, opt them in.
-        if ($this->record->smsOptIn && in_array($currentSmsStatus, [SmsStatus::$pendingStatus, SmsStatus::$stopStatus])) {
+        if ($this->record->smsOptIn && in_array($currentSmsStatus, [SmsStatus::$pending, SmsStatus::$stop])) {
             $result[$key] = $importSmsStatus;
 
             return $result;
