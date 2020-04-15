@@ -7,6 +7,18 @@ use Illuminate\Support\Str;
 class RockTheVoteRecord
 {
     /**
+     * @var string
+     */
+    public static $mobileFieldName = 'Phone';
+
+    /**
+     * Note: Not a typo, this column name does not have the trailing question mark.
+     *
+     * @var string
+     */
+    public static $smsOptInFieldName = 'Opt-in to Partner SMS/robocall';
+
+    /**
      * Parses values to send to DS API from given CSV record, using given config.
      *
      * @param array $record
@@ -29,7 +41,7 @@ class RockTheVoteRecord
             'email' => $record['Email address'],
             'first_name' => $record['First name'],
             'last_name' => $record['Last name'],
-            'mobile' => isset($record['Phone']) && is_valid_mobile($record['Phone']) ? $record['Phone'] : null,
+            'mobile' => isset($record[static::$mobileFieldName]) && is_valid_mobile($record[static::$mobileFieldName]) ? $record[static::$mobileFieldName] : null,
             'email_subscription_status' => $emailOptIn,
             'email_subscription_topics' => $emailOptIn ? explode(',', $config['user']['email_subscription_topics']) : [],
             'voter_registration_status' => Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus,
@@ -39,10 +51,9 @@ class RockTheVoteRecord
         ];
 
         if ($this->userData['mobile']) {
-            // Note: Not a typo, this column name does not have the trailing question mark.
-            $smsOptIn = str_to_boolean($record['Opt-in to Partner SMS/robocall']);
+            $smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
 
-            $this->userData['sms_status'] = $smsOptIn ? 'active' : 'stop';
+            $this->userData['sms_status'] = $smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
             $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
         }
 

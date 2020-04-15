@@ -8,7 +8,7 @@ The import upserts a `voter-reg` type post for each unique "Started registration
 
 If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action. Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
 
-## Voter Registration Status
+## Status
 
 As of [April 2020](https://github.com/DoSomething/chompy/pull/153), we save the status provided by Rock The Vote on `voter-reg` posts for Rock the Vote, with the exception of using two different statuses for the `Complete` status:
 
@@ -67,9 +67,11 @@ We’ve established this hierarchy because each time a user interacts with the R
 
 In this case, we would want to count the form completion (`register-form`). It’s important to note that the hierarchy is for internal reporting and doesn’t prevent the user from interacting with the RTV form if they want to do so.
 
-### Existing Users
+## Existing Users
 
-If an existing User is found using the NS ID, email, or number, we attempt to update the user's `voter_registration_status` profile field based on the new status from the record.
+If an existing User is found using the NS ID, email, or number, we may update the user's `voter_registration_status` or SMS preferences based on the new values from the record.
+
+### Voter Registration Status
 
 If there's an existing status on the user, we follow the same hierarchy rules established above but check for a few additional statuses:
 
@@ -91,7 +93,28 @@ So the full hierarchy order taken into account when updating the profile from lo
 - `confirmed`
 - `registration_complete`
 
-### New Users
+### Mobile
+
+If an existing user has a null `mobile` profile field and provides a phone number via RTV form, we save it to the user's `mobile` profile field.
+
+**Notes**:
+
+- We do **not** override an existing phone number.
+- We save a user's mobile number regardless of whether they opt-in to SMS messaging from DS.
+
+### SMS Status
+
+If an existing user **opts-in** to voting-related SMS messaging from DS via RTV form, we update `sms_status` as `active` if current value is either null, `less`, `stop`, or `undeliverable`.
+
+If an existing user **opts-out** of voting-related SMS messaging from DS via RTV form, we update `sms_status` as `stop` if current value is null or `undeliverable`.
+
+### SMS Subscription Topics
+
+If an existing user **opts-in** to voting-related SMS messaging from DS via RTV form, we add the `voting` topic to their `sms_subscription_topics` if it doesn't exist.
+
+If an existing user **opts-out** of voting-related SMS messaging from DS via RTV form, we remove the `voting` topic from their `sms_subscription_topics` if it exists.
+
+## New Users
 
 If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with the PII provided from Rock The Vote.
 

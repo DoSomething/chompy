@@ -3,6 +3,7 @@
 namespace Chompy\Jobs;
 
 use Exception;
+use Chompy\SmsStatus;
 use Chompy\ImportType;
 use Chompy\Services\Rogue;
 use Illuminate\Bus\Queueable;
@@ -37,6 +38,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $this->userData = $this->record->userData;
         $this->postData = $this->record->postData;
         $this->importFile = $importFile;
+        $this->smsOptIn = isset($this->userData['sms_status']) && $this->userData['sms_status'] == SmsStatus::$active;
     }
 
     /**
@@ -258,26 +260,101 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function getUserSmsSubscriptionUpdatePayload(NorthstarUser $user)
     {
-        $result = [];
-
         // If registration does not have a mobile provided, there is nothing to update.
         if (! $this->userData['mobile']) {
-            return $result;
+            return [];
         }
 
         // We don't need to update user's SMS subscription if we already did for this registration.
         if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
-            return $result;
+            return [];
         }
 
-        // @TODO: Check for changes to user's SMS status and subscription topics.
+        $payload = $this->parseMobileChangeForUser($user);
+        $payload = array_merge($payload, $this->parseSmsSubscriptionTopicsChangeForUser($user));
+        $payload = array_merge($payload, $this->parseSmsStatusChangeForUser($user));
 
-        // Update user's mobile only if we currently don't have one saved.
-        if (! $user->mobile) {
-            $result['mobile'] = $this->userData['mobile'];
+        return $payload;
+    }
+
+    /**
+     * Returns payload to update mobile if user does not currently have one saved.
+     *
+     * @return array
+     */
+    public function parseMobileChangeForUser(NorthstarUser $user)
+    {
+        $fieldName = 'mobile';
+
+        if ($user->{$fieldName}) {
+            return [];
         }
 
-        return $result;
+        return [$fieldName => $this->userData[$fieldName]];
+    }
+
+    /**
+     * Returns payload to update SMS subscription topics if they have changed.
+     *
+     * @return array
+     */
+    public function parseSmsSubscriptionTopicsChangeForUser(NorthstarUser $user)
+    {
+        $fieldName = 'sms_subscription_topics';
+        $currentSmsTopics = ! empty($user->{$fieldName}) ? $user->{$fieldName} : [];
+
+        // If user opted in to SMS, add the import topics to current topics.
+        if ($this->smsOptIn) {
+            return [$fieldName => array_unique(array_merge($currentSmsTopics, $this->userData[$fieldName]))];
+        }
+
+        // Nothing to remove if current topics in empty.
+        if (! count($currentSmsTopics)) {
+            return [];
+        }
+
+        // If user hasn't opted-in and has current topics, remove all import topics from current.
+        $updatedSmsTopics = [];
+
+        foreach ($currentSmsTopics as $topic) {
+            if (! in_array($topic, explode(',', config('import.rock_the_vote.user.sms_subscription_topics')))) {
+                array_push($updatedSmsTopics, $topic);
+            }
+        }
+
+        return [$fieldName => $updatedSmsTopics];
+    }
+
+    /**
+     * Returns payload to update SMS status if it has changed.
+     *
+     * @return array
+     */
+    public function parseSmsStatusChangeForUser(NorthstarUser $user)
+    {
+        $fieldName = 'sms_status';
+        $currentSmsStatus = $user->{$fieldName};
+        $importSmsStatus = $this->userData[$fieldName];
+
+        /**
+         * If current status is null or undeliverable, update status per whether they opted in
+         * via the RTV form.
+         *
+         * This is the only scenario when we want to change an existing user's status to stop.
+         */
+        if ($currentSmsStatus == SmsStatus::$undeliverable || ! $currentSmsStatus) {
+            return [$fieldName => $importSmsStatus];
+        }
+
+        if ($this->smsOptIn && in_array($currentSmsStatus, [
+            SmsStatus::$less,
+            SmsStatus::$pending,
+            SmsStatus::$stop,
+        ])) {
+            return [$fieldName => $importSmsStatus];
+        }
+
+        return [];
     }
 
     /**
