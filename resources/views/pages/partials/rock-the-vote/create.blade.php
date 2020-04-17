@@ -39,7 +39,7 @@
 <div class="form-group row">
     <label class="col-sm-3 col-form-label">Update SMS Subscription</label>
     <div class="col-sm-9">
-        <p class="form-control-static">{{ $config['update_user_sms_enabled'] == 'false' ? 'OFF' : 'ON' }}</p>
+        <p class="form-control-static">{{ $config['update_user_sms_enabled'] ? 'ON' : 'OFF'  }}</p>
         <small class="form-text text-muted">
           If this is ON, an existing user's SMS subscription will be updated per their <a href="https://github.com/DoSomething/chompy/blob/master/docs/imports/rock-the-vote.md#mobile" target="_blank">voter registration</a>.
         </small>

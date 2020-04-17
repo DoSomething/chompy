@@ -181,6 +181,6 @@ class ImportFileController extends Controller
 
         return redirect('import/'.$importType.'?source=test')
             ->withInput(Input::all())
-            ->with('status', print_r($request->post(), true));
+            ->with('status', 'Import successful.');
     }
 }

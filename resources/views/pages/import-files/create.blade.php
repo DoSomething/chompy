@@ -8,6 +8,7 @@
     <form action={{ route('import.upload', ['importType' => $importType]) }} method="post" enctype="multipart/form-data">
         {{ csrf_field() }}
         @if ($importType === \Chompy\ImportType::$rockTheVote)
+            <a href="/import/rock-the-vote?source=test" class="pull-right">Test Import</a>
             @include('pages.partials.rock-the-vote.create', ['config' => $config])
         @elseif ($importType === \Chompy\ImportType::$emailSubscription)
             @include('pages.partials.email-subscription.create')
