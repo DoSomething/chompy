@@ -140,6 +140,15 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 
 - Voter Registration Status
 
+If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with PII provided from Rock The Vote:
+
+- First Name
+- Last Name
+- Street Address, City, Zip
+- Mobile
+
+Note: We do not import the user's birthdate.
+
 ### Online Drives
 
 Online drives is one of the tactics we have for getting people to get their friends registered to vote. For example, someone would sign up for the campaign and they have their own personal registration page (w/ a RTV form on it w/ the same kind of tracking) that they share with their friends/family. The appeal for them is that on their campaign action page, it will show how many people has viewed their personal registration page (v2 feature enhancement might be upping this to show who has registered).
