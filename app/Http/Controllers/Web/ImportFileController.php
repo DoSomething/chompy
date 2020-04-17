@@ -138,6 +138,7 @@ class ImportFileController extends Controller
 
         return view('pages.import-files.show', ['importFile' => $importFile, 'rows' => $rows]);
     }
+
     /**
      * Imports an create request.
      *
