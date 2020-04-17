@@ -71,6 +71,8 @@ In this case, we would want to count the form completion (`register-form`). Itâ€
 
 If an existing User is found using the NS ID, email, or number, we may update the user's `voter_registration_status` or SMS preferences based on the new values from the record.
 
+Note: We do not update any PII for an existing user (except for a mobile, if we do not have one saved already).
+
 ### Voter Registration Status
 
 If there's an existing status on the user, we follow the same hierarchy rules established above but check for a few additional statuses:
@@ -147,7 +149,7 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 - Street Address, City, Zip
 - Mobile
 
-Note: We do not import the user's birthdate.
+Note: We do not import the user's birthdate, likely for [privacy concerns](https://dosomething.slack.com/archives/CTVPG6L4R/p1587153485493600?thread_ts=1587153236.493300&cid=CTVPG6L4R).
 
 ### Online Drives
 
