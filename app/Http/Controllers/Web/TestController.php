@@ -4,7 +4,6 @@ namespace Chompy\Http\Controllers\Web;
 
 use Carbon\Carbon;
 use Chompy\ImportType;
-use Chompy\RockTheVoteRecord;
 use Illuminate\Http\Request;
 use Chompy\Models\ImportFile;
 use Illuminate\Support\Facades\Input;
@@ -44,7 +43,7 @@ class TestController extends Controller
                 'last_name' => $user->last_name,
                 'mobile' => $user->mobile,
                 'referral' => 'user:'.$userId.',source:test,source_detail:ChompyUI',
-                'started_registration' => \Carbon\Carbon::now()->format('Y-m-d H:i:s O'),
+                'started_registration' => Carbon::now()->format('Y-m-d H:i:s O'),
             ];
         }
 
