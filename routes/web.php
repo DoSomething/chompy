@@ -22,6 +22,9 @@ Route::resource('rock-the-vote-reports', 'RockTheVoteReportController', [
     'except' => ['delete', 'update'],
 ]);
 
+$router->get('tests/{importType}', 'TestController@create')->name('test.show');
+$router->post('tests/{importType}', 'TestController@submit')->name('test.submit');
+
 Route::resource('users', 'UserController', ['only' => ['show']]);
 
 Route::get('/', function () {
