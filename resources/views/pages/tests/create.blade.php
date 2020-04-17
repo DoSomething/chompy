@@ -7,7 +7,7 @@
 <div>
     <h1>Test Import</h1>
     <p>
-        Use this form to test importing the <code>{{$importType}}</code> import.
+        Use this form to test importing a <code>{{$importType}}</code> record.
     <p>
     <div>
         <form action={{ route('test.submit', ['importType' => $importType]) }} method="post" enctype="multipart/form-data">

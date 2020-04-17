@@ -42,11 +42,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Execute the job to create a Rock The Vote post in Rogue.
+     * Execute the job to upsert a user and their voter registration post.
      *
      * @return array
      */
-    public function handle(Rogue $rogue)
+    public function handle()
     {
         info('progress_log: Processing Rock The Vote record');
 
