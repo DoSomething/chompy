@@ -1,39 +1,25 @@
 @extends('layouts.master')
 
-@section('title', 'Upload CSV')
+@section('title', 'Import test')
 
 @section('main_content')
 
 <div>
-    <form action={{ route('import.store', ['importType' => $importType]) }} method="post" enctype="multipart/form-data">
-        {{ csrf_field() }}
-        @if ($importType === \Chompy\ImportType::$rockTheVote)
-            @include('pages.partials.rock-the-vote.create', ['config' => $config])
-        @elseif ($importType === \Chompy\ImportType::$emailSubscription)
-            @include('pages.partials.email-subscription.create')
-        @endif
-        <div class="form-group">
-            <h3>Upload</h3>
-            <div class="input-group">
-                <label class="input-group-btn">
-                    <span class="btn btn-default">
-                        Select CSV <input type="file" name="upload-file" style="display: none;" multiple>
-                    </span>
-                </label>
-                <input type="text" class="form-control" readonly>
+    <h1>Test Import</h1>
+    <p>
+        Use this form to test importing a <code>{{$importType}}</code> record.
+    <p>
+    <div>
+        <form action={{ route('import.store', ['importType' => $importType]) }} method="post" enctype="multipart/form-data">
+            {{ csrf_field() }}
+            @if ($importType === \Chompy\ImportType::$rockTheVote)
+                @include('pages.partials.rock-the-vote.test')
+            @endif
+            <div>
+                <input type="submit" class="btn btn-primary btn-lg" value="Submit">
             </div>
-        </div>
-        <div>
-            <input type="submit" class="btn btn-primary btn-lg" value="Import">
-        </div>
-    </form>
-</div>
-<h2>Progress Log</h2>
-<div id="messages">
-    <!--Messages goes here-->
-</div>
-<div class="progress">
-    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+        </form>
+    </div>
 </div>
 
 

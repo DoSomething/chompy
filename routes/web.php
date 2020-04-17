@@ -15,6 +15,7 @@ Route::resource('failed-jobs', 'FailedJobController');
 
 $router->get('import/{importType}', 'ImportFileController@create')->name('import.show');
 $router->post('import/{importType}', 'ImportFileController@store')->name('import.store');
+$router->post('upload/{importType}', 'ImportFileController@upload')->name('import.upload');
 
 Route::resource('import-files', 'ImportFileController', ['only' => ['index', 'show']]);
 
@@ -22,8 +23,6 @@ Route::resource('rock-the-vote-reports', 'RockTheVoteReportController', [
     'except' => ['delete', 'update'],
 ]);
 
-$router->get('tests/{importType}', 'TestController@create')->name('test.show');
-$router->post('tests/{importType}', 'TestController@submit')->name('test.submit');
 
 Route::resource('users', 'UserController', ['only' => ['show']]);
 
