@@ -35,7 +35,7 @@ class ImportFileController extends Controller
     public function create($importType)
     {
         if (request('source') !== 'test') {
-            return view('pages.import-files.upload', [
+            return view('pages.import-files.create', [
                 'importType' => $importType,
                 'config' => ImportType::getConfig($importType),
             ]);
@@ -60,7 +60,7 @@ class ImportFileController extends Controller
             ];
         }
 
-        return view('pages.import-files.create', [
+        return view('pages.import-files.test', [
             'importType' => $importType,
             'config' => ImportType::getConfig($importType),
             'data' => $data,
