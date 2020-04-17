@@ -123,6 +123,7 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 - First Name
 - Last Name
 - Street Address, City, Zip
+- Email
 - Mobile
 
 Note: We do not import the user's birthdate, likely for [privacy concerns](https://dosomething.slack.com/archives/CTVPG6L4R/p1587153485493600?thread_ts=1587153236.493300&cid=CTVPG6L4R).
