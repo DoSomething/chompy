@@ -116,7 +116,14 @@ If an existing user **opts-out** of voting-related SMS messaging from DS via RTV
 
 ## New Users
 
-If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with the PII provided from Rock The Vote.
+If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with PII provided from Rock The Vote:
+
+- First Name
+- Last Name
+- Street Address, City, Zip
+- Mobile
+
+Note: We do not import the user's birthdate.
 
 ### Online Drives
 
