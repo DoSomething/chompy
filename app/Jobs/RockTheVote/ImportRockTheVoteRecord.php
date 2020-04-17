@@ -42,11 +42,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Execute the job to create a Rock The Vote post in Rogue.
+     * Execute the job to upsert a user and their voter registration post.
      *
      * @return array
      */
-    public function handle(Rogue $rogue)
+    public function handle()
     {
         info('progress_log: Processing Rock The Vote record');
 
@@ -239,6 +239,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
         }
 
         if (config('import.rock_the_vote.update_user_sms_enabled') == 'true') {
+            info('Checking for SMS subscription updates', ['user' => $user->id]);
+
             $payload = array_merge($payload, $this->getUserSmsSubscriptionUpdatePayload($user));
         }
 
@@ -250,7 +252,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         gateway('northstar')->asClient()->updateUser($user->id, $payload);
 
-        info('Updated user', ['user' => $user->id]);
+        info('Updated user', ['user' => $user->id, 'changed' => array_keys($payload)]);
     }
 
     /**
@@ -267,6 +269,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         // We don't need to update user's SMS subscription if we already did for this registration.
         if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
+            info('Already updated SMS subscription for this registration', ['user' => $user->id]);
+
             return [];
         }
 
@@ -287,6 +291,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $fieldName = 'mobile';
 
         if ($user->{$fieldName}) {
+            info('User already has mobile');
+
             return [];
         }
 
@@ -303,6 +309,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $fieldName = 'sms_subscription_topics';
         $currentSmsTopics = ! empty($user->{$fieldName}) ? $user->{$fieldName} : [];
 
+        // @TODO: Remove this and fix a big bug, our $user does not have a sms_subscription_topics
+        // property set here -- so we are not property updating this field.
+        info('User ' . print_r($user, true));
+
         // If user opted in to SMS, add the import topics to current topics.
         if ($this->smsOptIn) {
             return [$fieldName => array_unique(array_merge($currentSmsTopics, $this->userData[$fieldName]))];
@@ -310,6 +320,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         // Nothing to remove if current topics in empty.
         if (! count($currentSmsTopics)) {
+            info('User does not have any SMS subscription topics to remove', ['user' => $user->id]);
+
             return [];
         }
 

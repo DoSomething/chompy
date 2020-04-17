@@ -13,6 +13,7 @@
         "fideloper/proxy": "^4.0",
         "itsgoingd/clockwork": "^3.0",
         "laravel/framework": "5.7.*",
+        "laravelcollective/html": "v5.7",
         "league/csv": "^9.0",
         "league/flysystem-aws-s3-v3": "~1.0",
         "league/uri": "^5.3",

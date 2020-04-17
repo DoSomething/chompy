@@ -15,6 +15,7 @@ Route::resource('failed-jobs', 'FailedJobController');
 
 $router->get('import/{importType}', 'ImportFileController@create')->name('import.show');
 $router->post('import/{importType}', 'ImportFileController@store')->name('import.store');
+$router->post('upload/{importType}', 'ImportFileController@upload')->name('import.upload');
 
 Route::resource('import-files', 'ImportFileController', ['only' => ['index', 'show']]);
 
