@@ -34,10 +34,12 @@ class ImportFileController extends Controller
      */
     public function create($importType)
     {
+        $config = ImportType::getConfig($importType);
+
         if (request('source') !== 'test') {
             return view('pages.import-files.create', [
                 'importType' => $importType,
-                'config' => ImportType::getConfig($importType),
+                'config' => $config,
             ]);
         }
 
@@ -50,7 +52,7 @@ class ImportFileController extends Controller
                 'addr_street1' => $user->addr_street1,
                 'addr_street2' => $user->addr_street2,
                 'addr_city' => $user->addr_city,
-                'addr_zip' => $user->addr_zip,          
+                'addr_zip' => $user->addr_zip,
                 'email' => $user->email,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
@@ -62,7 +64,7 @@ class ImportFileController extends Controller
 
         return view('pages.import-files.test', [
             'importType' => $importType,
-            'config' => ImportType::getConfig($importType),
+            'config' => $config,
             'data' => $data,
         ]);
     }
