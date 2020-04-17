@@ -309,6 +309,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $fieldName = 'sms_subscription_topics';
         $currentSmsTopics = ! empty($user->{$fieldName}) ? $user->{$fieldName} : [];
 
+        // @TODO: Remove this and fix a big bug, our $user does not have a sms_subscription_topics
+        // property set here -- so we are not property updating this field.
         info('User ' . print_r($user, true));
 
         // If user opted in to SMS, add the import topics to current topics.
