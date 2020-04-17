@@ -34,7 +34,7 @@ class ImportFileController extends Controller
      */
     public function create($importType)
     {
-        if (request('source') === 'csv') {
+        if (request('source') !== 'test') {
             return view('pages.import-files.upload', [
                 'importType' => $importType,
                 'config' => ImportType::getConfig($importType),
@@ -104,7 +104,7 @@ class ImportFileController extends Controller
 
         ImportFileRecords::dispatch(\Auth::user(), $path, $importType, $importOptions)->delay(now()->addSeconds(3));
 
-        return redirect('import/'.$importType.'?source=csv')
+        return redirect('import/'.$importType)
             ->with('status', 'Queued '.$path.' for import.');
     }
 
@@ -176,7 +176,7 @@ class ImportFileController extends Controller
             $job->handle();
         }
 
-        return redirect('import/'.$importType)
+        return redirect('import/'.$importType.'?source=test')
             ->withInput(Input::all())
             ->with('status', print_r($request->post(), true));
     }

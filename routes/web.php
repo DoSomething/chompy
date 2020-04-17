@@ -23,7 +23,6 @@ Route::resource('rock-the-vote-reports', 'RockTheVoteReportController', [
     'except' => ['delete', 'update'],
 ]);
 
-
 Route::resource('users', 'UserController', ['only' => ['show']]);
 
 Route::get('/', function () {
