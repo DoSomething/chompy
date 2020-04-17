@@ -291,8 +291,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $fieldName = 'mobile';
 
         if ($user->{$fieldName}) {
-            info('User already has mobile');
-
             return [];
         }
 
@@ -309,7 +307,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $fieldName = 'sms_subscription_topics';
         $currentSmsTopics = ! empty($user->{$fieldName}) ? $user->{$fieldName} : [];
 
-
         // If user opted in to SMS, add the import topics to current topics.
         if ($this->smsOptIn) {
             return [$fieldName => array_unique(array_merge($currentSmsTopics, $this->userData[$fieldName]))];
@@ -317,8 +314,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         // Nothing to remove if current topics in empty.
         if (! count($currentSmsTopics)) {
-            info('User does not have any SMS subscription topics to remove', ['user' => $user->id]);
-
             return [];
         }
 
