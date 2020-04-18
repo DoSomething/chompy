@@ -144,7 +144,7 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 
 Online drives is one of the tactics we have for getting people to get their friends registered to vote. For example, someone would sign up for the campaign and they have their own personal registration page (w/ a RTV form on it w/ the same kind of tracking) that they share with their friends/family. The appeal for them is that on their campaign action page, it will show how many people has viewed their personal registration page (v2 feature enhancement might be upping this to show who has registered).
 
-So, the Alpha sends their page to a Beta and they register. The Alpha's referral links look like this: https://vote.dosomething.org/member-drive?userId={userId}&r=user:{userId},source=web,source_details=onlinedrivereferral,referral=true
+So, the Alpha sends their page to a Beta and they register. The Alpha's referral links look like this: https://vote.dosomething.org/member-drive?userId=58e68d5da0bfad4c3b4cd722&r=user:58e68d5da0bfad4c3b4cd722,source=web,source_details=onlinedrivereferral,referral=true
 
 We've added `referral=true` to the link so that we can know to not attribute the registration to the NS ID that is present in the URL. In this case, this NS ID is the referrer and not the registrant.
 
