@@ -132,7 +132,7 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 
   - If user opts-out of SMS messging from DS, user's `voting` SMS topic is removed if exists. SMS status will be set to `active` if was previously set to `stop` or `undeliverable`.
 
-- [Voter Registration Status](/#voter-registration-status)
+- Voter Registration Status
 
 ### Online Drives
 
