@@ -56,7 +56,7 @@
   <div class="col-sm-9">
     {!! Form::text('referral', $data['referral'], ['class' => 'form-control']) !!}
       <small class="form-text text-muted">
-        The `r` query string value sent, e.g. <code>&r=user:5e9a3c0c9454f2503d3f36d2,source=web,source_details=puppetSlothArchive</code>. See <a href="https://github.com/DoSomething/chompy/blob/master/docs/imports/rock-the-vote.md#online-drives">docs</a>.
+        The `r` query string value sent, e.g. <code>vote.dosomething.org?r=user:5e9a3c0c9454f2503d3f36d2,source=web,source_details=puppetSlothArchive</code>. See <a href="https://github.com/DoSomething/chompy/blob/master/docs/imports/rock-the-vote.md#online-drives">docs</a>.
       </small>
   </div>
 </div>
