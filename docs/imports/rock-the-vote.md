@@ -132,6 +132,8 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 
   - If user opts-out of SMS messging from DS, user's `voting` SMS topic is removed if exists. SMS status will be set to `active` if was previously set to `stop` or `undeliverable`.
 
+- [Voter Registration Status](/#voter-registration-status)
+
 ### Online Drives
 
 Online drives is one of the tactics we have for getting people to get their friends registered to vote. For example, someone would sign up for the campaign and they have their own personal registration page (w/ a RTV form on it w/ the same kind of tracking) that they share with their friends/family. The appeal for them is that on their campaign action page, it will show how many people has viewed their personal registration page (v2 feature enhancement might be upping this to show who has registered).
