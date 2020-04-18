@@ -24,7 +24,7 @@ The other status values returned from RTV are:
 
 - `step-1`: a person entered email/ZIP code on the first page, then stopped.
 
-  - Note -- we've seen PII entered in rows that are on Step 1, and TBD why this happens sometimes.
+  - Note -- we've seen profile info entered in rows that are on Step 1, and TBD why this happens sometimes.
 
 - `step-2`: user got to the second page to start filling out their personal info, but did not finish
 
@@ -71,8 +71,6 @@ In this case, we would want to count the form completion (`register-form`). Itâ€
 
 If an existing User is found using the NS ID, email, or number, we may update the user's `voter_registration_status` or SMS preferences based on the new values from the record.
 
-Note: We do not update any PII for an existing user (except for a mobile, if we do not have one saved already).
-
 ### Voter Registration Status
 
 If there's an existing status on the user, we follow the same hierarchy rules established above but check for a few additional statuses:
@@ -118,15 +116,21 @@ If an existing user **opts-out** of voting-related SMS messaging from DS via RTV
 
 ## New Users
 
-If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with PII provided from Rock The Vote:
+If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with the following info provided from Rock The Vote:
 
-- First Name
-- Last Name
-- Street Address, City, Zip
+- First and last name
+
+- Address, City, Zip
+
 - Email
+
+  - If user opts-in to email messaging from DS, user is subscribed with `community` topic and an Activate Account email is sent.
+
 - Mobile
 
-Note: We do not import the user's birthdate, likely for [privacy concerns](https://dosomething.slack.com/archives/CTVPG6L4R/p1587153485493600?thread_ts=1587153236.493300&cid=CTVPG6L4R).
+  - If user opts-in to SMS messging from DS, user is subscribed to the `voting` SMS topic with status `active`.
+
+  - If user opts-out of SMS messging from DS, user's `voting` SMS topic is removed if exists. SMS status will be set to `active` if was previously set to `stop` or `undeliverable`.
 
 ### Online Drives
 
