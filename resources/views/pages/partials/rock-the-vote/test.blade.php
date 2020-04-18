@@ -52,7 +52,7 @@
 
 <h3>Voter Registration</h3>
 <div class="form-group row">
-  <label for="referral" class="col-sm-3 col-form-label" required>Referral</label>
+  <label for="referral" class="col-sm-3 col-form-label" required>Tracking Source</label>
   <div class="col-sm-9">
     {!! Form::text('referral', $data['referral'], ['class' => 'form-control']) !!}
       <small class="form-text text-muted">

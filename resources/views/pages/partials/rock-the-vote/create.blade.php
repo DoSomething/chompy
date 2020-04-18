@@ -5,7 +5,25 @@
     <div class="col-sm-9">
         <p class="form-control-static"><code>{{ $config['user']['email_subscription_topics'] }}</code></p>
         <small class="form-text text-muted">
-          The email subscription topics to subscribe new users to, if they have opted in to receive emails.
+          The email subscription topics to subscribe new users to, if they have opted-in to receive emails from DS.
+        </small>
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label">SMS subscription topics</label>
+    <div class="col-sm-9">
+        <p class="form-control-static"><code>{{ $config['user']['sms_subscription_topics'] }}</code></p>
+        <small SMS="form-text text-muted">
+          The SMS subscription topics to subscribe new users to, if they have opted-in to receive texts from DS.
+        </small>
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label">Update SMS subscriptions</label>
+    <div class="col-sm-9">
+        <p class="form-control-static">{{ $config['update_user_sms_enabled'] ? 'ON' : 'OFF'  }}</p>
+        <small class="form-text text-muted">
+          If this is ON, an existing user's SMS subscription will be updated per whether they opted-in to <a href="https://github.com/DoSomething/chompy/blob/master/docs/imports/rock-the-vote.md#mobile" target="_blank">receive texts from DS</a>.
         </small>
     </div>
 </div>
@@ -19,7 +37,7 @@
     </div>
 </div>
 <div class="form-group row">
-    <label class="col-sm-3 col-form-label">Send Password Reset</label>
+    <label class="col-sm-3 col-form-label">Send activate account email</label>
     <div class="col-sm-9">
         <p class="form-control-static">{{ $config['reset']['enabled'] ? 'ON' : 'OFF' }}</p>
         <small class="form-text text-muted">
@@ -28,7 +46,7 @@
     </div>
 </div>
 <div class="form-group row">
-    <label class="col-sm-3 col-form-label">Password Reset Type</label>
+    <label class="col-sm-3 col-form-label">Activate account email template</label>
     <div class="col-sm-9">
         <p class="form-control-static"><code>{{ $config['reset']['type'] }}</code></p>
         <small class="form-text text-muted">
@@ -36,15 +54,7 @@
         </small>
     </div>
 </div>
-<div class="form-group row">
-    <label class="col-sm-3 col-form-label">Update SMS Subscription</label>
-    <div class="col-sm-9">
-        <p class="form-control-static">{{ $config['update_user_sms_enabled'] ? 'ON' : 'OFF'  }}</p>
-        <small class="form-text text-muted">
-          If this is ON, an existing user's SMS subscription will be updated per their <a href="https://github.com/DoSomething/chompy/blob/master/docs/imports/rock-the-vote.md#mobile" target="_blank">voter registration</a>.
-        </small>
-    </div>
-</div>
+
 <h4>Posts</h4>
 <div class="form-group row">
     <label class="col-sm-3 col-form-label">Action ID</label>
