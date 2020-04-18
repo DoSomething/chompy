@@ -102,17 +102,23 @@ If an existing user has a null `mobile` profile field and provides a phone numbe
 - We do **not** override an existing phone number.
 - We save a user's mobile number regardless of whether they opt-in to SMS messaging from DS.
 
-### SMS Status
+### Email Subscription
 
-If an existing user **opts-in** to voting-related SMS messaging from DS via RTV form, we update `sms_status` as `active` if current value is either null, `less`, `stop`, or `undeliverable`.
+Email subscriptions are not updated.
 
-If an existing user **opts-out** of voting-related SMS messaging from DS via RTV form, we update `sms_status` as `stop` if current value is null or `undeliverable`.
+### SMS Subscription
 
-### SMS Subscription Topics
+If an existing user **opts-in** to voting-related SMS messaging from DS:
 
-If an existing user **opts-in** to voting-related SMS messaging from DS via RTV form, we add the `voting` topic to their `sms_subscription_topics` if it doesn't exist.
+- add the `voting` topic to `sms_subscription_topics` if it doesn't exist.
 
-If an existing user **opts-out** of voting-related SMS messaging from DS via RTV form, we remove the `voting` topic from their `sms_subscription_topics` if it exists.
+- update `sms_status` as `active` if current value is either null, `less`, `stop`, or `undeliverable`.
+
+If an existing user **opts-out** of voting-related SMS messaging from DS:
+
+- remove the `voting` topic from `sms_subscription_topics` if it exists.
+
+- update `sms_status` as `stop` if current value is null or `undeliverable`.
 
 ## New Users
 
@@ -122,11 +128,11 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 
 - Address, City, Zip
 
-- Email
+- Email Subscription
 
   - If user opts-in to email messaging from DS, user is subscribed with `community` topic and an Activate Account email is sent.
 
-- Mobile
+- SMS Subscription
 
   - If user opts-in to SMS messging from DS, user is subscribed to the `voting` SMS topic with status `active`.
 
