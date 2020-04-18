@@ -57,7 +57,7 @@ class ImportFileController extends Controller
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'mobile' => $user->mobile,
-                'referral' => 'user:'.$userId.',source:test,source_detail:ChompyUI',
+                'referral' => 'ads',
                 'started_registration' => Carbon::now()->format('Y-m-d H:i:s O'),
             ];
         }
