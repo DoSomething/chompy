@@ -140,7 +140,7 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 
 - Voter Registration Status
 
-- [Voter Registration Status](/#voter-registration-status)
+- Voter Registration Status
 
 ### Online Drives
 
