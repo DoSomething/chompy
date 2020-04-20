@@ -34,9 +34,9 @@
   <div class="col-sm-3">
     {!! Form::text('email', $data['email'], ['class' => 'form-control']) !!}
   </div>
-  <label for="mobile" class="col-sm-3 col-form-label">Mobile</label>
+  <label for="phone" class="col-sm-3 col-form-label">Phone</label>
   <div class="col-sm-3">
-    {!! Form::text('mobile', $data['mobile'], ['class' => 'form-control']) !!}
+    {!! Form::text('phone', $data['phone'], ['class' => 'form-control']) !!}
   </div>
 </div>
 <div class="form-group row">
@@ -52,9 +52,9 @@
 
 <h3>Voter Registration</h3>
 <div class="form-group row">
-  <label for="referral" class="col-sm-3 col-form-label" required>Tracking Source</label>
+  <label for="tracking_source" class="col-sm-3 col-form-label" required>Tracking Source</label>
   <div class="col-sm-9">
-    {!! Form::text('referral', $data['referral'], ['class' => 'form-control']) !!}
+    {!! Form::text('tracking_source', $data['tracking_source'], ['class' => 'form-control']) !!}
       <small class="form-text text-muted">
         The `r` query string value sent, e.g. <code>vote.dosomething.org?r=user:5e9a3c0c9454f2503d3f36d2,source=web,source_details=puppetSlothArchive</code>. See <a href="https://github.com/DoSomething/chompy/blob/master/docs/imports/rock-the-vote.md#online-drives">docs</a>.
       </small>

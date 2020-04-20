@@ -56,8 +56,8 @@ class ImportFileController extends Controller
                 'email' => $user->email,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
-                'mobile' => $user->mobile,
-                'referral' => 'ads',
+                'phone' => $user->mobile,
+                'tracking_source' => 'source:test,source_details:ChompyUI',
                 'started_registration' => Carbon::now()->format('Y-m-d H:i:s O'),
             ];
         }
@@ -150,7 +150,7 @@ class ImportFileController extends Controller
         if ($importType === ImportType::$rockTheVote) {
             $row = [
                 'Email address' => $request->input('email'),
-                'Finish with State' => $request->input('status'),
+                'Finish with State' => $request->input('finish_with_state'),
                 'First name' => $request->input('first_name'),
                 'Home address' => $request->input('addr_street1'),
                 'Home city' => $request->input('addr_city'),
@@ -159,11 +159,11 @@ class ImportFileController extends Controller
                 'Last name' => $request->input('last_name'),
                 'Opt-in to Partner SMS/robocall' => $request->input('sms_opt_in') ?: 'No',
                 'Opt-in to Partner email?' => $request->input('email_opt_in') ?: 'No',
-                'Phone' => $request->input('mobile'),
+                'Phone' => $request->input('phone'),
                 'Pre-Registered' => $request->input('pre_registered') ?: 'No',
                 'Started registration' => $request->input('started_registration'),
                 'Status' => $request->input('status'),
-                'Tracking Source' => $request->input('referral'),
+                'Tracking Source' => $request->input('tracking_source'),
             ];
 
             $importFile = new ImportFile();
