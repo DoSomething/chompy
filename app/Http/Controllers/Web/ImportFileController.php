@@ -150,7 +150,7 @@ class ImportFileController extends Controller
         if ($importType === ImportType::$rockTheVote) {
             $row = [
                 'Email address' => $request->input('email'),
-                'Finish with State' => $request->input('finish_with_state'),
+                'Finish with State' => $request->input('finish_with_state') ?: 'No',
                 'First name' => $request->input('first_name'),
                 'Home address' => $request->input('addr_street1'),
                 'Home city' => $request->input('addr_city'),
