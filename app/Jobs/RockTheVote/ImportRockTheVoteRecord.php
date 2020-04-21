@@ -114,6 +114,25 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
+     * @return array
+     */
+    private function formatResponse($user, $post)
+    {
+        $result = [
+            'user' => [],
+            'post' => Arr::only($post, ['id', 'type', 'action_id', 'status', 'details']),
+        ];
+
+        $userFields = ['id', 'email', 'mobile', 'voter_registration_status', 'sms_status', 'sms_subscription_topics','email_subscription_status', 'email_subscription_topics'];
+
+        foreach ($userFields as $fieldName) {
+            $result['user'][$fieldName] = $user->{$fieldName};
+        }
+
+        return $result;
+    }
+
+    /**
      * Check for user first by id, next by email, last by mobile.
      *
      * @param string $id
