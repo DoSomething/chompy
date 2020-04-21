@@ -115,9 +115,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
+     * Returns given user and post with relevant fields per imported record.
+     *
      * @return array
      */
-    private function formatResponse($user, $post)
+    private function formatResponse(NorthstarUser $user, array $post)
     {
         $result = [
             'user' => [],
