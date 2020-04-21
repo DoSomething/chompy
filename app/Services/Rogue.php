@@ -90,7 +90,7 @@ class Rogue extends RestApiClient
             throw new Exception(500, 'Unable to update post for post: ' . $postId);
         }
 
-        return $post;
+        return $post['data'];
     }
 
     /**

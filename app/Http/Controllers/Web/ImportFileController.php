@@ -183,7 +183,7 @@ class ImportFileController extends Controller
 
         $html = 'Created <a href="/import-files/'.$importFile->id.'">import #'.$importFile->id.'</a>.<ul>';
 
-        if (count($result)) {
+        if ($result && count($result)) {
             foreach ($result as $key => $data) {
                 $html .= '<li>'.$key.'<ul>';
 

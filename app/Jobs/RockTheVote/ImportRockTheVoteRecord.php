@@ -79,15 +79,17 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return;
         }
 
-        $this->updateUserIfChanged($user);
+        $user = $this->updateUserIfChanged($user);
 
         if ($post = $this->getPost($user)) {
-            $this->updatePostIfChanged($post);
+            $post = $this->updatePostIfChanged($post);
         } else {
             $post = $this->createPost($user);
         }
 
         RockTheVoteLog::createFromRecord($this->record, $user, $this->importFile);
+
+        return $this->formatResponse($user, $post);
     }
 
     /**
@@ -267,12 +269,14 @@ class ImportRockTheVoteRecord implements ShouldQueue
         if (! count($payload)) {
             info('No changes to update for user', ['user' => $user->id]);
 
-            return;
+            return $user;
         }
 
-        gateway('northstar')->asClient()->updateUser($user->id, $payload);
+        $user = gateway('northstar')->asClient()->updateUser($user->id, $payload);
 
         info('Updated user', ['user' => $user->id, 'changed' => array_keys($payload)]);
+
+        return $user;
     }
 
     /**
@@ -395,9 +399,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return;
         }
 
-        app(Rogue::class)->updatePost($post['id'], ['status' => $this->postData['status']]);
+        $post = app(Rogue::class)->updatePost($post['id'], ['status' => $this->postData['status']]);
 
-        info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
+        info('Updated post', ['post' => $post['id'], 'status' => $post['status']]);
+
+        return $post;
     }
 
     /**
