@@ -134,9 +134,9 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 
 - SMS Subscription
 
-  - If user opts-in to SMS messging from DS, user is subscribed to the `voting` SMS topic with status `active`.
+  - If user opts-in to SMS messaging from DS, user is subscribed to the `voting` SMS topic with status `active`.
 
-  - If user opts-out of SMS messging from DS, user's `sms_status` will be set to `stop` and `sms_subscription_topics` will be set to empty.
+  - If user opts-out of SMS messaging from DS, user's `sms_status` will be set to `stop` and `sms_subscription_topics` will be set to empty.
 
 - Voter Registration Status
 
