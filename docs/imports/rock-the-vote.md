@@ -24,7 +24,7 @@ The other status values returned from RTV are:
 
 - `step-1`: a person entered email/ZIP code on the first page, then stopped.
 
-  - Note -- we've seen PII entered in rows that are on Step 1, and TBD why this happens sometimes.
+  - Note -- we've seen profile info entered in rows that are on Step 1, and TBD why this happens sometimes.
 
 - `step-2`: user got to the second page to start filling out their personal info, but did not finish
 
@@ -102,27 +102,49 @@ If an existing user has a null `mobile` profile field and provides a phone numbe
 - We do **not** override an existing phone number.
 - We save a user's mobile number regardless of whether they opt-in to SMS messaging from DS.
 
-### SMS Status
+### Email Subscription
 
-If an existing user **opts-in** to voting-related SMS messaging from DS via RTV form, we update `sms_status` as `active` if current value is either null, `less`, `stop`, or `undeliverable`.
+Email subscriptions are not updated.
 
-If an existing user **opts-out** of voting-related SMS messaging from DS via RTV form, we update `sms_status` as `stop` if current value is null or `undeliverable`.
+### SMS Subscription
 
-### SMS Subscription Topics
+If an existing user **opts-in** to voting-related SMS messaging from DS:
 
-If an existing user **opts-in** to voting-related SMS messaging from DS via RTV form, we add the `voting` topic to their `sms_subscription_topics` if it doesn't exist.
+- add the `voting` topic to `sms_subscription_topics` if it doesn't exist.
 
-If an existing user **opts-out** of voting-related SMS messaging from DS via RTV form, we remove the `voting` topic from their `sms_subscription_topics` if it exists.
+- update `sms_status` as `active` if current value is either null, `less`, `stop`, or `undeliverable`.
+
+If an existing user **opts-out** of voting-related SMS messaging from DS:
+
+- remove the `voting` topic from `sms_subscription_topics` if it exists.
+
+- update `sms_status` as `stop` if current value is null or `undeliverable`.
 
 ## New Users
 
-If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with the PII provided from Rock The Vote.
+If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with the following info provided from Rock The Vote:
+
+- First and last name
+
+- Address, City, Zip
+
+- Email Subscription
+
+  - If user opts-in to email messaging from DS, user is subscribed with `community` topic and an Activate Account email is sent.
+
+- SMS Subscription
+
+  - If user opts-in to SMS messaging from DS, user is subscribed to the `voting` SMS topic with status `active`.
+
+  - If user opts-out of SMS messaging from DS, user's `sms_status` will be set to `stop` and `sms_subscription_topics` will be set to empty.
+
+- Voter Registration Status
 
 ### Online Drives
 
 Online drives is one of the tactics we have for getting people to get their friends registered to vote. For example, someone would sign up for the campaign and they have their own personal registration page (w/ a RTV form on it w/ the same kind of tracking) that they share with their friends/family. The appeal for them is that on their campaign action page, it will show how many people has viewed their personal registration page (v2 feature enhancement might be upping this to show who has registered).
 
-So, the Alpha sends their page to a Beta and they register. The Alpha's referral links look like this: https://vote.dosomething.org/member-drive?userId={userId}&r=user:{userId},campaign:{campaignID},campaignRunID={campaignRunID},source=web,source_details=onlinedrivereferral,referral=true
+So, the Alpha sends their page to a Beta and they register. The Alpha's referral links look like this: https://vote.dosomething.org/member-drive?userId=58e68d5da0bfad4c3b4cd722&r=user:58e68d5da0bfad4c3b4cd722,source=web,source_details=onlinedrivereferral,referral=true
 
 We've added `referral=true` to the link so that we can know to not attribute the registration to the NS ID that is present in the URL. In this case, this NS ID is the referrer and not the registrant.
 
