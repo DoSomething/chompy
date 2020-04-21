@@ -181,7 +181,7 @@ class ImportFileController extends Controller
             $result = $job->handle();
         }
 
-        $html = 'Created import #'.$importFile->id.'.<ul>';
+        $html = 'Created <a href="/import-files/'.$importFile->id.'">import #'.$importFile->id.'</a>.<ul>';
 
         if (count($result)) {
             foreach ($result as $key => $data) {
