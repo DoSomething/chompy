@@ -93,9 +93,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
+     * Returns given user and post with relevant fields per imported record.
+     *
      * @return array
      */
-    private function formatResponse($user, $post)
+    private function formatResponse(NorthstarUser $user, array $post)
     {
         $result = [
             'user' => [],
@@ -248,9 +250,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Update Northstar user with record data.
+     * Updates user's profile with imported data, if updated.
      *
-     * @return void
+     * @return NorthstarUser
      */
     public function updateUserIfChanged(NorthstarUser $user)
     {
@@ -389,7 +391,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      * Updates Rogue post with record data if it should be updated.
      *
      * @param array $post
-     * @return void
+     * @return array
      */
     private function updatePostIfChanged($post)
     {

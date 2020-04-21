@@ -60,7 +60,7 @@ class Rogue extends RestApiClient
      * Create a post in rogue.
      *
      * @param array $data - The data to create the post with.
-     * @return array $post - The created post.
+     * @return array
      */
     public function createPost($data)
     {
@@ -69,10 +69,12 @@ class Rogue extends RestApiClient
         })->values()->toArray();
 
         $post = $this->asClient()->send('POST', 'v3/posts', ['multipart' => $multipartData]);
+
         if (! $post['data']) {
             throw new Exception(500, 'Unable to create post for user: ' . $data['northstar_id']);
         }
 
+        // @TODO: Return $post['data'] to keep consistent with updatePost.
         return $post;
     }
 
