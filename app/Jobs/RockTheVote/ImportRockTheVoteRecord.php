@@ -6,6 +6,7 @@ use Exception;
 use Chompy\SmsStatus;
 use Chompy\ImportType;
 use Chompy\Services\Rogue;
+use Illuminate\Support\Arr;
 use Illuminate\Bus\Queueable;
 use Chompy\RockTheVoteRecord;
 use Chompy\Models\ImportFile;
@@ -55,13 +56,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
         if (! $user) {
             $user = $this->createUser();
 
-            $this->createPost($user);
+            $post = $this->createPost($user);
 
             RockTheVoteLog::createFromRecord($this->record, $user, $this->importFile);
 
             $this->sendUserPasswordResetIfSubscribed($user);
 
-            return;
+            return $this->formatResponse($user, $post);
         }
 
         if (RockTheVoteLog::getByRecord($this->record, $user)) {
@@ -83,10 +84,29 @@ class ImportRockTheVoteRecord implements ShouldQueue
         if ($post = $this->getPost($user)) {
             $this->updatePostIfChanged($post);
         } else {
-            $this->createPost($user);
+            $post = $this->createPost($user);
         }
 
         RockTheVoteLog::createFromRecord($this->record, $user, $this->importFile);
+    }
+
+    /**
+     * @return array
+     */
+    private function formatResponse($user, $post)
+    {
+        $result = [
+            'user' => [],
+            'post' => Arr::only($post, ['id', 'type', 'action_id', 'status', 'details']),
+        ];
+
+        $userFields = ['id', 'email', 'mobile', 'voter_registration_status', 'sms_status', 'sms_subscription_topics','email_subscription_status', 'email_subscription_topics'];
+
+        foreach ($userFields as $fieldName) {
+            $result['user'][$fieldName] = $user->{$fieldName};
+        }
+
+        return $result;
     }
 
     /**
@@ -205,7 +225,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
 
-        return $post;
+        return $post['data'];
     }
 
     /**

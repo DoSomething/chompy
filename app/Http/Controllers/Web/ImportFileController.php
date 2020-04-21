@@ -147,6 +147,8 @@ class ImportFileController extends Controller
      */
     public function store(Request $request, $importType)
     {
+        $result = [];
+
         if ($importType === ImportType::$rockTheVote) {
             $row = [
                 'Email address' => $request->input('email'),
@@ -176,11 +178,37 @@ class ImportFileController extends Controller
 
             $job = new ImportRockTheVoteRecord($row, $importFile);
 
-            $job->handle();
+            $result = $job->handle();
         }
+
+        $html = 'Created import #'.$importFile->id.'.<ul>';
+
+        if (count($result)) {
+            foreach ($result as $key => $data) {
+                $values = [];
+                $html .= '<li>'.$key.'<ul>';
+                foreach ($data as $fieldName => $value) {
+                    if ($fieldName == 'id') {
+                        $url = $key == 'user' ? config('services.northstar.url').'/users/' : config('services.rogue.url').'/posts/';
+                        $fieldValue = '<a href="'.$url.$value.'">'.$value.'</a>';
+
+                    } else {
+                        $fieldValue = is_array($value) ? json_encode($value) : $value;
+                    }
+                    
+                    $html .= '<li>'.$fieldName.': <strong>'.$fieldValue.'</strong></li>';
+
+                }
+                $html .= '</ul></li>';
+            }
+
+            $html .= '</li>';
+        }
+
+        $html .= '</ul>';
 
         return redirect('import/'.$importType.'?source=test')
             ->withInput(Input::all())
-            ->with('status', 'Import successful.');
+            ->with('status', $html);
     }
 }
