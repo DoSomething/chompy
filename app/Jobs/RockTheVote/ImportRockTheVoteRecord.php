@@ -90,6 +90,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         RockTheVoteLog::createFromRecord($this->record, $user, $this->importFile);
 
         return $this->formatResponse($user, $post);
+
     }
 
     /**
