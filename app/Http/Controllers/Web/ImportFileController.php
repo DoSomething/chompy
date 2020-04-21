@@ -148,6 +148,7 @@ class ImportFileController extends Controller
     public function store(Request $request, $importType)
     {
         $result = [];
+        $html = '';
 
         if ($importType === ImportType::$rockTheVote) {
             $row = [
@@ -176,22 +177,20 @@ class ImportFileController extends Controller
             $importFile->import_type = $importType;
             $importFile->save();
 
+            $html = 'Created <a href="/import-files/'.$importFile->id.'">import #'.$importFile->id.'</a>.<ul>';
             $job = new ImportRockTheVoteRecord($row, $importFile);
-
             $result = $job->handle();
         }
 
-        $html = 'Created <a href="/import-files/'.$importFile->id.'">import #'.$importFile->id.'</a>.<ul>';
-
         if ($result && count($result)) {
-            foreach ($result as $key => $data) {
-                $html .= '<li>'.$key.'<ul>';
+            foreach ($result as $entityName => $entityData) {
+                $html .= '<li>'.$entityName.'<ul>';
 
                 $values = [];
 
-                foreach ($data as $fieldName => $value) {
+                foreach ($entityData as $fieldName => $value) {
                     if ($fieldName == 'id') {
-                        $url = $key == 'user' ? config('services.northstar.url').'/users/' : config('services.rogue.url').'/posts/';
+                        $url = $entityName == 'user' ? config('services.northstar.url').'/users/' : config('services.rogue.url').'/posts/';
                         $fieldValue = '<a href="'.$url.$value.'">'.$value.'</a>';
                     } else {
                         $fieldValue = is_array($value) ? json_encode($value) : $value;
