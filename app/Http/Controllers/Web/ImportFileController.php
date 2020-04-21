@@ -185,20 +185,21 @@ class ImportFileController extends Controller
 
         if (count($result)) {
             foreach ($result as $key => $data) {
-                $values = [];
                 $html .= '<li>'.$key.'<ul>';
+
+                $values = [];
+
                 foreach ($data as $fieldName => $value) {
                     if ($fieldName == 'id') {
                         $url = $key == 'user' ? config('services.northstar.url').'/users/' : config('services.rogue.url').'/posts/';
                         $fieldValue = '<a href="'.$url.$value.'">'.$value.'</a>';
-
                     } else {
                         $fieldValue = is_array($value) ? json_encode($value) : $value;
                     }
-                    
-                    $html .= '<li>'.$fieldName.': <strong>'.$fieldValue.'</strong></li>';
 
+                    $html .= '<li>'.$fieldName.': <strong>'.$fieldValue.'</strong></li>';
                 }
+
                 $html .= '</ul></li>';
             }
 
