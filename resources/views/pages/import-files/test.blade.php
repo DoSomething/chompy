@@ -9,6 +9,7 @@
     <p>
         Use this form to test importing a <code>{{$importType}}</code> record.
     <p>
+    @if (config('import.import_test_form_enabled') == 'true')
     <div>
         <form action={{ route('import.store', ['importType' => $importType]) }} method="post" enctype="multipart/form-data">
             {{ csrf_field() }}
@@ -21,6 +22,9 @@
             @endif
         </form>
     </div>
+    @else
+    <p>This feature is currently disabled.</p>
+    @endif
 
 </div>
 
