@@ -15,7 +15,7 @@
     <body>
         @if (Session::has('status'))
             <div class="alert alert-success" role="alert">
-                {!! Session::get('status') !!}
+                @include('components.alert-success', ['data' => Session::get('status')])
             </div>
         @endif
 
