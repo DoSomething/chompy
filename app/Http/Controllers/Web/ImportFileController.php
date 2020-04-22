@@ -178,8 +178,7 @@ class ImportFileController extends Controller
             $importFile->save();
 
             $html = 'Created <a href="/import-files/'.$importFile->id.'">import #'.$importFile->id.'</a>.<ul>';
-            $job = new ImportRockTheVoteRecord($row, $importFile);
-            $result = $job->handle();
+            $result = ImportRockTheVoteRecord::dispatchNow($row, $importFile);
         }
 
         if ($result && count($result)) {
