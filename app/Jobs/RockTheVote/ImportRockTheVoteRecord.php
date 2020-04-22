@@ -398,7 +398,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         if (! self::shouldUpdateStatus($post['status'], $this->postData['status'])) {
             info('No changes to update for post', ['post' => $post['id']]);
 
-            return;
+            return $post;
         }
 
         $post = app(Rogue::class)->updatePost($post['id'], ['status' => $this->postData['status']]);
