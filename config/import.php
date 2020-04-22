@@ -1,6 +1,9 @@
 <?php
 
 return [
+    // Whether to display the Test Import form within the Chompy UI.
+    'import_test_form_enabled' => env('IMPORT_TEST_FORM_ENABLED', 'false'),
+    // Configuration for an email subscription import.
     'email_subscription' => [
         'topics' => [
             'community' => [
@@ -29,6 +32,7 @@ return [
             ],
         ],
     ],
+    // Configuration for a Rock The Vote voter registration import.
     'rock_the_vote' => [
         // Constants to use when creating a post.
         'post' => [
