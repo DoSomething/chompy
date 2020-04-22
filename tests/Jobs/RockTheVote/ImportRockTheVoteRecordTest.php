@@ -13,6 +13,14 @@ use DoSomething\Gateway\Resources\NorthstarUser;
 class ImportRockTheVoteRecordTest extends TestCase
 {
     /**
+     * Set or unset the Update User SMS Subscription feature flag.
+     */
+    private function enableUpdateUserSmsFeature(bool $shouldUpdate)
+    {
+        \Config::set('import.rock_the_vote.update_user_sms_enabled', $shouldUpdate ? 'true' : 'false');
+    }
+
+    /**
      * Test that user and post are created if user not found.
      *
      * @return void
@@ -126,6 +134,8 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testUpdatesUserIfShouldChangeStatus()
     {
+        $this->enableUpdateUserSmsFeature(false);
+
         $userId = $this->faker->northstar_id;
         $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
         $postId = $this->faker->randomDigitNotNull;
@@ -186,6 +196,8 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testUserUpdatePayloadDoesNotContainMobileIfUpdateUserSmsConfigIsDisabled()
     {
+        $this->enableUpdateUserSmsFeature(false);
+
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
             'voter_registration_status' => 'step-1',
@@ -216,7 +228,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testUserUpdatePayloadContainsMobileIfUpdateUserSmsConfigIsEnabled()
     {
-        \Config::set('import.rock_the_vote.update_user_sms_enabled', 'true');
+        $this->enableUpdateUserSmsFeature(true);
 
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -245,7 +257,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job->updateUserIfChanged($user);
 
-        \Config::set('import.rock_the_vote.update_user_sms_enabled', 'false');
+        $this->enableUpdateUserSmsFeature(false);
     }
 
     /**
