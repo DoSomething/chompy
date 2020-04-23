@@ -67,6 +67,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             'voter_registration_status' => 'step-1',
         ]);
         $this->northstarMock->shouldNotReceive('createUser');
+        // No changes to make to the user's voter registration status or SMS subscriptions.
         $this->northstarMock->shouldNotReceive('updateUser');
         $this->northstarMock->shouldNotReceive('sendPasswordReset');
         $this->rogueMock->shouldReceive('getPosts')->andReturn(null);
@@ -194,13 +195,14 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testUserUpdatePayloadDoesNotContainMobileIfUpdateUserSmsConfigIsDisabled()
+    public function testSmsSubscriptionIsNotUpdatedIfUpdateUserSmsFeatureDisabled()
     {
         $this->enableUpdateUserSmsFeature(false);
 
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
             'voter_registration_status' => 'step-1',
+            'sms_status' => null,
         ]);
         $phoneNumber = $this->faker->phoneNumber;
         $row = $this->faker->rockTheVoteReportRow([
@@ -210,6 +212,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
+        // If our feature flag was enabled, we'd additionally update mobile, sms status & topics.
         $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
             'voter_registration_status' => 'step-2',
         ])->andReturn(new NorthstarUser([
@@ -226,7 +229,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testUserUpdatePayloadContainsMobileIfUpdateUserSmsConfigIsEnabled()
+    public function testUserUpdatePayloadContainsMobileIfProvided()
     {
         $this->enableUpdateUserSmsFeature(true);
 
@@ -242,26 +245,27 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
-            'mobile' => $phoneNumber,
-            'sms_status' => SmsStatus::$active,
-            'sms_subscription_topics' => ['voting'],
-            'voter_registration_status' => 'step-2',
-        ])->andReturn(new NorthstarUser([
-            'id' => $user->id,
-            'mobile' => $phoneNumber,
-            'sms_status' => SmsStatus::$active,
-            'sms_subscription_topics' => ['voting'],
-            'voter_registration_status' => 'step-2',
-        ]));
+        $this->northstarMock
+            ->shouldReceive('updateUser')
+            ->with($user->id, [
+                'mobile' => $phoneNumber,
+                'sms_status' => SmsStatus::$active,
+                'sms_subscription_topics' => ['voting'],
+                'voter_registration_status' => 'step-2',
+            ])->andReturn(new NorthstarUser([
+                'id' => $user->id,
+                'mobile' => $phoneNumber,
+                'sms_status' => SmsStatus::$active,
+                'sms_subscription_topics' => ['voting'],
+                'voter_registration_status' => 'step-2',
+            ]));
 
         $job->updateUserIfChanged($user);
-
-        $this->enableUpdateUserSmsFeature(false);
     }
 
     /**
-     * Test that user is not updated if their voter registration status should not change.
+     * Test that user is not updated if their voter registration status or SMS subscription
+     * should not change.
      *
      * @return void
      */
