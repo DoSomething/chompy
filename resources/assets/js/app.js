@@ -1,3 +1,5 @@
+require('environment-badge')();
+
 // Set up JS
 import './bootstrap';
 
@@ -6,4 +8,3 @@ import './uploadForm';
 
 // Handles updating the progress bar
 import './progress';
-
