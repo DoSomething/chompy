@@ -245,20 +245,18 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $this->northstarMock
-            ->shouldReceive('updateUser')
-            ->with($user->id, [
-                'mobile' => $phoneNumber,
-                'sms_status' => SmsStatus::$active,
-                'sms_subscription_topics' => ['voting'],
-                'voter_registration_status' => 'step-2',
-            ])->andReturn(new NorthstarUser([
-                'id' => $user->id,
-                'mobile' => $phoneNumber,
-                'sms_status' => SmsStatus::$active,
-                'sms_subscription_topics' => ['voting'],
-                'voter_registration_status' => 'step-2',
-            ]));
+        $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
+            'mobile' => $phoneNumber,
+            'sms_status' => SmsStatus::$active,
+            'sms_subscription_topics' => ['voting'],
+            'voter_registration_status' => 'step-2',
+        ])->andReturn(new NorthstarUser([
+            'id' => $user->id,
+            'mobile' => $phoneNumber,
+            'sms_status' => SmsStatus::$active,
+            'sms_subscription_topics' => ['voting'],
+            'voter_registration_status' => 'step-2',
+        ]));
 
         $job->updateUserIfChanged($user);
     }
