@@ -157,8 +157,14 @@ class ImportRockTheVoteRecordTest extends TestCase
              * additionally update the user mobile field here too.
              */
             'voter_registration_status' => 'registration_complete',
-        ]);
+        ])->andReturn(new NorthstarUser([
+            'id' => $userId,
+            'voter_registration_status' => 'registration_complete',
+        ]));
         $this->rogueMock->shouldReceive('updatePost')->with($postId, [
+            'status' => 'register-OVR',
+        ])->andReturn([
+            'id' => $postId,
             'status' => 'register-OVR',
         ]);
 
@@ -194,7 +200,10 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
             'voter_registration_status' => 'step-2',
-        ]);
+        ])->andReturn(new NorthstarUser([
+            'id' => $user->id,
+            'voter_registration_status' => 'step-2',
+        ]));
 
         $job->updateUserIfChanged($user);
     }
@@ -226,7 +235,13 @@ class ImportRockTheVoteRecordTest extends TestCase
             'sms_status' => SmsStatus::$active,
             'sms_subscription_topics' => ['voting'],
             'voter_registration_status' => 'step-2',
-        ]);
+        ])->andReturn(new NorthstarUser([
+            'id' => $user->id,
+            'mobile' => $phoneNumber,
+            'sms_status' => SmsStatus::$active,
+            'sms_subscription_topics' => ['voting'],
+            'voter_registration_status' => 'step-2',
+        ]));
 
         $job->updateUserIfChanged($user);
 
@@ -264,7 +279,12 @@ class ImportRockTheVoteRecordTest extends TestCase
             'data' => [0 => $olderExistingCompletedPost],
         ]);
         // But we do create a new post, since we don't have one for this row's Started registration.
-        $this->rogueMock->shouldReceive('createPost');
+        $this->rogueMock->shouldReceive('createPost')->andReturn([
+            'data' => $this->faker->rogueVoterRegPost([
+                'northstar_id' => $userId,
+                'status' => 'step-1',
+            ]),
+        ]);
         $this->rogueMock->shouldNotReceive('updatePost');
 
         ImportRockTheVoteRecord::dispatch($row, $importFile);

@@ -147,6 +147,8 @@ class ImportFileController extends Controller
      */
     public function store(Request $request, $importType)
     {
+        $result = [];
+
         if ($importType === ImportType::$rockTheVote) {
             $row = [
                 'Email address' => $request->input('email'),
@@ -174,13 +176,13 @@ class ImportFileController extends Controller
             $importFile->import_type = $importType;
             $importFile->save();
 
-            $job = new ImportRockTheVoteRecord($row, $importFile);
-
-            $job->handle();
+            $result = array_merge([
+                'import' => ['id' => $importFile->id],
+            ], ImportRockTheVoteRecord::dispatchNow($row, $importFile));
         }
 
         return redirect('import/'.$importType.'?source=test')
             ->withInput(Input::all())
-            ->with('status', 'Import successful.');
+            ->with('status', $result);
     }
 }

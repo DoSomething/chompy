@@ -6,6 +6,7 @@ use Exception;
 use Chompy\SmsStatus;
 use Chompy\ImportType;
 use Chompy\Services\Rogue;
+use Illuminate\Support\Arr;
 use Illuminate\Bus\Queueable;
 use Chompy\RockTheVoteRecord;
 use Chompy\Models\ImportFile;
@@ -55,13 +56,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
         if (! $user) {
             $user = $this->createUser();
 
-            $this->createPost($user);
+            $post = $this->createPost($user);
 
             RockTheVoteLog::createFromRecord($this->record, $user, $this->importFile);
 
             $this->sendUserPasswordResetIfSubscribed($user);
 
-            return;
+            return $this->formatResponse($user, $post);
         }
 
         if (RockTheVoteLog::getByRecord($this->record, $user)) {
@@ -78,15 +79,38 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return;
         }
 
-        $this->updateUserIfChanged($user);
+        $user = $this->updateUserIfChanged($user);
 
         if ($post = $this->getPost($user)) {
-            $this->updatePostIfChanged($post);
+            $post = $this->updatePostIfChanged($post);
         } else {
-            $this->createPost($user);
+            $post = $this->createPost($user);
         }
 
         RockTheVoteLog::createFromRecord($this->record, $user, $this->importFile);
+
+        return $this->formatResponse($user, $post);
+    }
+
+    /**
+     * Returns given user and post with relevant fields per imported record.
+     *
+     * @return array
+     */
+    private function formatResponse(NorthstarUser $user, array $post)
+    {
+        $result = [
+            'user' => [],
+            'post' => Arr::only($post, ['id', 'type', 'action_id', 'status', 'details']),
+        ];
+
+        $userFields = ['id', 'email', 'mobile', 'voter_registration_status', 'sms_status', 'sms_subscription_topics', 'email_subscription_status', 'email_subscription_topics'];
+
+        foreach ($userFields as $fieldName) {
+            $result['user'][$fieldName] = $user->{$fieldName};
+        }
+
+        return $result;
     }
 
     /**
@@ -205,7 +229,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
 
-        return $post;
+        return $post['data'];
     }
 
     /**
@@ -226,9 +250,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Update Northstar user with record data.
+     * Updates user's profile with imported data, if updated.
      *
-     * @return void
+     * @return NorthstarUser
      */
     public function updateUserIfChanged(NorthstarUser $user)
     {
@@ -247,12 +271,14 @@ class ImportRockTheVoteRecord implements ShouldQueue
         if (! count($payload)) {
             info('No changes to update for user', ['user' => $user->id]);
 
-            return;
+            return $user;
         }
 
-        gateway('northstar')->asClient()->updateUser($user->id, $payload);
+        $user = gateway('northstar')->asClient()->updateUser($user->id, $payload);
 
         info('Updated user', ['user' => $user->id, 'changed' => array_keys($payload)]);
+
+        return $user;
     }
 
     /**
@@ -365,19 +391,21 @@ class ImportRockTheVoteRecord implements ShouldQueue
      * Updates Rogue post with record data if it should be updated.
      *
      * @param array $post
-     * @return void
+     * @return array
      */
     private function updatePostIfChanged($post)
     {
         if (! self::shouldUpdateStatus($post['status'], $this->postData['status'])) {
             info('No changes to update for post', ['post' => $post['id']]);
 
-            return;
+            return $post;
         }
 
-        app(Rogue::class)->updatePost($post['id'], ['status' => $this->postData['status']]);
+        $post = app(Rogue::class)->updatePost($post['id'], ['status' => $this->postData['status']]);
 
-        info('Updated post', ['post' => $post['id'], 'status' => $this->postData['status']]);
+        info('Updated post', ['post' => $post['id'], 'status' => $post['status']]);
+
+        return $post;
     }
 
     /**
