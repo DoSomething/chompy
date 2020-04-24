@@ -695,29 +695,45 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testUserSmsSubscriptionUpdateIfUserHasPendingSmsStatusAndOptsIn()
+    public function testEnabledUpdateUserSmsWhenUserHasPendingSmsStatusAndOptsIn()
     {
+        $this->enableUpdateUserSmsFeature(true);
+
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$pending, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
+        $this->northstarMock->shouldReceive('updateUser')
+          ->with($mocks->user->id, [
+              // Status should change, don't update topics because user already has 'voting' topic.
+              'sms_status' => SmsStatus::$active,
+          ])
+          ->andReturn($mocks->user);
 
-        // Status should change, don't update topics because user already has 'voting' topic.
-        $this->assertEquals(['sms_status' => SmsStatus::$active], $result);
+        $job->updateUserIfChanged($mocks->user);
+
+        $this->enableUpdateUserSmsFeature(false);
     }
 
     /**
      * @return void
      */
-    public function testUserSmsSubscriptionUpdateIfUserHasPendingSmsStatusAndOptsOut()
+    public function testEnabledUpdateUserSmsWhenUserHasPendingSmsStatusAndOptsOut()
     {
+        $this->enableUpdateUserSmsFeature(true);
+
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$pending, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
+        $this->northstarMock->shouldReceive('updateUser')
+          ->with($mocks->user->id, [
+              // Status should not change, but 'voting' topic should be removed.
+              'sms_subscription_topics' => ['general'],
+          ])
+          ->andReturn($mocks->user);
 
-        // Status should not change, but 'voting' topic should be removed.
-        $this->assertEquals(['sms_subscription_topics' => ['general']], $result);
+        $job->updateUserIfChanged($mocks->user);
+
+        $this->enableUpdateUserSmsFeature(false);
     }
 
     /**

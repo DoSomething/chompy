@@ -266,7 +266,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
             info('Checking for SMS subscription updates', ['user' => $user->id]);
 
             $payload = array_merge($payload, $this->getUserSmsSubscriptionUpdatePayload($user));
-            info('Test payload', $payload);
         }
 
         if (! count($payload)) {
