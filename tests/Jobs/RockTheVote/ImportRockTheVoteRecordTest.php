@@ -731,7 +731,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
- 
+
         $this->assertEquals(['sms_status' => SmsStatus::$stop], $result);
     }
 
