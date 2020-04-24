@@ -606,51 +606,50 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Tests that update is empty if user with active value opts-out.
-     *
      * @return void
      */
-    public function testParseSmsStatusChangeIfUserHasActiveSmsStatusAndOptsOut()
+    public function testUserSmsSubscriptionUpdateIfUserHasActiveSmsStatusAndOptsOut()
     {
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$active, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->parseSmsStatusChangeForUser($mocks->user);
+        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
 
-        $this->assertEquals([], $result);
+        $this->assertEquals([
+            // The 'voting' topic should be removed.
+            'sms_subscription_topics' => ['general'],
+        ], $result);
     }
 
     /**
-     * Test that SMS status is updated to active if user with less value opts-in
-     *
      * @return void
      */
-    public function testParseSmsStatusChangeIfUserHasLessSmsStatusAndOptsIn()
+    public function testUserSmsSubscriptionUpdateIfUserHasLessSmsStatusAndOptsIn()
     {
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$less, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->parseSmsStatusChangeForUser($mocks->user);
+        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
 
+        // Topics not changed, since user already had 'voting' topic set.
         $this->assertEquals(['sms_status' => SmsStatus::$active], $result);
     }
 
     /**
-     * Test that update is empty if user with less value opts-out.
-     *
      * @return void
      */
-    public function testParseSmsStatusChangeIfUserHasLessSmsStatusAndOptsOut()
+    public function testUserSmsSubscriptionUpdateIfUserHasLessSmsStatusAndOptsOut()
     {
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$less, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->parseSmsStatusChangeForUser($mocks->user);
+        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
 
-        $this->assertEquals([], $result);
+        // Status should not change, but 'voting' topic should be removed.
+        $this->assertEquals(['sms_subscription_topics' => ['general']], $result);
     }
 
-    /**
+    /**`
      * Test that SMS status is updated to active if user with pending value opts-in.
      *
      * @return void
