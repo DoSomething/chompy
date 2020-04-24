@@ -539,7 +539,8 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
 
     /**
-     * Return mock user and row for a parseSmsStatusChange test.
+     * Return mock user and row that do not have voter registration changes for a
+     * SmsSubscriptionUpdate test.
      *
      * @param string $currentSmsStatus
      * @param bool @rtvSmsOptIn
@@ -552,10 +553,14 @@ class ImportRockTheVoteRecordTest extends TestCase
             'mobile' => $this->faker->phoneNumber,
             'sms_status' => $currentSmsStatus,
             'sms_subscription_topics' => in_array($currentSmsStatus, [SmsStatus::$active, SmsStatus::$less, SmsStatus::$pending]) ? ['general', 'voting'] : [],
+            'voter_registration_status' => 'registration_complete',
         ]);
+
         $row = $this->faker->rockTheVoteReportRow([
             RockTheVoteRecord::$mobileFieldName => $this->faker->phoneNumber,
             RockTheVoteRecord::$smsOptInFieldName => $rtvSmsOptIn ? 'Yes' : 'No',
+            'Status' => 'Complete',
+            'Finish with State' => 'Yes',
         ]);
 
         return (object) ['user' => $user, 'row' => $row];
@@ -564,17 +569,23 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testUserSmsSubscriptionUpdateIfUserHasNullSmsStatusAndOptsIn()
+    public function testUpdateUserIfUserHasNullSmsStatusAndOptsIn()
     {
         $mocks = $this->getMocksForParseSmsStatusChangeTest(null, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
+        $this->enableUpdateUserSmsFeature(true);
 
-        $this->assertEquals([
+        $this->northstarMock->shouldReceive('updateUser')
+          ->with($mocks->user->id, [
             'sms_status' => SmsStatus::$active,
             'sms_subscription_topics' => ['voting'],
-        ], $result);
+          ])
+          ->andReturn($mocks->user);
+
+        $job->updateUserIfChanged($mocks->user);
+
+        $this->enableUpdateUserSmsFeature(false);
     }
 
     /**
