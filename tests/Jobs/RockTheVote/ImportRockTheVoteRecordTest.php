@@ -814,6 +814,26 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
+     * @return void
+     */
+    public function testDisabledUpdateUserSmsWhenUserHasUndeliverableSmsStatusAndOptsIn()
+    {
+        /**
+         * The UpdateUserSms feature is currently disabled on production, but for local development
+         * we turn it on, in order to test the import.
+         */
+        $this->enableUpdateUserSmsFeature(false);
+
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$undeliverable, true);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
+
+        // When UpdateUserSms is disabled, existing users can't resubscribe via import.
+        $this->northstarMock->shouldNotReceive('updateUser');
+
+        $job->updateUserIfChanged($mocks->user);
+    }
+
+    /**
      * ---------------------------------------
      * parseSmsSubscriptionTopicsChangeForUser
      * ---------------------------------------
