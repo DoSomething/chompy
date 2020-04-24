@@ -533,9 +533,9 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * ---------------------------
-     * parseSmsStatusChangeForUser
-     * ---------------------------
+     * -----------------------------------
+     * getUserSmsSubscriptionUpdatePayload
+     * -----------------------------------
      */
 
     /**
@@ -551,6 +551,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             'id' => $this->faker->northstar_id,
             'mobile' => $this->faker->phoneNumber,
             'sms_status' => $currentSmsStatus,
+            'sms_subscription_topics' => in_array($currentSmsStatus, [SmsStatus::$active, SmsStatus::$less, SmsStatus::$pending]) ? ['general', 'voting'] : [],
         ]);
         $row = $this->faker->rockTheVoteReportRow([
             RockTheVoteRecord::$mobileFieldName => $this->faker->phoneNumber,
@@ -561,46 +562,45 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Tests SMS status is updated to active if user with null value opts-in.
-     *
      * @return void
      */
-    public function testParseSmsStatusChangeIfUserHasNullSmsStatusAndOptsIn()
+    public function testUserSmsSubscriptionUpdateIfUserHasNullSmsStatusAndOptsIn()
     {
         $mocks = $this->getMocksForParseSmsStatusChangeTest(null, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->parseSmsStatusChangeForUser($mocks->user);
+        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
 
-        $this->assertEquals(['sms_status' => SmsStatus::$active], $result);
+        $this->assertEquals([
+            'sms_status' => SmsStatus::$active,
+            'sms_subscription_topics' => ['voting'],
+        ], $result);
     }
 
     /**
-     * Tests SMS status is updated to stop if user with null value opts-out.
-     *
      * @return void
      */
-    public function testParseSmsStatusChangeIfUserHasNullSmsStatusAndOptsOut()
+    public function testUserSmsSubscriptionUpdateIfUserHasNullSmsStatusAndOptsOut()
     {
         $mocks = $this->getMocksForParseSmsStatusChangeTest(null, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->parseSmsStatusChangeForUser($mocks->user);
+        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
 
-        $this->assertEquals(['sms_status' => SmsStatus::$stop], $result);
+        $this->assertEquals([
+            'sms_status' => SmsStatus::$stop,
+        ], $result);
     }
 
     /**
-     * Tests that update is empty if user with active value opts-in.
-     *
      * @return void
      */
-    public function testParseSmsStatusChangeIfUserHasActiveSmsStatusAndOptsIn()
+    public function testUserSmsSubscriptionUpdateIfUserHasActiveSmsStatusAndOptsIn()
     {
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$active, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->parseSmsStatusChangeForUser($mocks->user);
+        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
 
         $this->assertEquals([], $result);
     }

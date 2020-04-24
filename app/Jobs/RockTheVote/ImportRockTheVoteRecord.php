@@ -332,10 +332,18 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         $fieldName = 'sms_subscription_topics';
         $currentSmsTopics = ! empty($user->{$fieldName}) ? $user->{$fieldName} : [];
+        $updatedSmsTopics = [];
 
         // If user opted in to SMS, add the import topics to current topics.
         if ($this->smsOptIn) {
-            return [$fieldName => array_unique(array_merge($currentSmsTopics, $this->userData[$fieldName]))];
+            $updatedSmsTopics =  array_unique(array_merge($currentSmsTopics, $this->userData[$fieldName]));
+
+            // If we didn't add any new topics, nothing to update.
+            if (count($updatedSmsTopics) === count($currentSmsTopics)) {
+                return [];
+            }
+
+            return [$fieldName => $updatedSmsTopics];
         }
 
         // Nothing to remove if current topics in empty.
@@ -344,8 +352,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
         }
 
         // If user hasn't opted-in and has current topics, remove all import topics from current.
-        $updatedSmsTopics = [];
-
         foreach ($currentSmsTopics as $topic) {
             if (! in_array($topic, explode(',', config('import.rock_the_vote.user.sms_subscription_topics')))) {
                 array_push($updatedSmsTopics, $topic);
