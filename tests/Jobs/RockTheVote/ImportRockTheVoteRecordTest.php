@@ -533,12 +533,6 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * -----------------------------------
-     * getUserSmsSubscriptionUpdatePayload
-     * -----------------------------------
-     */
-
-    /**
      * Return mock user and row that do not have voter registration changes for a
      * SmsSubscriptionUpdate test.
      *
@@ -546,7 +540,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      * @param bool @rtvSmsOptIn
      * @return obj
      */
-    public function getMocksForParseSmsStatusChangeTest($currentSmsStatus, bool $rtvSmsOptIn)
+    public function getMocksForUpdateUserSmsTest($currentSmsStatus, bool $rtvSmsOptIn)
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -573,7 +567,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(null, true);
+        $mocks = $this->getMocksForUpdateUserSmsTest(null, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -595,7 +589,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(null, false);
+        $mocks = $this->getMocksForUpdateUserSmsTest(null, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -616,7 +610,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$active, true);
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$active, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         // Nothing to update, user already has 'voting' topic.
@@ -634,7 +628,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$active, false);
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$active, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -656,7 +650,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$less, true);
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$less, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -678,7 +672,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$less, false);
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$less, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -700,7 +694,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$pending, true);
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$pending, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -722,7 +716,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$pending, false);
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$pending, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -744,7 +738,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$stop, true);
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$stop, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -766,7 +760,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$stop, false);
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$stop, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldNotReceive('updateUser');
@@ -783,7 +777,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$undeliverable, true);
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$undeliverable, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -805,7 +799,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     {
         $this->enableUpdateUserSmsFeature(true);
 
-        $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$undeliverable, false);
+        $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$undeliverable, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
