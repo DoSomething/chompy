@@ -749,8 +749,8 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
-            'sms_status' => SmsStatus::$active,
-            'sms_subscription_topics' => ['voting'],
+              'sms_status' => SmsStatus::$active,
+              'sms_subscription_topics' => ['voting'],
           ])
           ->andReturn($mocks->user);
 
@@ -779,30 +779,44 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testUserSmsSubscriptionUpdateIfUserHasUndeliverableSmsStatusAndOptsIn()
+    public function testEnabledUpdateUserSmsWhenUserHasUndeliverableSmsStatusAndOptsIn()
     {
+        $this->enableUpdateUserSmsFeature(true);
+
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$undeliverable, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
+        $this->northstarMock->shouldReceive('updateUser')
+          ->with($mocks->user->id, [
+              'sms_status' => SmsStatus::$active,
+              'sms_subscription_topics' => ['voting'],
+          ])
+          ->andReturn($mocks->user);
 
-        $this->assertEquals([
-            'sms_status' => SmsStatus::$active,
-            'sms_subscription_topics' => ['voting'],
-        ], $result);
+        $job->updateUserIfChanged($mocks->user);
+
+        $this->enableUpdateUserSmsFeature(false);
     }
 
     /**
      * @return void
      */
-    public function testUserSmsSubscriptionUpdateIfUserHasUndeliverableSmsStatusAndOptsOut()
+    public function testEnabledUpdateUserSmsWhenUserHasUndeliverableSmsStatusAndOptsOut()
     {
+        $this->enableUpdateUserSmsFeature(true);
+
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$undeliverable, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
+        $this->northstarMock->shouldReceive('updateUser')
+          ->with($mocks->user->id, [
+              'sms_status' => SmsStatus::$stop,
+          ])
+          ->andReturn($mocks->user);
 
-        $this->assertEquals(['sms_status' => SmsStatus::$stop], $result);
+        $job->updateUserIfChanged($mocks->user);
+
+        $this->enableUpdateUserSmsFeature(false);
     }
 
     /**
