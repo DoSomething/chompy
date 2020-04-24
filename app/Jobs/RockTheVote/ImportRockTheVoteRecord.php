@@ -314,7 +314,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function parseMobileChangeForUser(NorthstarUser $user)
     {
-        info('parseMobileChangeForUser');
         $fieldName = 'mobile';
 
         if ($user->{$fieldName}) {
@@ -331,10 +330,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function parseSmsSubscriptionTopicsChangeForUser(NorthstarUser $user)
     {
-        info('parseSmsSubscriptionTopicsChangeForUser');
         $fieldName = 'sms_subscription_topics';
         $currentSmsTopics = ! empty($user->{$fieldName}) ? $user->{$fieldName} : [];
-        info('test', $currentSmsTopics ? $currentSmsTopics : ['null']);
         $updatedSmsTopics = [];
 
         // If user opted in to SMS, add the import topics to current topics.
