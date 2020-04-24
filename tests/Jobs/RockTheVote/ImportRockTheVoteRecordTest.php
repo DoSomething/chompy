@@ -619,6 +619,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$active, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
+        // Nothing to update, user already has 'voting' topic.
         $this->northstarMock->shouldNotReceive('updateUser');
 
         $job->updateUserIfChanged($mocks->user);
@@ -638,7 +639,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
-              // The 'voting' topic should be removed.
+              // Status not changed, but 'voting' topic should be removed.
               'sms_subscription_topics' => ['general'],
           ])
           ->andReturn($mocks->user);
@@ -682,7 +683,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
-              // Status should not change, but 'voting' topic should be removed.
+              // Status not changed, but 'voting' topic should be removed.
               'sms_subscription_topics' => ['general'],
           ])
           ->andReturn($mocks->user);
@@ -726,7 +727,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
-              // Status should not change, but 'voting' topic should be removed.
+              // Status not changed, but 'voting' topic should be removed.
               'sms_subscription_topics' => ['general'],
           ])
           ->andReturn($mocks->user);
@@ -739,30 +740,40 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testUserSmsSubscriptionUpdateIfUserHasStopSmsStatusAndOptsIn()
+    public function testEnabledUpdateUserSmsWhenUserHasStopSmsStatusAndOptsIn()
     {
+        $this->enableUpdateUserSmsFeature(true);
+
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$stop, true);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
-
-        $this->assertEquals([
+        $this->northstarMock->shouldReceive('updateUser')
+          ->with($mocks->user->id, [
             'sms_status' => SmsStatus::$active,
             'sms_subscription_topics' => ['voting'],
-        ], $result);
+          ])
+          ->andReturn($mocks->user);
+
+        $job->updateUserIfChanged($mocks->user);
+
+        $this->enableUpdateUserSmsFeature(false);
     }
 
     /**
      * @return void
      */
-    public function testUserSmsSubscriptionUpdateIfUserHasStopSmsStatusAndOptsOut()
+    public function testEnabledUpdateUserSmsWhenUserHasStopSmsStatusAndOptsOut()
     {
+        $this->enableUpdateUserSmsFeature(true);
+
         $mocks = $this->getMocksForParseSmsStatusChangeTest(SmsStatus::$stop, false);
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($mocks->user);
+        $this->northstarMock->shouldNotReceive('updateUser');
 
-        $this->assertEquals([], $result);
+        $job->updateUserIfChanged($mocks->user);
+
+        $this->enableUpdateUserSmsFeature(false);
     }
 
     /**
