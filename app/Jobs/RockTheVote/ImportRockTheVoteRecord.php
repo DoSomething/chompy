@@ -76,7 +76,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
             $this->importFile->incrementSkipCount();
 
-            return;
+            return [];
         }
 
         $user = $this->updateUserIfChanged($user);
