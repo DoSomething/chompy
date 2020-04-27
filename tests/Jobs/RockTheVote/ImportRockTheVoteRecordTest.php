@@ -609,7 +609,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$active, true);
- 
+
         // Nothing to update, user already has 'voting' topic.
         $this->northstarMock->shouldNotReceive('updateUser');
 
@@ -710,7 +710,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$pending, false);
- 
+
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
               // Status not changed, but 'voting' topic should be removed.
@@ -718,9 +718,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-       $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-       $job->updateUserIfChanged($mocks->user);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
