@@ -568,7 +568,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(null, true);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
@@ -577,9 +576,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -590,7 +589,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(null, false);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
@@ -598,9 +596,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -611,14 +609,13 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$active, true);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
-
+ 
         // Nothing to update, user already has 'voting' topic.
         $this->northstarMock->shouldNotReceive('updateUser');
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -629,7 +626,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$active, false);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
@@ -638,9 +634,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -651,7 +647,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$less, true);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
@@ -660,9 +655,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -673,7 +668,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$less, false);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
@@ -682,9 +676,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -695,7 +689,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$pending, true);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
@@ -704,9 +697,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -717,8 +710,7 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$pending, false);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
-
+ 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
               // Status not changed, but 'voting' topic should be removed.
@@ -726,9 +718,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-        $job->updateUserIfChanged($mocks->user);
+       $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+       $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -739,7 +731,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$stop, true);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
@@ -748,9 +739,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -761,13 +752,12 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$stop, false);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldNotReceive('updateUser');
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -778,7 +768,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$undeliverable, true);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
@@ -787,9 +776,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
@@ -800,7 +789,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->enableUpdateUserSmsFeature(true);
 
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$undeliverable, false);
-        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
         $this->northstarMock->shouldReceive('updateUser')
           ->with($mocks->user->id, [
@@ -808,9 +796,9 @@ class ImportRockTheVoteRecordTest extends TestCase
           ])
           ->andReturn($mocks->user);
 
-        $job->updateUserIfChanged($mocks->user);
+        $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $this->enableUpdateUserSmsFeature(false);
+        $job->updateUserIfChanged($mocks->user);
     }
 
     /**
