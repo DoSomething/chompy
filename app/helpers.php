@@ -49,5 +49,16 @@ function is_anonymous_mobile($mobile)
  */
 function is_valid_mobile($mobile)
 {
-    return $mobile != '000-000-0000';
+    // This phone number has been passed before and fails Northstar validation.
+    if ($mobile == '000-000-0000') {
+        return false;
+    }
+
+    /**
+     * Remove spaces and dashes and make sure there are at least 10 digits, e.g. "787 249 13" has
+     * been passed and fails Northstar validation.
+     */
+    $mobile = preg_replace("/[\s-]+/", '', $mobile);
+
+    return strlen($mobile) > 9;
 }
