@@ -159,3 +159,7 @@ If the referral column has `referral=true` in it, then proceed with the logic wi
 - In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a `voter-reg` post.
 - If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants:
   See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
+
+# Email Subscriptions
+
+Admins can upload CSV's of Instapage leads to subscribe users to email newsletters. The import will create or update an existing user via the Northstar API.

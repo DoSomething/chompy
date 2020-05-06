@@ -10,9 +10,9 @@ Third-parties with authorized access can post data to the Chompy API. See [API d
 
 Chompy supports imports of two types of CSV:
 
-* Rock The Vote voter registrations
+- [Rock The Vote voter registrations](<(https://github.com/DoSomething/chompy/tree/master/docs/imports.md#rock-the-vote).>)
 
-* Email subscriptions to newsletters
+- Email subscriptions to newsletters
 
 Staff members may login to Chompy with their Northstar credentials, and select a CSV to import. The uploaded file is stored on S3, and then a [queue job](https://laravel.com/docs/5.6/queues) is pushed onto a Redis queue to import records from the CSV as users and/or activity.
 
