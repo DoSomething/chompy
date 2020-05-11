@@ -17,11 +17,9 @@
       <div class="col-sm-9">
         <strong>{{$data->commandName}}</strong>
         @isset($data->parameters)
-          <ul>
-            @foreach ($data->parameters as $key => $value)
-              <li><code>{{$key}}</code> {{$value}}</li>
-            @endforeach
-          </ul>
+          <code>
+            {{json_encode($data->parameters, TRUE)}}
+          </code>
         @endif
       </div>
     </div>
