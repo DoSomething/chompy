@@ -49,11 +49,13 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function handle()
     {
-        info('Processing Rock The Vote record', ['stared_registration' => $this->record->startedRegistration]);
+        info('Processing Rock The Vote record', ['started_registration' => $this->record->startedRegistration]);
 
         $user = $this->getUser($this->userData['id'], $this->userData['email'], $this->userData['mobile']);
 
         if (! $user) {
+            info('User not found, creating user');
+
             $user = $this->createUser();
 
             $post = $this->createPost($user);
