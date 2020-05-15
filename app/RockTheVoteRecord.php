@@ -30,6 +30,8 @@ class RockTheVoteRecord
             $config = ImportType::getConfig(ImportType::$rockTheVote);
         }
 
+        $this->startedRegistration = $record['Started registration'];
+
         $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
         $rtvStatus = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
 
@@ -82,8 +84,6 @@ class RockTheVoteRecord
      */
     public function parseReferralCode($referralCode)
     {
-        info('Parsing referral code: ' . $referralCode);
-
         $result = [
             'user_id' => null,
             'referrer_user_id' => null,
