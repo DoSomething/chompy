@@ -32,7 +32,9 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
-        \Log::error(json_encode($exception->errors()));
+        $logMessage = method_exists($exception, 'errors') ? json_encode($exception->errors()) : $exception->getMessage();
+
+        \Log::error($logMessage);
 
         parent::report($exception);
     }

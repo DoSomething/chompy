@@ -49,6 +49,7 @@ function is_anonymous_mobile($mobile)
  */
 function is_valid_mobile($mobile)
 {
+    return true;
     // This phone number has been passed before and fails Northstar validation.
     if ($mobile == '000-000-0000') {
         return false;
