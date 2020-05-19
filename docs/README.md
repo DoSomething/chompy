@@ -10,7 +10,7 @@ Third-parties with authorized access can post data to the Chompy API. See [API d
 
 Chompy supports imports of two types of CSV:
 
-- [Rock The Vote voter registrations](<(https://github.com/DoSomething/chompy/tree/master/docs/imports.md#rock-the-vote).>)
+- [Rock The Vote voter registrations](https://github.com/DoSomething/chompy/tree/master/docs/imports.md#rock-the-vote)
 
 - Email subscriptions to newsletters
 

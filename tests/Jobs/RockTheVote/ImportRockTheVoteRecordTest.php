@@ -12,8 +12,6 @@ use DoSomething\Gateway\Resources\NorthstarUser;
 
 class ImportRockTheVoteRecordTest extends TestCase
 {
-
-
     /**
      * Test that user and post are created if user not found.
      *

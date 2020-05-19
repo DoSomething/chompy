@@ -74,8 +74,6 @@ return [
             'register-form',
             'registration_complete',
         ],
-        // Whether to update SMS profile information for an existing user.
-        'update_user_sms_enabled' => env('ROCK_THE_VOTE_UPDATE_USER_SMS_ENABLED', 'false'),
         // Constants to use when creating a new user.
         'user' => [
             'email_subscription_topics' => env('ROCK_THE_VOTE_EMAIL_SUBSCRIPTION_TOPICS', 'community'),
