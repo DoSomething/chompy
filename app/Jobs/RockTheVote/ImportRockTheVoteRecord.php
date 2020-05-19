@@ -265,12 +265,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
         if (self::shouldUpdateStatus($user->voter_registration_status, $this->userData['voter_registration_status'])) {
             $payload['voter_registration_status'] = $this->userData['voter_registration_status'];
         }
+  
+        info('Checking for SMS subscription updates', ['user' => $user->id]);
 
-        if (config('import.rock_the_vote.update_user_sms_enabled') == 'true') {
-            info('Checking for SMS subscription updates', ['user' => $user->id]);
-
-            $payload = array_merge($payload, $this->getUserSmsSubscriptionUpdatePayload($user));
-        }
+        $payload = array_merge($payload, $this->getUserSmsSubscriptionUpdatePayload($user));
 
         if (! count($payload)) {
             info('No changes to update for user', ['user' => $user->id]);
