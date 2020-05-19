@@ -13,14 +13,6 @@ use DoSomething\Gateway\Resources\NorthstarUser;
 class ImportRockTheVoteRecordTest extends TestCase
 {
     /**
-     * Set or unset the Update User SMS Subscription feature flag.
-     */
-    private function enableUpdateUserSmsFeature(bool $shouldUpdate)
-    {
-        \Config::set('import.rock_the_vote.update_user_sms_enabled', $shouldUpdate ? 'true' : 'false');
-    }
-
-    /**
      * Test that user and post are created if user not found.
      *
      * @return void
@@ -135,13 +127,10 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testUpdatesUserIfShouldChangeStatus()
     {
-        $this->enableUpdateUserSmsFeature(false);
-
         $userId = $this->faker->northstar_id;
         $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
         $postId = $this->faker->randomDigitNotNull;
         $row = $this->faker->rockTheVoteReportRow([
-            'Phone' => $this->faker->phoneNumber,
             'Started registration' => $startedRegistration,
             'Status' => 'Complete',
             'Finish with State' => 'Yes',
@@ -163,10 +152,6 @@ class ImportRockTheVoteRecordTest extends TestCase
         ]);
         $this->rogueMock->shouldNotReceive('createPost');
         $this->northstarMock->shouldReceive('updateUser')->with($userId, [
-            /**
-             * Note: If the ROCK_THE_VOTE_UPDATE_USER_SMS_ENABLED config var is set to true, we'd
-             * additionally update the user mobile field here too.
-             */
             'voter_registration_status' => 'registration_complete',
         ])->andReturn(new NorthstarUser([
             'id' => $userId,
@@ -190,40 +175,6 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that user mobile is not updated when row has a phone, user does not have a mobile, and
-     * update_user_sms_enabled config is false.
-     *
-     * @return void
-     */
-    public function testSmsSubscriptionIsNotUpdatedIfUpdateUserSmsFeatureDisabled()
-    {
-        $this->enableUpdateUserSmsFeature(false);
-
-        $user = new NorthstarUser([
-            'id' => $this->faker->northstar_id,
-            'voter_registration_status' => 'step-1',
-            'sms_status' => null,
-        ]);
-        $phoneNumber = $this->faker->phoneNumber;
-        $row = $this->faker->rockTheVoteReportRow([
-            'Opt-in to Partner SMS/robocall' => 'Yes',
-            'Phone' =>  $phoneNumber,
-            'Status' => 'Step 2',
-        ]);
-        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
-
-        // If our feature flag was enabled, we'd additionally update mobile, sms status & topics.
-        $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
-            'voter_registration_status' => 'step-2',
-        ])->andReturn(new NorthstarUser([
-            'id' => $user->id,
-            'voter_registration_status' => 'step-2',
-        ]));
-
-        $job->updateUserIfChanged($user);
-    }
-
-    /**
      * Test that user mobile is updated when row has a phone, user does not have a mobile, and
      * update_user_sms_enabled config is true.
      *
@@ -231,8 +182,6 @@ class ImportRockTheVoteRecordTest extends TestCase
      */
     public function testUserUpdatePayloadContainsMobileIfProvided()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
             'voter_registration_status' => 'step-1',
@@ -563,10 +512,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasNullSmsStatusAndOptsIn()
+    public function testUpdateUserSmsWhenUserHasNullSmsStatusAndOptsIn()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(null, true);
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -584,10 +531,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasNullSmsStatusAndOptsOut()
+    public function testUpdateUserSmsWhenUserHasNullSmsStatusAndOptsOut()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(null, false);
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -604,10 +549,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasActiveSmsStatusAndOptsIn()
+    public function testUpdateUserSmsWhenUserHasActiveSmsStatusAndOptsIn()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$active, true);
 
         // Nothing to update, user already has 'voting' topic.
@@ -621,10 +564,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasActiveSmsStatusAndOptsOut()
+    public function testUpdateUserSmsWhenUserHasActiveSmsStatusAndOptsOut()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$active, false);
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -642,10 +583,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasLessSmsStatusAndOptsIn()
+    public function testUpdateUserSmsWhenUserHasLessSmsStatusAndOptsIn()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$less, true);
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -663,10 +602,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasLessSmsStatusAndOptsOut()
+    public function testUpdateUserSmsWhenUserHasLessSmsStatusAndOptsOut()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$less, false);
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -684,10 +621,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasPendingSmsStatusAndOptsIn()
+    public function testUpdateUserSmsWhenUserHasPendingSmsStatusAndOptsIn()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$pending, true);
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -705,10 +640,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasPendingSmsStatusAndOptsOut()
+    public function testUpdateUserSmsWhenUserHasPendingSmsStatusAndOptsOut()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$pending, false);
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -726,10 +659,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasStopSmsStatusAndOptsIn()
+    public function testUpdateUserSmsWhenUserHasStopSmsStatusAndOptsIn()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$stop, true);
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -747,10 +678,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasStopSmsStatusAndOptsOut()
+    public function testUpdateUserSmsWhenUserHasStopSmsStatusAndOptsOut()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$stop, false);
 
         $this->northstarMock->shouldNotReceive('updateUser');
@@ -763,10 +692,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasUndeliverableSmsStatusAndOptsIn()
+    public function testUpdateUserSmsWhenUserHasUndeliverableSmsStatusAndOptsIn()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$undeliverable, true);
 
         $this->northstarMock->shouldReceive('updateUser')
@@ -784,10 +711,8 @@ class ImportRockTheVoteRecordTest extends TestCase
     /**
      * @return void
      */
-    public function testEnabledUpdateUserSmsWhenUserHasUndeliverableSmsStatusAndOptsOut()
+    public function testUpdateUserSmsWhenUserHasUndeliverableSmsStatusAndOptsOut()
     {
-        $this->enableUpdateUserSmsFeature(true);
-
         $mocks = $this->getMocksForUpdateUserSmsTest(SmsStatus::$undeliverable, false);
 
         $this->northstarMock->shouldReceive('updateUser')
