@@ -409,12 +409,12 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that update SMS payload is empty if we've already processed the registration's phone
-     * number.
+     * Test that SMS subscription update is not made if we've already processed the registration
+     * phone number.
      *
      * @return void
      */
-    public function testSmsSubscriptionPayloadIsEmptyIfAlreadyUpdatedSmsSubscription()
+    public function testUserIsNotUpdatedIfAlreadyUpdatedSmsSubscription()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -429,11 +429,11 @@ class ImportRockTheVoteRecordTest extends TestCase
             'started_registration' => $startedRegistration,
             'contains_phone' => true,
         ]);
+        $this->northstarMock->shouldNotReceive('updateUser');
+
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($user);
-
-        $this->assertEquals([], $result);
+        $result = $job->updateSmsSubscriptionIfChanged($user);
     }
 
     /**
@@ -442,7 +442,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testSmsSubscriptionPayloadContainsMobileIfHaveNotUpdatedSmsSubscription()
+    public function testUserIsUpdatedIfHaveNotUpdatedSmsSubscription()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -451,11 +451,15 @@ class ImportRockTheVoteRecordTest extends TestCase
         $row = $this->faker->rockTheVoteReportRow([
             'Phone' => $phoneNumber,
         ]);
+        $this->northstarMock->shouldReceive('updateUser')
+            ->with($user->id, [
+                'mobile' => $phoneNumber,
+                'sms_status' => SmsStatus::$stop
+            ])
+            ->andReturn($mocks->user);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($user);
-
-        $this->assertEquals(['mobile' => $phoneNumber, 'sms_status' => SmsStatus::$stop], $result);
+        $result = $job->updateSmsSubscriptionIfChanged($user);
     }
 
     /**
