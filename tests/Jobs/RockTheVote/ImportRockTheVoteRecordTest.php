@@ -125,7 +125,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testUpdatesUserIfShouldChangeStatus()
+    public function testUpdatesVoterRegistrationStatusIfShouldChangeStatus()
     {
         $userId = $this->faker->northstar_id;
         $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
@@ -175,12 +175,12 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that user mobile is updated when row has a phone, user does not have a mobile, and
-     * update_user_sms_enabled config is true.
+     * Test that user mobile is updated if import mobile exists, user does not have a mobile, and no
+     * other user owns the import mobile.
      *
      * @return void
      */
-    public function testUserUpdatePayloadContainsMobileIfProvided()
+    public function testUserUpdatedWithMobileIfDoesNotHaveMobileAndImportMobileProvided()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -192,13 +192,11 @@ class ImportRockTheVoteRecordTest extends TestCase
             'Phone' =>  $phoneNumber,
             'Status' => 'Step 2',
         ]);
-        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
-
+        $this->northstarMock->shouldReceive('getUser')->andReturn(null);
         $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
             'mobile' => $phoneNumber,
             'sms_status' => SmsStatus::$active,
             'sms_subscription_topics' => ['voting'],
-            'voter_registration_status' => 'step-2',
         ])->andReturn(new NorthstarUser([
             'id' => $user->id,
             'mobile' => $phoneNumber,
@@ -206,6 +204,8 @@ class ImportRockTheVoteRecordTest extends TestCase
             'sms_subscription_topics' => ['voting'],
             'voter_registration_status' => 'step-2',
         ]));
+
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
         $job->updateSmsSubscriptionIfChanged($user);
     }

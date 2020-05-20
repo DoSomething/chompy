@@ -308,14 +308,14 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         info('Checking for SMS subscription update', ['user' => $user->id]);
 
-        // We don't need to update user's SMS subscription if we already did for this registration.
+        // Don't update import user's SMS subscription if we already did for this registration.
         if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
             info('Already updated SMS subscription for this registration', ['user' => $user->id]);
 
             return $user;
         }
 
-        // If the user already has a mobile, we don't want to change it - just update subscription.
+        // If import user already has a mobile, don't change it - just update subscription.
         if ($user->mobile) {
             return $this->updateUser($user, $this->getUserSmsSubscriptionUpdatePayload($user));
         }
