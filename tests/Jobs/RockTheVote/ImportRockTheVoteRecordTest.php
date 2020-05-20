@@ -451,12 +451,15 @@ class ImportRockTheVoteRecordTest extends TestCase
         $row = $this->faker->rockTheVoteReportRow([
             'Phone' => $phoneNumber,
         ]);
+        $this->northstarMock
+          ->shouldReceive('getUser')
+          ->andReturn(null);
         $this->northstarMock->shouldReceive('updateUser')
             ->with($user->id, [
                 'mobile' => $phoneNumber,
-                'sms_status' => SmsStatus::$stop
+                'sms_status' => SmsStatus::$stop,
             ])
-            ->andReturn($mocks->user);
+            ->andReturn($user);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
         $result = $job->updateSmsSubscriptionIfChanged($user);

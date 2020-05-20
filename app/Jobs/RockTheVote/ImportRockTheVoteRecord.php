@@ -191,8 +191,9 @@ class ImportRockTheVoteRecord implements ShouldQueue
      * @param array $data
      * @return NorthstarUser
      */
-    private function updateUser($user, $data) {
-        if (!$data) {
+    private function updateUser($user, $data)
+    {
+        if (! $data) {
             info('No updates to make', ['user' => $user->id]);
 
             return $user;
@@ -303,7 +304,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @return NorthstarUser
      */
-    public function updateSmsSubscriptionIfChanged(NorthstarUser $user) {
+    public function updateSmsSubscriptionIfChanged(NorthstarUser $user)
+    {
         info('Checking for SMS subscription update', ['user' => $user->id]);
 
         // We don't need to update user's SMS subscription if we already did for this registration.
