@@ -95,12 +95,15 @@ So the full hierarchy order taken into account when updating the profile from lo
 
 ### Mobile
 
-If an existing user has a null `mobile` profile field and provides a phone number via RTV form, we save it to the user's `mobile` profile field.
+If an existing user has a null `mobile` profile field and provides a phone number via RTV form, the import will save it to the user's `mobile` profile field if we cannot find an existing user for the mobile.
+
+If the mobile provided is already taken by another user, the import will update the SMS subscription of the user that owns the mobile number. per the SMS opt-in import value.
 
 **Notes**:
 
-- We do **not** override an existing phone number.
-- We save a user's mobile number regardless of whether they opt-in to SMS messaging from DS.
+- We will **not** override an existing phone number on a user if they provide a different one in the RTV form.
+
+- If provided in the RTV form, we save a user's mobile number (new or existing) regardless of whether they opt-in to SMS messaging from DS.
 
 ### Email Subscription
 
