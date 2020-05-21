@@ -97,7 +97,7 @@ So the full hierarchy order taken into account when updating the profile from lo
 
 If an existing user has a null `mobile` profile field and provides a phone number via RTV form, the import will save it to the user's `mobile` profile field if we cannot find an existing user for the mobile.
 
-If the mobile provided is already taken by another user, the import will update the SMS subscription of the user that owns the mobile number. per the SMS opt-in import value.
+If the mobile provided is already taken by another user, the import will update the SMS subscription of the user that owns the mobile number.
 
 **Notes**:
 
