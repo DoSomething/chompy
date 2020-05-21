@@ -391,21 +391,35 @@ class ImportRockTheVoteRecordTest extends TestCase
         $this->assertEquals($result, null);
     }
 
-    /*
-     * Test that update SMS payload is empty if a mobile is not provided.
+    /**
+     * Test that SMS subscription is not updated if import mobile not provided.
      *
      * @return void
      */
-    public function testSmsSubscriptionPayloadIsEmptyIfMobileIsNull()
+    public function testSmsSubscriptionIsNotUpdatedWhenImportMobileIsNull()
     {
-        $row = $this->faker->rockTheVoteReportRow();
-        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+        $userId = $this->faker->northstar_id;
+        $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
+        $row = $this->faker->rockTheVoteReportRow([
+            'Started registration' => $startedRegistration,
+            'Status' => 'Step 2',
+            RockTheVoteRecord::$smsOptInFieldName => 'Yes',
+        ]);
+        $post = $this->faker->rogueVoterRegPost([
+            'northstar_id' => $userId,
+            'status' => 'step-2',
+        ], $startedRegistration);
+        $this->mockGetNorthstarUser([
+            'id' => $userId,
+            'sms_status' => SmsStatus::$stop,
+            'voter_registration_status' => 'step-2',
+        ]);
+        // No voter registration status update to make, and no subscription updates per null mobile.
+        $this->northstarMock->shouldNotReceive('updateUser');
+        $this->rogueMock->shouldReceive('getPosts')
+            ->andReturn(['data' => [0 => $post]]);
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload(new NorthstarUser([
-            'id' => $this->faker->northstar_id,
-        ]));
-
-        $this->assertEquals([], $result);
+        ImportRockTheVoteRecord::dispatch($row, factory(ImportFile::class)->create());
     }
 
     /**
@@ -414,7 +428,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testUserIsNotUpdatedIfAlreadyUpdatedSmsSubscription()
+    public function testSmsSubscriptionIsNotUpdatedIfAlreadyUpdatedSmsSubscription()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
