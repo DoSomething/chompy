@@ -437,12 +437,12 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that update SMS payload contains mobile if we haven't processed the registration's
-     * phone number, and the user doesn't have a mobile set.
+     * Test we update the import user's mobile if they don't have one set, and no other user owns
+     * the mobile number.
      *
      * @return void
      */
-    public function testUserSmsSubscriptionIsUpdatedIfHaveNotUpdatedSmsSubscription()
+    public function testUserMobileIsUpdatedIfImportUserHasNoMobileAndMobileIsAvailable()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -451,12 +451,46 @@ class ImportRockTheVoteRecordTest extends TestCase
         $row = $this->faker->rockTheVoteReportRow([
             'Phone' => $phoneNumber,
         ]);
-        $this->northstarMock
-          ->shouldReceive('getUser')
-          ->andReturn(null);
+        // If the mobile is not owned by any other users, we can update our import user with it.
+        $this->northstarMock->shouldReceive('getUser')->andReturn(null);
+        // Test that we update our import user witht he mobile number.
         $this->northstarMock->shouldReceive('updateUser')
             ->with($user->id, [
                 'mobile' => $phoneNumber,
+                'sms_status' => SmsStatus::$stop,
+            ])
+            ->andReturn($user);
+
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $job->updateUserSmsSubscriptionIfChanged($user);
+    }
+
+    /**
+     * Test we update the user that owns the mobile if another user owns the import mobile.
+     *
+     * @return void
+     */
+    public function testMobileOwnerSubscriptionIsUpdatedIfImportUserHasNoMobileAndMobileIsTaken()
+    {
+        $phoneNumber = $this->faker->phoneNumber;
+        $user = new NorthstarUser([
+            'id' => $this->faker->unique()->northstar_id,
+        ]);
+        $mobileUser = new NorthstarUser([
+            'id' => $this->faker->unique()->northstar_id,
+            'mobile' => $phoneNumber,
+        ]);
+        $row = $this->faker->rockTheVoteReportRow([
+            'Phone' => $phoneNumber,
+        ]);
+        // If the mobile is not owned by any other users, we can update our import user with it.
+        $this->northstarMock->shouldReceive('getUser')
+            ->with('mobile', $phoneNumber)
+            ->andReturn($mobileUser);
+        // Test that we update the mobile user's SMS subscrition.
+        $this->northstarMock->shouldReceive('updateUser')
+            ->with($mobileUser->id, [
                 'sms_status' => SmsStatus::$stop,
             ])
             ->andReturn($user);
@@ -471,7 +505,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testUserMobileIsNotUpdatedIfUserAlreadyHasMobile()
+    public function testUserMobileIsNotUpdatedIfImportUserAlreadyHasMobile()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
