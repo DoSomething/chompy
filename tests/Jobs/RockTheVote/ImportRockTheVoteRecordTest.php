@@ -125,7 +125,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testUpdatesUserIfShouldChangeStatus()
+    public function testUpdatesVoterRegistrationStatusIfShouldChangeStatus()
     {
         $userId = $this->faker->northstar_id;
         $startedRegistration = $this->faker->daysAgoInRockTheVoteFormat();
@@ -175,12 +175,12 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that user mobile is updated when row has a phone, user does not have a mobile, and
-     * update_user_sms_enabled config is true.
+     * Test that user mobile is updated if import mobile exists, user does not have a mobile, and no
+     * other user owns the import mobile.
      *
      * @return void
      */
-    public function testUserUpdatePayloadContainsMobileIfProvided()
+    public function testUserUpdatedWithMobileIfDoesNotHaveMobileAndImportMobileProvided()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -192,13 +192,11 @@ class ImportRockTheVoteRecordTest extends TestCase
             'Phone' =>  $phoneNumber,
             'Status' => 'Step 2',
         ]);
-        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
-
+        $this->northstarMock->shouldReceive('getUser')->andReturn(null);
         $this->northstarMock->shouldReceive('updateUser')->with($user->id, [
             'mobile' => $phoneNumber,
             'sms_status' => SmsStatus::$active,
             'sms_subscription_topics' => ['voting'],
-            'voter_registration_status' => 'step-2',
         ])->andReturn(new NorthstarUser([
             'id' => $user->id,
             'mobile' => $phoneNumber,
@@ -207,7 +205,9 @@ class ImportRockTheVoteRecordTest extends TestCase
             'voter_registration_status' => 'step-2',
         ]));
 
-        $job->updateUserIfChanged($user);
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $job->updateUserSmsSubscriptionIfChanged($user);
     }
 
     /**
@@ -409,12 +409,12 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that update SMS payload is empty if we've already processed the registration's phone
-     * number.
+     * Test that SMS subscription update is not made if we've already processed the registration
+     * phone number.
      *
      * @return void
      */
-    public function testSmsSubscriptionPayloadIsEmptyIfAlreadyUpdatedSmsSubscription()
+    public function testUserIsNotUpdatedIfAlreadyUpdatedSmsSubscription()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -429,20 +429,20 @@ class ImportRockTheVoteRecordTest extends TestCase
             'started_registration' => $startedRegistration,
             'contains_phone' => true,
         ]);
+        $this->northstarMock->shouldNotReceive('updateUser');
+
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($user);
-
-        $this->assertEquals([], $result);
+        $job->updateUserSmsSubscriptionIfChanged($user);
     }
 
     /**
-     * Test that update SMS payload contains mobile if we haven't processed the registration's
-     * phone number, and the user doesn't have a mobile set.
+     * Test that import user's mobile is updated if they don't have one set, and no other user owns
+     * the mobile number.
      *
      * @return void
      */
-    public function testSmsSubscriptionPayloadContainsMobileIfHaveNotUpdatedSmsSubscription()
+    public function testUserMobileIsUpdatedIfImportUserHasNoMobileAndMobileIsAvailable()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -451,34 +451,85 @@ class ImportRockTheVoteRecordTest extends TestCase
         $row = $this->faker->rockTheVoteReportRow([
             'Phone' => $phoneNumber,
         ]);
+        // If the mobile is not owned by any other users, we can update our import user with it.
+        $this->northstarMock->shouldReceive('getUser')->andReturn(null);
+        $this->northstarMock->shouldReceive('updateUser')
+            ->with($user->id, [
+                'mobile' => $phoneNumber,
+                'sms_status' => SmsStatus::$stop,
+            ])
+            ->andReturn($user);
+
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($user);
-
-        $this->assertEquals(['mobile' => $phoneNumber, 'sms_status' => SmsStatus::$stop], $result);
+        $job->updateUserSmsSubscriptionIfChanged($user);
     }
 
     /**
-     * Test that update SMS payload is empty if we haven't processed the registration's phone
-     * number, but the user already has a mobile set.
+     * Test the owner of the mobile is updated if import user does not have a mobile set, but the
+     * import mobile is taken by another user.
      *
      * @return void
      */
-    public function testSmsSubscriptionPayloadIsEmptyIfUserAlreadyHasMobile()
+    public function testMobileOwnerIsUpdatedIfImportUserHasNoMobileAndMobileIsTaken()
+    {
+        $phoneNumber = $this->faker->phoneNumber;
+        $user = new NorthstarUser([
+            'id' => $this->faker->unique()->northstar_id,
+        ]);
+        $mobileUser = new NorthstarUser([
+            'id' => $this->faker->unique()->northstar_id,
+            'mobile' => $phoneNumber,
+        ]);
+        $row = $this->faker->rockTheVoteReportRow([
+            'Phone' => $phoneNumber,
+        ]);
+        $this->northstarMock->shouldReceive('getUser')
+            ->with('mobile', $phoneNumber)
+            ->andReturn($mobileUser);
+        $this->northstarMock->shouldReceive('updateUser')
+            ->with($mobileUser->id, [
+                'sms_status' => SmsStatus::$stop,
+            ])
+            ->andReturn($user);
+
+        $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
+
+        $job->updateUserSmsSubscriptionIfChanged($user);
+    }
+
+    /**
+     * Test that an existing user's mobile is not updated if a value already exists.
+     *
+     * @return void
+     */
+    public function testUserMobileIsNotUpdatedIfImportUserAlreadyHasMobile()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
             'mobile' => $this->faker->phoneNumber,
-            'sms_status' => SmsStatus::$less,
+            'sms_status' => SmsStatus::$stop,
         ]);
         $row = $this->faker->rockTheVoteReportRow([
             'Phone' => $this->faker->phoneNumber,
+            RockTheVoteRecord::$smsOptInFieldName => 'Yes',
         ]);
+        /**
+         * We don't need to query for whether another user has the mobile if import user already has
+         * a mobile.
+         */
+        $this->northstarMock->shouldNotReceive('getUser');
+        // Verify that subscription fields are updated, but mobile is not.
+        $this->northstarMock->shouldReceive('updateUser')
+            ->with($user->id, [
+                'sms_status' => SmsStatus::$active,
+                'sms_subscription_topics' => ['voting'],
+            ])
+            ->andReturn($user);
+
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($user);
-
-        $this->assertEquals([], $result);
+        $job->updateUserSmsSubscriptionIfChanged($user);
     }
 
     /**
@@ -525,7 +576,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -543,7 +594,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -558,7 +609,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -577,7 +628,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -596,7 +647,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -615,7 +666,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -634,7 +685,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -653,7 +704,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -672,7 +723,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -686,7 +737,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -705,7 +756,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -723,7 +774,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateUserIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**

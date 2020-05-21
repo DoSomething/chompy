@@ -71,19 +71,28 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         if (RockTheVoteLog::getByRecord($this->record, $user)) {
             $details = $this->record->getPostDetails();
-
-            info('Skipping record that has already been imported', [
+            $skipLogMessage = 'Skipping record that has already been imported';
+            $skipLogInfo = [
                 'user' => $user->id,
                 'status' => $details['Status'],
                 'started_registration' => $details['Started registration'],
-            ]);
+            ];
+
+            info($skipLogMessage, $skipLogInfo);
 
             $this->importFile->incrementSkipCount();
 
-            return [];
+            return [
+                'response' => array_merge(['message' => $skipLogMessage], ['keys' => $skipLogInfo]),
+            ];
         }
 
-        $user = $this->updateUserIfChanged($user);
+        $user = $this->updateUserVoterRegistrationStatusIfChanged($user);
+
+        // If registration does not have a mobile provided, no need to update SMS subscription.
+        if ($this->userData['mobile']) {
+            $user = $this->updateUserSmsSubscriptionIfChanged($user);
+        }
 
         if ($post = $this->getPost($user)) {
             $post = $this->updatePostIfChanged($post);
@@ -105,13 +114,20 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         $result = [
             'user' => [],
+            'mobile_user' => [],
             'post' => Arr::only($post, ['id', 'type', 'action_id', 'status', 'details', 'referrer_user_id']),
         ];
 
-        $userFields = ['id', 'email', 'mobile', 'voter_registration_status', 'sms_status', 'sms_subscription_topics', 'email_subscription_status', 'email_subscription_topics'];
+        $userFields = ['id', 'email', 'mobile', 'voter_registration_status', 'sms_status', 'sms_subscription_topics', 'email_subscription_status', 'email_subscription_topics', 'referrer_user_id'];
 
         foreach ($userFields as $fieldName) {
             $result['user'][$fieldName] = $user->{$fieldName};
+        }
+
+        if (isset($this->mobileUser)) {
+            foreach ($userFields as $fieldName) {
+                $result['mobile_user'][$fieldName] = $this->mobileUser->{$fieldName};
+            }
         }
 
         return $result;
@@ -176,6 +192,28 @@ class ImportRockTheVoteRecord implements ShouldQueue
         }
 
         info('Created user', ['user' => $user->id]);
+
+        return $user;
+    }
+
+    /**
+     * Updates given user with given data.
+     *
+     * @param NorthstarUser $user
+     * @param array $data
+     * @return NorthstarUser
+     */
+    private function updateUser($user, $data)
+    {
+        if (! $data) {
+            info('No updates to make', ['user' => $user->id]);
+
+            return $user;
+        }
+
+        $user = gateway('northstar')->asClient()->updateUser($user->id, $data);
+
+        info('Updated user', ['user' => $user->id, 'changed' => array_keys($data)]);
 
         return $user;
     }
@@ -254,33 +292,67 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Updates user's profile with imported data, if updated.
+     * Updates user's voter registration status if changed per import.
      *
      * @return NorthstarUser
      */
-    public function updateUserIfChanged(NorthstarUser $user)
+    public function updateUserVoterRegistrationStatusIfChanged(NorthstarUser $user)
     {
-        $payload = [];
+        info('Checking for voter registration status update', ['user' => $user->id]);
 
-        if (self::shouldUpdateStatus($user->voter_registration_status, $this->userData['voter_registration_status'])) {
-            $payload['voter_registration_status'] = $this->userData['voter_registration_status'];
-        }
-
-        info('Checking for SMS subscription updates', ['user' => $user->id]);
-
-        $payload = array_merge($payload, $this->getUserSmsSubscriptionUpdatePayload($user));
-
-        if (! count($payload)) {
-            info('No changes to update for user', ['user' => $user->id]);
+        if (! self::shouldUpdateStatus($user->voter_registration_status, $this->userData['voter_registration_status'])) {
+            info('No updates to make for voter registration status', ['user' => $user->id]);
 
             return $user;
         }
 
-        $user = gateway('northstar')->asClient()->updateUser($user->id, $payload);
+        return $this->updateUser($user, [
+            'voter_registration_status' =>  $this->userData['voter_registration_status'],
+        ]);
+    }
 
-        info('Updated user', ['user' => $user->id, 'changed' => array_keys($payload)]);
+    /**
+     * Updates user's SMS subscription if changed per import.
+     *
+     * @return NorthstarUser
+     */
+    public function updateUserSmsSubscriptionIfChanged(NorthstarUser $user)
+    {
+        info('Checking for SMS subscription update', ['user' => $user->id]);
 
-        return $user;
+        // Don't update import user's SMS subscription if we already did for this registration.
+        if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
+            info('Already updated SMS subscription for this registration', ['user' => $user->id]);
+
+            return $user;
+        }
+
+        // If import user already has a mobile, don't change it - just update subscription.
+        if ($user->mobile) {
+            info('User has an existing mobile', ['user' => $user->id]);
+
+            return $this->updateUser($user, $this->getUserSmsSubscriptionUpdatePayload($user));
+        }
+
+        // Check if another user already owns the import mobile.
+        $this->mobileUser = gateway('northstar')->asClient()->getUser('mobile', $this->userData['mobile']);
+
+        // If another user owns the import mobile, update their subscription.
+        if ($this->mobileUser) {
+            info('Mobile is already taken, updating mobile user', ['user' => $user->id, 'mobile_user' => $this->mobileUser->id]);
+
+            $this->mobileUser = $this->updateUser($this->mobileUser, $this->getUserSmsSubscriptionUpdatePayload($this->mobileUser));
+
+            return $user;
+        }
+
+        // Otherwise, update the import user's mobile and subscription.
+        info('Did not find existing user with mobile', ['user', $user->id]);
+
+        return $this->updateUser($user, array_merge(
+            ['mobile' => $this->userData['mobile']],
+            $this->getUserSmsSubscriptionUpdatePayload($user),
+        ));
     }
 
     /**
@@ -290,39 +362,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function getUserSmsSubscriptionUpdatePayload(NorthstarUser $user)
     {
-        // If registration does not have a mobile provided, there is nothing to update.
-        if (! $this->userData['mobile']) {
-            return [];
-        }
-
-        // We don't need to update user's SMS subscription if we already did for this registration.
-        if (RockTheVoteLog::hasAlreadyUpdatedSmsSubscription($this->record, $user)) {
-            info('Already updated SMS subscription for this registration', ['user' => $user->id]);
-
-            return [];
-        }
-
-        $payload = $this->parseMobileChangeForUser($user);
-        $payload = array_merge($payload, $this->parseSmsSubscriptionTopicsChangeForUser($user));
-        $payload = array_merge($payload, $this->parseSmsStatusChangeForUser($user));
-
-        return $payload;
-    }
-
-    /**
-     * Returns payload to update mobile if user does not currently have one saved.
-     *
-     * @return array
-     */
-    public function parseMobileChangeForUser(NorthstarUser $user)
-    {
-        $fieldName = 'mobile';
-
-        if ($user->{$fieldName}) {
-            return [];
-        }
-
-        return [$fieldName => $this->userData[$fieldName]];
+        return array_merge(
+            $this->parseSmsStatusChangeForUser($user),
+            $this->parseSmsSubscriptionTopicsChangeForUser($user),
+        );
     }
 
     /**
