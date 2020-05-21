@@ -442,7 +442,7 @@ class ImportRockTheVoteRecordTest extends TestCase
      *
      * @return void
      */
-    public function testUserIsUpdatedIfHaveNotUpdatedSmsSubscription()
+    public function testUserSmsSubscriptionIsUpdatedIfHaveNotUpdatedSmsSubscription()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
@@ -460,32 +460,44 @@ class ImportRockTheVoteRecordTest extends TestCase
                 'sms_status' => SmsStatus::$stop,
             ])
             ->andReturn($user);
+
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->updateUserSmsSubscriptionIfChanged($user);
+        $job->updateUserSmsSubscriptionIfChanged($user);
     }
 
     /**
-     * Test that update SMS payload is empty if we haven't processed the registration's phone
-     * number, but the user already has a mobile set.
+     * Test that we do not update an existing user's mobile if one already exists.
      *
      * @return void
      */
-    public function testSmsSubscriptionPayloadIsEmptyIfUserAlreadyHasMobile()
+    public function testUserMobileIsNotUpdatedIfUserAlreadyHasMobile()
     {
         $user = new NorthstarUser([
             'id' => $this->faker->northstar_id,
             'mobile' => $this->faker->phoneNumber,
-            'sms_status' => SmsStatus::$less,
+            'sms_status' => SmsStatus::$stop,
         ]);
         $row = $this->faker->rockTheVoteReportRow([
             'Phone' => $this->faker->phoneNumber,
+            RockTheVoteRecord::$smsOptInFieldName => 'Yes',
         ]);
+        /**
+         * We don't need to query for whether another user has the mobile if import user already has
+         * a mobile.
+         */
+        $this->northstarMock->shouldNotReceive('getUser');
+        // Expect that we do update subscription info, but not their mobile.
+        $this->northstarMock->shouldReceive('updateUser')
+            ->with($user->id, [
+                'sms_status' => SmsStatus::$active,
+                'sms_subscription_topics' => ['voting'],
+            ])
+            ->andReturn($user);
+
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->getUserSmsSubscriptionUpdatePayload($user);
-
-        $this->assertEquals([], $result);
+        $job->updateUserSmsSubscriptionIfChanged($user);
     }
 
     /**

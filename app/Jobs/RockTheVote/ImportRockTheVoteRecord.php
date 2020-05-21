@@ -89,6 +89,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         $user = $this->updateUserVoterRegistrationStatusIfChanged($user);
 
+        // If registration does not have a mobile provided, no need to update SMS subscription.
         if ($this->userData['mobile']) {
             $user = $this->updateUserSmsSubscriptionIfChanged($user);
         }
