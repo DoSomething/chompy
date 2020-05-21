@@ -207,7 +207,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($user);
+        $job->updateUserSmsSubscriptionIfChanged($user);
     }
 
     /**
@@ -433,7 +433,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->updateSmsSubscriptionIfChanged($user);
+        $result = $job->updateUserSmsSubscriptionIfChanged($user);
     }
 
     /**
@@ -462,7 +462,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             ->andReturn($user);
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
 
-        $result = $job->updateSmsSubscriptionIfChanged($user);
+        $result = $job->updateUserSmsSubscriptionIfChanged($user);
     }
 
     /**
@@ -532,7 +532,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -550,7 +550,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -565,7 +565,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -584,7 +584,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -603,7 +603,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -622,7 +622,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -641,7 +641,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -660,7 +660,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -679,7 +679,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -693,7 +693,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -712,7 +712,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**
@@ -730,7 +730,7 @@ class ImportRockTheVoteRecordTest extends TestCase
 
         $job = new ImportRockTheVoteRecord($mocks->row, factory(ImportFile::class)->create());
 
-        $job->updateSmsSubscriptionIfChanged($mocks->user);
+        $job->updateUserSmsSubscriptionIfChanged($mocks->user);
     }
 
     /**

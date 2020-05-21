@@ -87,10 +87,10 @@ class ImportRockTheVoteRecord implements ShouldQueue
             ];
         }
 
-        $user = $this->updateVoterRegistrationStatusIfChanged($user);
+        $user = $this->updateUserVoterRegistrationStatusIfChanged($user);
 
         if ($this->userData['mobile']) {
-            $user = $this->updateSmsSubscriptionIfChanged($user);
+            $user = $this->updateUserSmsSubscriptionIfChanged($user);
         }
 
         if ($post = $this->getPost($user)) {
@@ -295,7 +295,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @return NorthstarUser
      */
-    public function updateVoterRegistrationStatusIfChanged(NorthstarUser $user)
+    public function updateUserVoterRegistrationStatusIfChanged(NorthstarUser $user)
     {
         info('Checking for voter registration status update', ['user' => $user->id]);
 
@@ -315,7 +315,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
      *
      * @return NorthstarUser
      */
-    public function updateSmsSubscriptionIfChanged(NorthstarUser $user)
+    public function updateUserSmsSubscriptionIfChanged(NorthstarUser $user)
     {
         info('Checking for SMS subscription update', ['user' => $user->id]);
 
