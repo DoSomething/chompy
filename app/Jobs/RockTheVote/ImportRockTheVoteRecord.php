@@ -71,22 +71,26 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         if (RockTheVoteLog::getByRecord($this->record, $user)) {
             $details = $this->record->getPostDetails();
-
-            info('Skipping record that has already been imported', [
+            $skipLogMessage = 'Skipping record that has already been imported';
+            $skipLogInfo = [
                 'user' => $user->id,
                 'status' => $details['Status'],
                 'started_registration' => $details['Started registration'],
-            ]);
+            ];
+
+            info($skipLogMessage, $skipLogInfo);
 
             $this->importFile->incrementSkipCount();
 
-            return [];
+            return [
+                'response' => array_merge(['message' => $skipLogMessage], ['keys' => $skipLogInfo]),
+            ];
         }
 
         $user = $this->updateVoterRegistrationStatusIfChanged($user);
 
         if ($this->userData['mobile']) {
-            $this->updateSmsSubscriptionIfChanged($user);
+            $user = $this->updateSmsSubscriptionIfChanged($user);
         }
 
         if ($post = $this->getPost($user)) {
@@ -109,13 +113,20 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         $result = [
             'user' => [],
+            'mobile_user' => [],
             'post' => Arr::only($post, ['id', 'type', 'action_id', 'status', 'details', 'referrer_user_id']),
         ];
 
-        $userFields = ['id', 'email', 'mobile', 'voter_registration_status', 'sms_status', 'sms_subscription_topics', 'email_subscription_status', 'email_subscription_topics'];
+        $userFields = ['id', 'email', 'mobile', 'voter_registration_status', 'sms_status', 'sms_subscription_topics', 'email_subscription_status', 'email_subscription_topics', 'referrer_user_id'];
 
         foreach ($userFields as $fieldName) {
             $result['user'][$fieldName] = $user->{$fieldName};
+        }
+
+        if (isset($this->mobileUser)) {
+            foreach ($userFields as $fieldName) {
+                $result['mobile_user'][$fieldName] = $this->mobileUser->{$fieldName};
+            }
         }
 
         return $result;
@@ -317,17 +328,21 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         // If import user already has a mobile, don't change it - just update subscription.
         if ($user->mobile) {
+            info('User has an existing mobile', ['user' => $user->id]);
+
             return $this->updateUser($user, $this->getUserSmsSubscriptionUpdatePayload($user));
         }
 
         // Check if another user already owns the import mobile.
-        $mobileUser = gateway('northstar')->asClient()->getUser('mobile', $this->userData['mobile']);
+        $this->mobileUser = gateway('northstar')->asClient()->getUser('mobile', $this->userData['mobile']);
 
         // If another user owns the import mobile, update their subscription.
-        if ($mobileUser) {
-            info('Mobile is already taken, updating mobile user', ['user', $user->id, 'mobile_user' => $mobileUser->id]);
+        if ($this->mobileUser) {
+            info('Mobile is already taken, updating mobile user', ['user' => $user->id, 'mobile_user' => $this->mobileUser->id]);
 
-            return $this->updateUser($mobileUser, $this->getUserSmsSubscriptionUpdatePayload($mobileUser));
+            $this->mobileUser = $this->updateUser($this->mobileUser, $this->getUserSmsSubscriptionUpdatePayload($this->mobileUser));
+
+            return $user;
         }
 
         // Otherwise, update the import user's mobile and subscription.
