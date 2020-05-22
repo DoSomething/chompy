@@ -48,15 +48,13 @@ These definitions can be found in the [RTV docs](https://www.rockthevote.org/pro
 
 ### Historical values
 
-- We used to save all of the `step-*` status values as `uncertain`, up until [April 2020](https://github.com/DoSomething/chompy/pull/153).
-
-- We used to save `rejected` and `under-18` values as `ineligible`.
+- We used to save all of the `step-*` status values as `uncertain`, and the `rejected` and `under-18` values as `ineligible`, up until [April 2020](https://github.com/DoSomething/chompy/pull/153).
 
 - The TurboVote data (which we imported before Rock The Vote - see [Notes](#notes)), would supply a `confirmed` status - similar to the Rock the Vote `Completed` status.
 
 ### Status Hierarchy
 
-Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy, from lowest to highest, to determine which status should be reported on their Rogue post if a user post already exists for the import Action and its `Started registration` datetime:
+Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy, from lowest to highest, to determine which status should be reported on their `voter-reg` post if a post already exists for user, import action, and its `Started registration` datetime:
 
 - `uncertain`
 - `ineligible`
