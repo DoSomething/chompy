@@ -163,15 +163,11 @@ If the `Tracking Source` doesn't contain a NS ID, the import searches for an exi
 
 - Data extracts the `source` and `source_detail` values found in the `Tracking Source` into Looker for voter registration reporting.
 
-- The `submission_created_at` date is when the importer ran. Details about when the registration was created/updated are in the `source_details`.
+- Very early iterations of this import would:
 
-- All of these signups will have a `source` of `importer-client` (this is how messaging is suppressed in C.io)
+  - Save the action per the month that the registration came in (e.g. `february-2018-rockthevote`)
 
-- In early iterations of the import, the month that the registration came in would inform the `action` column (e.g., february-2018-rockthevote)
-
-- In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a `voter-reg` post.
-
-- If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants. See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
+  - Use Campaign/Run IDs key/values within the Tracking Source to use when upserting a `voter-reg` post
 
 - Before we partnered with Rock The Vote on voter registration, we had partnered with TurboVote in 2016, 2018. See [VR Tech Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
 
