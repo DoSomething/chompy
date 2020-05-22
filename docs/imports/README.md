@@ -4,13 +4,27 @@ We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` po
 
 ## Overview
 
+Chompy integrates with the RTV API to generate, download, and import voter registration CSV's on an hourly basis.
+
 The import upserts a `voter-reg` type post for each unique "Started registration" datetime we receive for a user -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
 
 If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action. Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
 
+## Tracking Source
+
+Each registration may contain a `Tracking Source` column, which corresponds to the `source` query parameter we include when directing users to our Rock The Vote registration partner site.
+
+The import saves the raw `Tracking Source` value property into the serialized `details` field of the `voter-reg` post it creates.
+
+It also inspects the value to see whether `referral` and `user` keys have been passed. You can find [details on the format in the Phoenix docs](https://app.gitbook.com/@dosomething/s/phoenix-documentation/development/features/voter-registration#tracking-source)
+
+- If a `referral` key exists, the `user` value should be saved as the `referrer_user_id` on the post (and user, if creating a new user).
+
+- If a `referral` key does not exist, the `user` value corresponds to the ID of the user that is registering to vote. If present, we use this first when checking to match a user to the given row we are importing.
+
 ## Status
 
-As of [April 2020](https://github.com/DoSomething/chompy/pull/153), we save the status provided by Rock The Vote on `voter-reg` posts for Rock the Vote, with the exception of using two different statuses for the `Complete` status:
+We save the status provided by Rock The Vote on `voter-reg` posts for Rock the Vote, with the exception of using two different statuses for the `Complete` status:
 
 - `register-form` - User completed the registration form (the row `Finish with State` column is set to `No`)
 
@@ -36,7 +50,7 @@ These definitions can be found in the [RTV docs](https://www.rockthevote.org/pro
 
 ### Historical values
 
-- We used to save all of the `step-*` status values as `uncertain`.
+- We used to save all of the `step-*` status values as `uncertain`, up until [April 2020](https://github.com/DoSomething/chompy/pull/153).
 
 - We used to save `rejected` and `under-18` values as `ineligible`.
 
@@ -142,16 +156,6 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
   - If user opts-out of SMS messaging from DS, user's `sms_status` will be set to `stop` and `sms_subscription_topics` will be set to empty.
 
 - Voter Registration Status
-
-### Online Drives
-
-Online drives is one of the tactics we have for getting people to get their friends registered to vote. For example, someone would sign up for the campaign and they have their own personal registration page (w/ a RTV form on it w/ the same kind of tracking) that they share with their friends/family. The appeal for them is that on their campaign action page, it will show how many people has viewed their personal registration page (v2 feature enhancement might be upping this to show who has registered).
-
-So, the Alpha sends their page to a Beta and they register. The Alpha's referral links look like this: https://vote.dosomething.org/member-drive?userId=58e68d5da0bfad4c3b4cd722&r=user:58e68d5da0bfad4c3b4cd722,source=web,source_details=onlinedrivereferral,referral=true
-
-We've added `referral=true` to the link so that we can know to not attribute the registration to the NS ID that is present in the URL. In this case, this NS ID is the referrer and not the registrant.
-
-If the referral column has `referral=true` in it, then proceed with the logic with dealing w/ non-member registrants above.
 
 ## Notes
 
