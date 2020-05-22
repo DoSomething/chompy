@@ -159,15 +159,15 @@ If the `Tracking Source` doesn't contain a NS ID, the import searches for an exi
 
   - Example: At 12pm, the import finds Alice at status `step-2` and opting to SMS. Alice is sent a welcome text, and unsubscribes. The import runs again at 1pm, and finds Alice at a completed status, but still having opted in from earlier. Alice has already unsubscribed at this point, we would not want the import to resubscribe her per the opt-in from the previous hour.
 
-- Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
+- Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote three times in 2018 resulted in a single post, not three).
 
 - Data extracts the `source` and `source_detail` values found in the `Tracking Source` into Looker for voter registration reporting.
 
 - Very early iterations of this import would:
 
-  - Save the action per the month that the registration came in (e.g. `february-2018-rockthevote`)
+  - Save the post action based on the month that the registration came in (e.g. `february-2018-rockthevote`)
 
-  - Use Campaign/Run IDs key/values within the Tracking Source to use when upserting a `voter-reg` post
+  - Use Campaign/Run IDs key/values within the Tracking Source to use when upserting the post
 
 - Before we partnered with Rock The Vote on voter registration, we had partnered with TurboVote in 2016, 2018. See [VR Tech Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
 
