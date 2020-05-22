@@ -1,14 +1,12 @@
 # Rock The Vote
 
-We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` posts. We previously imported this data from TurboVote (TV) in 2016, 2018. See [VR Tech Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
+Chompy integrates with the Rock The Vote (RTV) API to generate, download, and import voter registration CSV's on an hourly basis.
 
 ## Overview
 
-Chompy integrates with the RTV API to generate, download, and import voter registration CSV's on an hourly basis.
-
 The import upserts a `voter-reg` type post for each unique "Started registration" datetime we receive for a user -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
 
-If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action. Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
+If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action.
 
 ## Tracking Source
 
@@ -54,7 +52,7 @@ These definitions can be found in the [RTV docs](https://www.rockthevote.org/pro
 
 - We used to save `rejected` and `under-18` values as `ineligible`.
 
-- The TurboVote data (which we imported before Rock The Vote), would supply a `confirmed` status - similar to the Rock the Vote `Completed` status.
+- The TurboVote data (which we imported before Rock The Vote - see [Notes](#notes)), would supply a `confirmed` status - similar to the Rock the Vote `Completed` status.
 
 ### Status Hierarchy
 
@@ -72,7 +70,7 @@ Because RTV CSVs may contain multiple records _for a single user_, we use the fo
 - `register-OVR`
 - `register-form`
 
-For example: If a user has a `confirmed` status already from a previous TurboVote import, and the RTV file suggests that it should be `step-1`, do not update.
+For example: If a user has a `confirmed` status already from a previous TurboVote import (see [Notes](#notes), and the RTV file suggests that it should be `step-1`, do not update.
 
 We’ve established this hierarchy because each time a user interacts with the RTV form, a new row is created in the CSV. There are the edge cases when a user is chased to finish their registration that they would be interacting with the same row (thus the "steps"). Here’s one example:
 
@@ -91,7 +89,7 @@ If there's an existing status on the user, we follow the same hierarchy rules es
 
 - `unregistered` -- can be set when creating an account on the web, denoting that the user has not registered to vote.
 
-- `registration_complete` -- set from our RTV import if the record's status is either `register-form` or `register-ovr`.
+- `registration_complete` -- set from our RTV import if the record's status is either `register-form` or `register-OVR`.
 
 So the full hierarchy order taken into account when updating the profile from lowest to highest is:
 
@@ -161,6 +159,8 @@ If the `Tracking Source` doesn't contain a NS ID, the import searches for an exi
 
   - Example: At 12pm, the import finds Alice at status `step-2` and opting to SMS. Alice is sent a welcome text, and unsubscribes. The import runs again at 1pm, and finds Alice at a completed status, but still having opted in from earlier. Alice has already unsubscribed at this point, we would not want the import to resubscribe her per the opt-in from the previous hour.
 
+- Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
+
 - Data extracts the `source` and `source_detail` values found in the `Tracking Source` into Looker for voter registration reporting.
 
 - The `submission_created_at` date is when the importer ran. Details about when the registration was created/updated are in the `source_details`.
@@ -172,6 +172,8 @@ If the `Tracking Source` doesn't contain a NS ID, the import searches for an exi
 - In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a `voter-reg` post.
 
 - If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants. See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
+
+- Before we partnered with Rock The Vote on voter registration, we had partnered with TurboVote in 2016, 2018. See [VR Tech Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
 
 # Email Subscriptions
 
