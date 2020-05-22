@@ -12,7 +12,7 @@ If a user registers to vote twice in 2020 (e.g. change of address), two `voter-r
 
 ## Tracking Source
 
-Each registration may contain a `Tracking Source` column, which corresponds to the `source` query parameter we include when directing users to our Rock The Vote registration partner site. See [Phoenix docs](https://app.gitbook.com/@dosomething/s/phoenix-documentation/development/features/voter-registration#tracking-source)
+Each RTV record may contain a `Tracking Source` column, which corresponds to the `source` query parameter we include when directing users to our Rock The Vote registration partner site. See [Phoenix docs](https://app.gitbook.com/@dosomething/s/phoenix-documentation/development/features/voter-registration#tracking-source)
 
 The import saves the raw `Tracking Source` value property into the serialized `details` field of the `voter-reg` post it creates.
 
@@ -139,11 +139,9 @@ If an existing user **opts-out** of voting-related SMS messaging from DS:
 
 ## New Users
 
-If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with the following info provided from Rock The Vote:
+If the `Tracking Source` doesn't contain a NS ID, the import searches for an existing user by email, and last by mobile number. If a user is still not found, then a new user is created using the following record data:
 
-- First and last name
-
-- Address, City, Zip
+- PII: First name, last name, address, city, zip
 
 - Email Subscription
 
@@ -159,13 +157,21 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 
 ## Notes
 
-- Data uses the post `details` to determine `source` and `source_detail` used in voter registration reporting.
+- An existing user's SMS subscription is only updated once per unique registration. This is to avoid a scenario where a registration may appear twice within our hourly imports, and we could re-subscribe a user who unsubscribed after the first import that subscribed them was processed.
+
+  - Example: At 12pm, the import finds Alice at status `step-2` and opting to SMS. Alice is sent a welcome text, and unsubscribes. The import runs again at 1pm, and finds Alice at a completed status, but still having opted in from earlier. Alice has already unsubscribed at this point, we would not want the import to resubscribe her per the opt-in from the previous hour.
+
+- Data extracts the `source` and `source_detail` values found in the `Tracking Source` into Looker for voter registration reporting.
+
 - The `submission_created_at` date is when the importer ran. Details about when the registration was created/updated are in the `source_details`.
+
 - All of these signups will have a `source` of `importer-client` (this is how messaging is suppressed in C.io)
+
 - In early iterations of the import, the month that the registration came in would inform the `action` column (e.g., february-2018-rockthevote)
+
 - In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a `voter-reg` post.
-- If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants:
-  See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
+
+- If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants. See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
 
 # Email Subscriptions
 
