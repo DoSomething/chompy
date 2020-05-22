@@ -12,13 +12,13 @@ If a user registers to vote twice in 2020 (e.g. change of address), two `voter-r
 
 ## Tracking Source
 
-Each registration may contain a `Tracking Source` column, which corresponds to the `source` query parameter we include when directing users to our Rock The Vote registration partner site.
+Each registration may contain a `Tracking Source` column, which corresponds to the `source` query parameter we include when directing users to our Rock The Vote registration partner site. See [Phoenix docs](https://app.gitbook.com/@dosomething/s/phoenix-documentation/development/features/voter-registration#tracking-source)
 
 The import saves the raw `Tracking Source` value property into the serialized `details` field of the `voter-reg` post it creates.
 
-It also inspects the value to see whether `referral` and `user` keys have been passed. You can find [details on the format in the Phoenix docs](https://app.gitbook.com/@dosomething/s/phoenix-documentation/development/features/voter-registration#tracking-source)
+It also inspects the value to see whether `referral` and `user` keys have been passed:
 
-- If a `referral` key exists, the `user` value should be saved as the `referrer_user_id` on the post (and user, if creating a new user).
+- If a `referral` key exists, the `user` value should be saved as the `referrer_user_id` on the post (and user, if creating a new user). This `referral` is set when a [beta is registering to vote via an alpha's OVRD page](https://app.gitbook.com/@dosomething/s/phoenix-documentation/development/features/voter-registration#online-drives).
 
 - If a `referral` key does not exist, the `user` value corresponds to the ID of the user that is registering to vote. If present, we use this first when checking to match a user to the given row we are importing.
 
