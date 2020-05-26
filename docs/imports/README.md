@@ -1,16 +1,28 @@
 # Rock The Vote
 
-We import CSVs from Rock The Vote (RTV) to upsert users and their `voter-reg` posts. We previously imported this data from TurboVote (TV) in 2016, 2018. See [VR Tech Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
+Chompy integrates with the Rock The Vote (RTV) API to generate, download, and import voter registration CSV's on an hourly basis.
 
 ## Overview
 
 The import upserts a `voter-reg` type post for each unique "Started registration" datetime we receive for a user -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
 
-If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action. Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote twice in 2018 resulted in a single `voter-reg` post).
+If a user registers to vote twice in 2020 (e.g. change of address), two `voter-reg` posts will be upserted for the user and this year's action.
+
+## Tracking Source
+
+Each RTV record may contain a `Tracking Source` column, which corresponds to the `source` query parameter we include when directing users to our Rock The Vote registration partner site. See [Phoenix docs](https://app.gitbook.com/@dosomething/s/phoenix-documentation/development/features/voter-registration#tracking-source)
+
+The import saves the raw `Tracking Source` value property into the serialized `details` field of the `voter-reg` post it creates.
+
+It also inspects the value to see whether `referral` and `user` keys have been passed:
+
+- If a `referral` key exists, the `user` value should be saved as the `referrer_user_id` on the post (and user, if creating a new user). This `referral` is set when a [beta is registering to vote via an alpha's OVRD page](https://app.gitbook.com/@dosomething/s/phoenix-documentation/development/features/voter-registration#online-drives).
+
+- If a `referral` key does not exist, the `user` value corresponds to the ID of the user that is registering to vote. If present, we use this first when checking to match a user to the given row we are importing.
 
 ## Status
 
-As of [April 2020](https://github.com/DoSomething/chompy/pull/153), we save the status provided by Rock The Vote on `voter-reg` posts for Rock the Vote, with the exception of using two different statuses for the `Complete` status:
+We save the status provided by Rock The Vote on `voter-reg` posts for Rock the Vote, with the exception of using two different statuses for the `Complete` status:
 
 - `register-form` - User completed the registration form (the row `Finish with State` column is set to `No`)
 
@@ -36,15 +48,13 @@ These definitions can be found in the [RTV docs](https://www.rockthevote.org/pro
 
 ### Historical values
 
-- We used to save all of the `step-*` status values as `uncertain`.
+- We used to save all of the `step-*` status values as `uncertain`, and the `rejected` and `under-18` values as `ineligible`, up until [April 2020](https://github.com/DoSomething/chompy/pull/153).
 
-- We used to save `rejected` and `under-18` values as `ineligible`.
-
-- The TurboVote data (which we imported before Rock The Vote), would supply a `confirmed` status - similar to the Rock the Vote `Completed` status.
+- The TurboVote data (which we imported before Rock The Vote - see [Notes](#notes)), would supply a `confirmed` status - similar to the Rock the Vote `Completed` status.
 
 ### Status Hierarchy
 
-Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy, from lowest to highest, to determine which status should be reported on their Rogue post if a user post already exists for the import Action and its `Started registration` datetime:
+Because RTV CSVs may contain multiple records _for a single user_, we use the following hierarchy, from lowest to highest, to determine which status should be reported on their `voter-reg` post if a post already exists for user, import action, and its `Started registration` datetime:
 
 - `uncertain`
 - `ineligible`
@@ -58,7 +68,7 @@ Because RTV CSVs may contain multiple records _for a single user_, we use the fo
 - `register-OVR`
 - `register-form`
 
-For example: If a user has a `confirmed` status already from a previous TurboVote import, and the RTV file suggests that it should be `step-1`, do not update.
+For example: If a user has a `confirmed` status already from a previous TurboVote import (see [Notes](#notes), and the RTV file suggests that it should be `step-1`, do not update.
 
 We’ve established this hierarchy because each time a user interacts with the RTV form, a new row is created in the CSV. There are the edge cases when a user is chased to finish their registration that they would be interacting with the same row (thus the "steps"). Here’s one example:
 
@@ -77,7 +87,7 @@ If there's an existing status on the user, we follow the same hierarchy rules es
 
 - `unregistered` -- can be set when creating an account on the web, denoting that the user has not registered to vote.
 
-- `registration_complete` -- set from our RTV import if the record's status is either `register-form` or `register-ovr`.
+- `registration_complete` -- set from our RTV import if the record's status is either `register-form` or `register-OVR`.
 
 So the full hierarchy order taken into account when updating the profile from lowest to highest is:
 
@@ -125,11 +135,9 @@ If an existing user **opts-out** of voting-related SMS messaging from DS:
 
 ## New Users
 
-If the referral column doesn't have a NS ID, we try to find to a user by email, and last by mobile number. If a user is still not found, then create a NS account for them with the following info provided from Rock The Vote:
+If the `Tracking Source` doesn't contain a NS ID, the import searches for an existing user by email, and last by mobile number. If a user is still not found, then a new user is created using the following record data:
 
-- First and last name
-
-- Address, City, Zip
+- PII: First name, last name, address, city, zip
 
 - Email Subscription
 
@@ -143,25 +151,23 @@ If the referral column doesn't have a NS ID, we try to find to a user by email, 
 
 - Voter Registration Status
 
-### Online Drives
-
-Online drives is one of the tactics we have for getting people to get their friends registered to vote. For example, someone would sign up for the campaign and they have their own personal registration page (w/ a RTV form on it w/ the same kind of tracking) that they share with their friends/family. The appeal for them is that on their campaign action page, it will show how many people has viewed their personal registration page (v2 feature enhancement might be upping this to show who has registered).
-
-So, the Alpha sends their page to a Beta and they register. The Alpha's referral links look like this: https://vote.dosomething.org/member-drive?userId=58e68d5da0bfad4c3b4cd722&r=user:58e68d5da0bfad4c3b4cd722,source=web,source_details=onlinedrivereferral,referral=true
-
-We've added `referral=true` to the link so that we can know to not attribute the registration to the NS ID that is present in the URL. In this case, this NS ID is the referrer and not the registrant.
-
-If the referral column has `referral=true` in it, then proceed with the logic with dealing w/ non-member registrants above.
-
 ## Notes
 
-- Data uses the post `details` to determine `source` and `source_detail` used in voter registration reporting.
-- The `submission_created_at` date is when the importer ran. Details about when the registration was created/updated are in the `source_details`.
-- All of these signups will have a `source` of `importer-client` (this is how messaging is suppressed in C.io)
-- In early iterations of the import, the month that the registration came in would inform the `action` column (e.g., february-2018-rockthevote)
-- In early iterations of the import, we would pass Campaign/Run IDs as parameters within the referral code to use when upsert a `voter-reg` post.
-- If a user shares their UTM'ed URL with other people, there could be duplicate referral codes but associated with different registrants:
-  See a [screenshot](https://cl.ly/0v210N283y2X) of what this data looks like (note: the user depicted in this spreadsheet is fake.)
+- An existing user's SMS subscription is only updated once per unique registration. This is to avoid a scenario where a registration may appear twice within our hourly imports, and we could re-subscribe a user who unsubscribed after the first import that subscribed them was processed.
+
+  - Example: At 12pm, the import finds Alice at status `step-2` and opting to SMS. Alice is sent a welcome text, and unsubscribes. The import runs again at 1pm, and finds Alice at a completed status, but still having opted in from earlier. Alice has already unsubscribed at this point, we would not want the import to resubscribe her per the opt-in from the previous hour.
+
+- Prior to [changes made in April 2020](https://github.com/DoSomething/chompy/pull/154), the import would upsert a single post for all registrations for an action ID (e.g registering to vote three times in 2018 resulted in a single post, not three).
+
+- Data extracts the `source` and `source_detail` values found in the `Tracking Source` into Looker for voter registration reporting.
+
+- Very early iterations of this import would:
+
+  - Save the post action based on the month that the registration came in (e.g. `february-2018-rockthevote`)
+
+  - Use Campaign/Run IDs key/values within the Tracking Source to use when upserting the post
+
+- Before we partnered with Rock The Vote on voter registration, we had partnered with TurboVote in 2016, 2018. See [VR Tech Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
 
 # Email Subscriptions
 
