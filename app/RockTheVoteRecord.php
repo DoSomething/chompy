@@ -70,6 +70,7 @@ class RockTheVoteRecord
 
         $this->userData['id'] = $trackingSource['user_id'];
         $this->userData['referrer_user_id'] = $trackingSource['referrer_user_id'];
+        $this->postData['group_id'] = $trackingSource['group_id'];
         $this->postData['referrer_user_id'] = $trackingSource['referrer_user_id'];
     }
 
@@ -83,8 +84,9 @@ class RockTheVoteRecord
     public function parseTrackingSource($trackingSource)
     {
         $result = [
-            'user_id' => null,
+            'group_id' => null,
             'referrer_user_id' => null,
+            'user_id' => null,
         ];
 
         // Remove some nonsense that comes in front of the referral code sometimes
@@ -114,15 +116,15 @@ class RockTheVoteRecord
             // Expected key: "user"
             if ($key === 'user' || $key === 'user_id' || $key === 'userid') {
                 $userId = $value[1];
-            }
-
+            } elseif ($key === 'group_id') {
+                $result['group_id'] = (int) $value[1];
             /**
              * If referral parameter is set to true, the user parameter belongs to the referring
              * user, not the user that should be associated with this voter registration record.
              *
              * Expected key: "referral"
              */
-            if (($key === 'referral' || $key === 'refferal') && str_to_boolean($value[1])) {
+            } elseif (($key === 'referral' || $key === 'refferal') && str_to_boolean($value[1])) {
                 /**
                  * Return result to force querying for existing user via this record email or mobile
                  * upon import.
