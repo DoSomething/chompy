@@ -66,21 +66,21 @@ class RockTheVoteRecord
             'action_id' => $config['post']['action_id'],
         ];
 
-        $referralCode = $this->parseReferralCode($record['Tracking Source']);
+        $trackingSource = $this->parseTrackingSource($record['Tracking Source']);
 
-        $this->userData['id'] = $referralCode['user_id'];
-        $this->userData['referrer_user_id'] = $referralCode['referrer_user_id'];
-        $this->postData['referrer_user_id'] = $referralCode['referrer_user_id'];
+        $this->userData['id'] = $trackingSource['user_id'];
+        $this->userData['referrer_user_id'] = $trackingSource['referrer_user_id'];
+        $this->postData['referrer_user_id'] = $trackingSource['referrer_user_id'];
     }
 
     /**
      * Parses User ID or Referrer User ID from input value.
      * Editors manually enter this value as a URL query string, so we safety check for typos.
      *
-     * @param string $referralCode
+     * @param string $trackingSource
      * @return array
      */
-    public function parseReferralCode($referralCode)
+    public function parseTrackingSource($trackingSource)
     {
         $result = [
             'user_id' => null,
@@ -88,20 +88,20 @@ class RockTheVoteRecord
         ];
 
         // Remove some nonsense that comes in front of the referral code sometimes
-        if (str_contains($referralCode, 'iframe?r=')) {
-            $referralCode = str_replace('iframe?r=', null, $referralCode);
+        if (str_contains($trackingSource, 'iframe?r=')) {
+            $trackingSource = str_replace('iframe?r=', null, $trackingSource);
         }
-        if (str_contains($referralCode, 'iframe?')) {
-            $referralCode = str_replace('iframe?', null, $referralCode);
+        if (str_contains($trackingSource, 'iframe?')) {
+            $trackingSource = str_replace('iframe?', null, $trackingSource);
         }
 
-        if (empty($referralCode)) {
+        if (empty($trackingSource)) {
             return $result;
         }
 
-        $referralCode = explode(',', $referralCode);
+        $trackingSource = explode(',', $trackingSource);
 
-        foreach ($referralCode as $value) {
+        foreach ($trackingSource as $value) {
             // See if we are dealing with ":" or "="
             if (str_contains($value, ':')) {
                 $value = explode(':', $value);
