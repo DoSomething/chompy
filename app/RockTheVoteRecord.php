@@ -76,7 +76,7 @@ class RockTheVoteRecord
 
     /**
      * Parses User ID or Referrer User ID from input value.
-     * Editors manually enter this value as a URL query string, so we safety check for typos.
+     * Editors may manually enter this value as a URL query string, so we safety check for typos.
      *
      * @param string $trackingSource
      * @return array
@@ -89,7 +89,8 @@ class RockTheVoteRecord
             'user_id' => null,
         ];
 
-        // Remove some nonsense that comes in front of the referral code sometimes
+        // Our voting portal sometimes includes this leading iframe value, we may not need this.
+        // @see https://dosomething.slack.com/archives/C1KL1MKAS/p1585091476054100
         if (str_contains($trackingSource, 'iframe?r=')) {
             $trackingSource = str_replace('iframe?r=', null, $trackingSource);
         }
