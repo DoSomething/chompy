@@ -115,7 +115,15 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $result = [
             'user' => [],
             'mobile_user' => [],
-            'post' => Arr::only($post, ['id', 'type', 'action_id', 'status', 'details', 'referrer_user_id']),
+            'post' => Arr::only($post, [
+                'id',
+                'type',
+                'action_id',
+                'status',
+                'details',
+                'referrer_user_id',
+                'group_id',
+            ]),
         ];
 
         $userFields = ['id', 'email', 'mobile', 'voter_registration_status', 'sms_status', 'sms_subscription_topics', 'email_subscription_status', 'email_subscription_topics', 'referrer_user_id'];
