@@ -89,15 +89,6 @@ class RockTheVoteRecord
             'user_id' => null,
         ];
 
-        // Our voting portal sometimes includes this leading iframe value, we may not need this.
-        // @see https://dosomething.slack.com/archives/C1KL1MKAS/p1585091476054100
-        if (str_contains($trackingSource, 'iframe?r=')) {
-            $trackingSource = str_replace('iframe?r=', null, $trackingSource);
-        }
-        if (str_contains($trackingSource, 'iframe?')) {
-            $trackingSource = str_replace('iframe?', null, $trackingSource);
-        }
-
         if (empty($trackingSource)) {
             return $result;
         }
