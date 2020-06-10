@@ -138,7 +138,7 @@ class RockTheVoteRecordTest extends TestCase
      */
     public function testSetsUserIdToNullIfNotExistsInTrackingSource()
     {
-        $trackingSource = 'campaignID:8017,campaignRunID:8022,source:email,source_details:newsletter_bdaytrigger';
+        $trackingSource = 'source:email,source_details:newsletter_bdaytrigger';
 
         $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
             'Tracking Source' => $trackingSource,
@@ -146,6 +146,26 @@ class RockTheVoteRecordTest extends TestCase
 
         $this->assertEquals($record->userData['id'], null);
         $this->assertEquals($record->userData['referrer_user_id'], null);
+        $this->assertEquals($record->postData['group_id'], null);
+        $this->assertEquals($record->postData['referrer_user_id'], null);
+    }
+
+    /**
+     * Test that a post group ID is set if found in tracking source .
+     *
+     * @return void
+     */
+    public function testSetsPostGroupIdIfExistsInTrackingSource()
+    {
+        $trackingSource = 'source:email,source_details:newsletter_bdaytrigger,group_id=12';
+
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            'Tracking Source' => $trackingSource,
+        ]));
+
+        $this->assertEquals($record->userData['id'], null);
+        $this->assertEquals($record->userData['referrer_user_id'], null);
+        $this->assertEquals($record->postData['group_id'], 12);
         $this->assertEquals($record->postData['referrer_user_id'], null);
     }
 
