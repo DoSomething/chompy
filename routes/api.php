@@ -18,9 +18,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 // Third Party Integration
-$router->group(['prefix' => 'v1'], function () {
+Route::group(['prefix' => 'v1'], function () {
     // CallPower
-    $this->post('callpower/call', 'ThirdParty\CallPowerController@store');
+    Route::post('callpower/call', 'ThirdParty\CallPowerController@store');
+
     // SoftEdge
-    $this->post('softedge/email', 'ThirdParty\SoftEdgeController@store');
+    Route::post('softedge/email', 'ThirdParty\SoftEdgeController@store');
 });

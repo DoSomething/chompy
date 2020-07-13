@@ -12,8 +12,8 @@
         "dosomething/gateway": "^1.17",
         "fideloper/proxy": "^4.0",
         "itsgoingd/clockwork": "^3.0",
-        "laravel/framework": "5.7.*",
-        "laravelcollective/html": "v5.7",
+        "laravel/framework": "5.8.*",
+        "laravelcollective/html": "5.8.*",
         "league/csv": "^9.0",
         "league/flysystem-aws-s3-v3": "~1.0",
         "league/uri": "^5.3",
@@ -23,8 +23,8 @@
     "require-dev": {
         "fzaninotto/faker": "~1.4",
         "laravel/tinker": "~1.0",
-        "mockery/mockery": "0.9.*",
-        "phpunit/phpunit": "~6.0"
+        "mockery/mockery": "^1.4.0",
+        "phpunit/phpunit": "^8.0"
     },
     "autoload": {
         "classmap": ["database"],

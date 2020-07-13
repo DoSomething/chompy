@@ -97,9 +97,9 @@ class RockTheVoteRecord
 
         foreach ($trackingSource as $value) {
             // See if we are dealing with ":" or "="
-            if (str_contains($value, ':')) {
+            if (Str::contains($value, ':')) {
                 $value = explode(':', $value);
-            } elseif (str_contains($value, '=')) {
+            } elseif (Str::contains($value, '=')) {
                 $value = explode('=', $value);
             }
 
