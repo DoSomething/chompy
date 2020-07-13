@@ -47,14 +47,19 @@ class ImportFileController extends Controller
 
         if ($importType === ImportType::$rockTheVote) {
             $userId = \Auth::user()->northstar_id;
-            $user = gateway('northstar')->asClient()->getUser($userId);
+            $user = gateway('northstar')->asClient()->getUser($userId, [
+                'addr_street1', 'addr_street2', 'email', 'mobile', 'last_name',
+            ]);
 
             $data = [
-                'display_name' => $user->display_name,
+                'addr_street1' => $user->addr_street1,
+                'addr_street2' => $user->addr_street2,
                 'addr_city' => $user->addr_city,
                 'addr_zip' => $user->addr_zip,
-                'email_preview' => $user->email_preview,
-                'phone_preview' => $user->mobile_preview,
+                'email' => $user->email,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'phone' => $user->mobile,
                 'tracking_source' => 'source:test,source_details:ChompyUI',
                 'started_registration' => Carbon::now()->format('Y-m-d H:i:s O'),
             ];
