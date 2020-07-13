@@ -45,7 +45,7 @@ class ImportFileController extends Controller
 
         $data = [];
         $userId = \Auth::user()->northstar_id;
-        $user = gateway('northstar')->asClient()->getUser('id', $userId);
+        $user = gateway('northstar')->asClient()->getUser($userId);
 
         if ($importType === ImportType::$rockTheVote) {
             $data = [

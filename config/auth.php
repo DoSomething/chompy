@@ -2,13 +2,6 @@
 
 return [
     /*
-     * This is a temporary hack until
-     * https://github.com/DoSomething/gateway/issues/65
-     * is resolved.
-     */
-    'model' => Chompy\User::class,
-
-    /*
     |--------------------------------------------------------------------------
     | Authentication Defaults
     |--------------------------------------------------------------------------

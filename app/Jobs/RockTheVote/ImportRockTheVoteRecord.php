@@ -152,7 +152,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     private function getUser($id, $email, $mobile)
     {
         if ($id) {
-            $user = gateway('northstar')->asClient()->getUser('id', $id);
+            $user = gateway('northstar')->asClient()->getUser($id);
 
             if ($user && $user->id) {
                 info('Found user by id', ['user' => $user->id]);
@@ -162,7 +162,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         }
 
         if ($email) {
-            $user = gateway('northstar')->asClient()->getUser('email', $email);
+            $user = gateway('northstar')->asClient()->getUserByEmail($email);
 
             if ($user && $user->id) {
                 info('Found user by email', ['user' => $user->id]);
@@ -175,7 +175,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             return null;
         }
 
-        $user = gateway('northstar')->asClient()->getUser('mobile', $mobile);
+        $user = gateway('northstar')->asClient()->getUserByMobile($mobile);
 
         if ($user && $user->id) {
             info('Found user by mobile', ['user' => $user->id]);
@@ -343,7 +343,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         }
 
         // Check if another user already owns the import mobile.
-        $this->mobileUser = gateway('northstar')->asClient()->getUser('mobile', $this->userData['mobile']);
+        $this->mobileUser = gateway('northstar')->asClient()->getUserByMobile($this->userData['mobile']);
 
         // If another user owns the import mobile, update their subscription.
         if ($this->mobileUser) {

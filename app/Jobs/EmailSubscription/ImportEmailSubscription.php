@@ -82,7 +82,7 @@ class ImportEmailSubscription implements ShouldQueue
      */
     private function getUser()
     {
-        $user = gateway('northstar')->asClient()->getUser('email', $this->email);
+        $user = gateway('northstar')->asClient()->getUserByEmail($this->email);
         if ($user && $user->id) {
             return $user;
         }
