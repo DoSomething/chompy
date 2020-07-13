@@ -126,7 +126,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             ]),
         ];
 
-        $userFields = ['id', 'email_preview', 'mobile_preview', 'voter_registration_status', 'sms_status', 'sms_subscription_topics', 'email_subscription_status', 'email_subscription_topics', 'referrer_user_id'];
+        $userFields = ['id', 'email', 'mobile', 'voter_registration_status', 'sms_status', 'sms_subscription_topics', 'email_subscription_status', 'email_subscription_topics', 'referrer_user_id'];
 
         foreach ($userFields as $fieldName) {
             $result['user'][$fieldName] = $user->{$fieldName};
