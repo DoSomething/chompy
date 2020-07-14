@@ -16,7 +16,7 @@
   </div>
   <label for="addr_street2" class="col-sm-3 col-form-label">Home unit</label>
   <div class="col-sm-3">
-    {!! Form::text('addr_street1', $data['addr_street1'], ['class' => 'form-control']) !!}
+    {!! Form::text('addr_street2', $data['addr_street2'], ['class' => 'form-control']) !!}
   </div>
 </div>
 <div class="form-group row">
