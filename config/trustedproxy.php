@@ -1,7 +1,7 @@
 <?php
 
 // Pre-process any comma-separated values into an array.
-$trustedProxies = env('TRUSTED_PROXY_IP_ADDRESSES');
+$trustedProxies = env('TRUSTED_PROXY_IP_ADDRESSES', '');
 if (str_contains($trustedProxies, ',')) {
     $trustedProxies = explode(',', $trustedProxies);
 }

@@ -44,10 +44,13 @@ class ImportFileController extends Controller
         }
 
         $data = [];
-        $userId = \Auth::user()->northstar_id;
-        $user = gateway('northstar')->asClient()->getUser('id', $userId);
 
         if ($importType === ImportType::$rockTheVote) {
+            $userId = \Auth::user()->northstar_id;
+            $user = gateway('northstar')->asClient()->getUser($userId, [
+                'addr_street1', 'addr_street2', 'email', 'mobile', 'last_name',
+            ]);
+
             $data = [
                 'addr_street1' => $user->addr_street1,
                 'addr_street2' => $user->addr_street2,

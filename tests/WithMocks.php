@@ -55,9 +55,9 @@ trait WithMocks
      */
     public function mockGetNorthstarUser($data = [])
     {
-        $this->northstarMock->shouldReceive('getUser')->andReturnUsing(function ($type, $id) use (&$data) {
+        $this->northstarMock->shouldReceive('getUser')->andReturnUsing(function ($id) use (&$data) {
             return new NorthstarUser(array_merge([
-                'id' => $type === 'id' ? $id : $this->faker->northstar_id,
+                'id' => $id,
                 'first_name' => $this->faker->firstName,
                 'last_name' => $this->faker->lastName,
                 'birthdate' => $this->faker->date,

@@ -82,7 +82,7 @@ class ImportCallPowerRecord implements ShouldQueue
     {
         // Get the user by mobile number.
         info('getting user with the mobile: ' . $mobile);
-        $user = gateway('northstar')->asClient()->getUser('mobile', $mobile);
+        $user = gateway('northstar')->asClient()->getUserByMobile($mobile);
 
         // If there is no user, create one.
         if (is_null($user)) {

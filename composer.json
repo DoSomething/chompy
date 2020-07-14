@@ -6,25 +6,25 @@
     "type": "project",
     "require": {
         "php": "7.3.*",
+        "ext-redis": "*",
         "aws/aws-sdk-php": "~3.0",
-        "dfurnes/environmentalist": "0.0.2",
-        "doctrine/dbal": "^2.6",
-        "dosomething/gateway": "^1.17",
+        "dfurnes/environmentalist": "0.0.6",
+        "doctrine/dbal": "^2.10",
+        "dosomething/gateway": "^3.0",
         "fideloper/proxy": "^4.0",
         "itsgoingd/clockwork": "^3.0",
-        "laravel/framework": "5.7.*",
-        "laravelcollective/html": "v5.7",
+        "laravel/framework": "^6.0",
+        "laravelcollective/html": "^6.0",
         "league/csv": "^9.0",
         "league/flysystem-aws-s3-v3": "~1.0",
         "league/uri": "^5.3",
-        "predis/predis": "~1.0",
-        "pusher/pusher-php-server": "~3.0"
+        "pusher/pusher-php-server": "^4.0"
     },
     "require-dev": {
-        "fzaninotto/faker": "~1.4",
-        "laravel/tinker": "~1.0",
-        "mockery/mockery": "0.9.*",
-        "phpunit/phpunit": "~6.0"
+        "fzaninotto/faker": "^1.9",
+        "laravel/tinker": "^2.0",
+        "mockery/mockery": "^1.4.0",
+        "phpunit/phpunit": "^8.0"
     },
     "autoload": {
         "classmap": ["database"],

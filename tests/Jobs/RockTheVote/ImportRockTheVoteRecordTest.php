@@ -498,8 +498,8 @@ class ImportRockTheVoteRecordTest extends TestCase
         $row = $this->faker->rockTheVoteReportRow([
             'Phone' => $phoneNumber,
         ]);
-        $this->northstarMock->shouldReceive('getUser')
-            ->with('mobile', $phoneNumber)
+        $this->northstarMock->shouldReceive('getUserByMobile')
+            ->with($phoneNumber)
             ->andReturn($mobileUser);
         $this->northstarMock->shouldReceive('updateUser')
             ->with($mobileUser->id, [
