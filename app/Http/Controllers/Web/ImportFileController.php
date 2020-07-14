@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Chompy\Models\ImportFile;
 use Chompy\Models\RockTheVoteLog;
 use Chompy\Jobs\ImportFileRecords;
-use Illuminate\Support\Facades\Input;
 use Chompy\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Chompy\Jobs\ImportRockTheVoteRecord;
@@ -185,7 +184,7 @@ class ImportFileController extends Controller
         }
 
         return redirect('import/'.$importType.'?source=test')
-            ->withInput(Input::all())
+            ->withInput($request->input())
             ->with('status', $result);
     }
 }
