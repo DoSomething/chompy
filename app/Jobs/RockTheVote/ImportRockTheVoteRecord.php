@@ -23,9 +23,16 @@ class ImportRockTheVoteRecord implements ShouldQueue
     /**
      * The record parsed from a Rock the Vote csv.
      *
-     * @var array
+     * @var RockTheVoteRecord
      */
     protected $record;
+
+    /**
+     * The mobile user (if different from "primary" user).
+     * 
+     * @var NorthstarUser
+     */
+    protected $mobileUser;
 
     /**
      * Create a new job instance.
@@ -106,15 +113,23 @@ class ImportRockTheVoteRecord implements ShouldQueue
     }
 
     /**
-     * Returns given user and post with relevant fields per imported record.
+     * When running this job synchronously (e.g. ImportFileController), we return an
+     * array of context/results from the 'handle' method to aid with testing.
      *
      * @return array
      */
     private function formatResponse(NorthstarUser $user, array $post)
     {
-        $result = [
-            'user' => [],
-            'mobile_user' => [],
+        $userFields = [
+            'id', 'email_preview', 'mobile_preview', 'voter_registration_status', 'referrer_user_id',
+            'sms_status', 'sms_subscription_topics', 'email_subscription_status', 'email_subscription_topics',
+        ];
+
+        return [
+            'record.userData' => $this->record->userData,
+            'record.postData' => $this->record->postData,
+            'user' => Arr::only($user->toArray(), $userFields),
+            'mobile_user' => !empty($this->mobileUser) ? Arr::only($this->mobileUser->toArray(), $userFields) : null,
             'post' => Arr::only($post, [
                 'id',
                 'type',
@@ -125,20 +140,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
                 'group_id',
             ]),
         ];
-
-        $userFields = ['id', 'email', 'mobile', 'voter_registration_status', 'sms_status', 'sms_subscription_topics', 'email_subscription_status', 'email_subscription_topics', 'referrer_user_id'];
-
-        foreach ($userFields as $fieldName) {
-            $result['user'][$fieldName] = $user->{$fieldName};
-        }
-
-        if (isset($this->mobileUser)) {
-            foreach ($userFields as $fieldName) {
-                $result['mobile_user'][$fieldName] = $this->mobileUser->{$fieldName};
-            }
-        }
-
-        return $result;
     }
 
     /**
