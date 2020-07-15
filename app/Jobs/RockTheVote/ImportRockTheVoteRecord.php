@@ -29,7 +29,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
     /**
      * The mobile user (if different from "primary" user).
-     * 
+     *
      * @var NorthstarUser
      */
     protected $mobileUser;
@@ -129,7 +129,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
             'record.userData' => $this->record->userData,
             'record.postData' => $this->record->postData,
             'user' => Arr::only($user->toArray(), $userFields),
-            'mobile_user' => !empty($this->mobileUser) ? Arr::only($this->mobileUser->toArray(), $userFields) : null,
+            'mobile_user' => ! empty($this->mobileUser) ? Arr::only($this->mobileUser->toArray(), $userFields) : null,
             'post' => Arr::only($post, [
                 'id',
                 'type',
