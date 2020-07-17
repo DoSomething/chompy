@@ -91,7 +91,7 @@ class RockTheVoteReport extends Model
     }
 
     /**
-     * Creates a new report with this report's time and since, and saves it to retry_report_id.
+     * Creates a new report from since and before, and saves it to retry_report_id.
      *
      * @return RockTheVoteReport
      */
