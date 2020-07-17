@@ -89,4 +89,19 @@ class RockTheVoteReport extends Model
     {
         return round(($this->current_index * 100) / $this->row_count);
     }
+
+    /**
+     * Creates a new report with this report's time and since, and saves it to retry_report_id.
+     *
+     * @return RockTheVoteReport
+     */
+    public function createRetryReport()
+    {
+        $retryReport = self::createFromApi($this->since, $this->before);
+
+        $this->retry_report_id = $retryReport->id;
+        $this->save();
+
+        return $retryReport;
+    }
 }
