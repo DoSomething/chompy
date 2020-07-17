@@ -67,12 +67,19 @@ class RockTheVoteReportController extends Controller
     /**
      * Display a listing of Rock The Vote reports.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $query = RockTheVoteReport::orderBy('id', 'desc');
+
+        if ($request->query('status') === 'failed') {
+            $query->where('status', 'failed');
+        }
+
         return view('pages.rock-the-vote-reports.index', [
-            'data' => RockTheVoteReport::orderBy('id', 'desc')->paginate(15),
+            'data' => $query->paginate(15),
         ]);
     }
 }
