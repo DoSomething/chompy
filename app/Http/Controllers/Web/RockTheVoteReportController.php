@@ -94,8 +94,13 @@ class RockTheVoteReportController extends Controller
         $report = RockTheVoteReport::findOrFail($id);
         $retryReport = $report->createRetryReport();
 
+        if (config('services.rock_the_vote.faker')) {
+            return redirect()->back()
+                ->with('status', 'Created fake retry report ' . $retryReport->id);
+        }
+
         ImportRockTheVoteReport::dispatch(\Auth::user(), $retryReport);
 
-        return redirect()->back()->with('status', 'Dispatched retry report ' . $retryReport->id);      
+        return redirect()->back()->with('status', 'Dispatched retry report ' . $retryReport->id);
     }
 }
