@@ -74,7 +74,7 @@ class RockTheVoteReportController extends Controller
     {
         $query = RockTheVoteReport::orderBy('id', 'desc');
 
-        if ($request->query('status') == 'failed') {
+        if ($request->query('status') === 'failed') {
             $query->where('status', 'failed');
         }
 
