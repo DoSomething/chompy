@@ -20,7 +20,7 @@ $router->post('upload/{importType}', 'ImportFileController@upload')->name('impor
 Route::resource('import-files', 'ImportFileController', ['only' => ['index', 'show']]);
 
 Route::resource('rock-the-vote-reports', 'RockTheVoteReportController', [
-    'except' => ['delete', 'update'],
+    'except' => ['delete'],
 ]);
 
 Route::resource('users', 'UserController', ['only' => ['show']]);
