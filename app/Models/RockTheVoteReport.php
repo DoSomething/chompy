@@ -18,13 +18,14 @@ class RockTheVoteReport extends Model
      * @var array
      */
     protected $fillable = [
-        'id',
-        'status',
-        'since',
         'before',
-        'row_count',
         'current_index',
         'dispatched_at',
+        'id',
+        'retry_report_id',
+        'row_count',
+        'since',
+        'status',
         'user_id',
     ];
 
@@ -34,9 +35,9 @@ class RockTheVoteReport extends Model
      * @var array
      */
     protected $dates = [
-        'since',
         'before',
         'dispatched_at',
+        'since',
     ];
 
     /**
@@ -48,8 +49,9 @@ class RockTheVoteReport extends Model
      * @var array
      */
     public static $indexes = [
-        'status',
         'dispatched_at',
+        'retry_report_id',
+        'status',
     ];
 
     /**
