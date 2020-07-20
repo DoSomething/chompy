@@ -28,7 +28,7 @@
             </p>
         @else
             <form method="POST" action="{{ route('rock-the-vote-reports.update', $report->id) }}">
-                {{ csrf_field()}}
+                {{ csrf_field() }}
                 {{ method_field('PATCH') }}
                 <div>
                     <input type="submit" class="btn btn-primary" value="Retry">
