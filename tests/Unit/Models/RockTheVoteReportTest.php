@@ -91,4 +91,37 @@ class RockTheVoteReportTest extends TestCase
             \Config::set('services.rock_the_vote.faker', 'true');
         }
     }
+
+    /**
+     * Test that createRetryReport creates a report and sets retry_report_id.
+     *
+     * @return void
+     */
+    public function testCreateRetryReport()
+    {
+        $isFaker = config('services.rock_the_vote.faker');
+
+        if ($isFaker) {
+            \Config::set('services.rock_the_vote.faker', false);
+        }
+
+        $this->rockTheVoteMock->shouldReceive('createReport')->andReturn((object) [
+            'status'=> 'queued',
+            'status_url' => 'https://register.rockthevote.com/api/v4/registrant_reports/17',
+        ]);
+
+        $report = factory(RockTheVoteReport::class)->create([
+            'status' => 'failed',
+        ]);
+
+        $this->assertEquals($report->retry_report_id, null);
+
+        $retryReport = $report->createRetryReport();
+
+        $this->assertEquals($report->retry_report_id, $retryReport->id);
+
+        if ($isFaker) {
+            \Config::set('services.rock_the_vote.faker', 'true');
+        }
+    }
 }
