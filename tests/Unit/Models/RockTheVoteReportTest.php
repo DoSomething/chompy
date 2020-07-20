@@ -102,17 +102,14 @@ class RockTheVoteReportTest extends TestCase
             'since' => '2019-12-19 00:00:00',
         ];
 
-        $report = factory(RockTheVoteReport::class)
-          ->create(array_merge($params, ['status' => 'failed']));
+        $report = factory(RockTheVoteReport::class)->create($params);
 
-        $this->rockTheVoteMock->shouldReceive('createReport')
-          ->with($params)
-          ->andReturn((object) [
+        $this->assertEquals($report->retry_report_id, null);
+
+        $this->rockTheVoteMock->shouldReceive('createReport')->with($params)->andReturn((object) [
             'status'=> 'queued',
             'status_url' => 'https://register.rockthevote.com/api/v4/registrant_reports/17',
         ]);
-
-        $this->assertEquals($report->retry_report_id, null);
 
         $retryReport = $report->createRetryReport();
 
