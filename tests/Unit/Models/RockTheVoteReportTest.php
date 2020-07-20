@@ -9,18 +9,39 @@ use Chompy\Models\RockTheVoteReport;
 class RockTheVoteReportTest extends TestCase
 {
     /**
+     * Whether the fake RTV API configuration variable is set.
+     *
+     * @var bool
+     */
+    protected $isFakerEnabled;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->isFakerEnabled = config('services.rock_the_vote.faker');
+
+        if ($this->isFakerEnabled) {
+            \Config::set('services.rock_the_vote.faker', false);
+        }
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+
+        if ($this->isFakerEnabled) {
+            \Config::set('services.rock_the_vote.faker', 'true');
+        }
+    }
+
+    /**
      * Test that expected fields are parsed from given API response object.
      *
      * @return void
      */
     public function testCreateViaApiWithValidResponse()
     {
-        $isFaker = config('services.rock_the_vote.faker');
-
-        if ($isFaker) {
-            \Config::set('services.rock_the_vote.faker', false);
-        }
-
         $this->rockTheVoteMock->shouldReceive('createReport')->andReturn((object) [
             'status'=> 'queued',
             'status_url' => 'https://register.rockthevote.com/api/v4/registrant_reports/17',
@@ -36,10 +57,6 @@ class RockTheVoteReportTest extends TestCase
         $this->assertEquals($report->before, $before);
         $this->assertEquals($report->status, 'queued');
         $this->assertEquals($report->user_id, null);
-
-        if ($isFaker) {
-            \Config::set('services.rock_the_vote.faker', 'true');
-        }
     }
 
     /**
@@ -49,21 +66,11 @@ class RockTheVoteReportTest extends TestCase
      */
     public function testCreateViaApiWithInvalidResponseType()
     {
-        $isFaker = config('services.rock_the_vote.faker');
-
-        if ($isFaker) {
-            \Config::set('services.rock_the_vote.faker', false);
-        }
-
         $this->rockTheVoteMock->shouldReceive('createReport')->andReturn('test');
 
         $this->expectException(ErrorException::class);
 
         RockTheVoteReport::createViaApi();
-
-        if ($isFaker) {
-            \Config::set('services.rock_the_vote.faker', 'true');
-        }
     }
 
     /**
@@ -73,12 +80,6 @@ class RockTheVoteReportTest extends TestCase
      */
     public function testCreateViaApiWithMissingStatusUrl()
     {
-        $isFaker = config('services.rock_the_vote.faker');
-
-        if ($isFaker) {
-            \Config::set('services.rock_the_vote.faker', false);
-        }
-
         $this->rockTheVoteMock->shouldReceive('createReport')->andReturn((object) [
             'status'=> 'queued',
         ]);
@@ -86,32 +87,29 @@ class RockTheVoteReportTest extends TestCase
         $this->expectException(ErrorException::class);
 
         RockTheVoteReport::createViaApi();
-
-        if ($isFaker) {
-            \Config::set('services.rock_the_vote.faker', 'true');
-        }
     }
 
     /**
-     * Test that createRetryReport creates a report and sets retry_report_id.
+     * Test that createRetryReport sets the retry_report_id after creating a report with the same
+     * since and before parameters.
      *
      * @return void
      */
     public function testCreateRetryReport()
     {
-        $isFaker = config('services.rock_the_vote.faker');
+        $params = [
+            'before' => '2020-02-19 00:00:00',
+            'since' => '2019-12-19 00:00:00',
+        ];
 
-        if ($isFaker) {
-            \Config::set('services.rock_the_vote.faker', false);
-        }
+        $report = factory(RockTheVoteReport::class)
+          ->create(array_merge($params, ['status' => 'failed']));
 
-        $this->rockTheVoteMock->shouldReceive('createReport')->andReturn((object) [
+        $this->rockTheVoteMock->shouldReceive('createReport')
+          ->with($params)
+          ->andReturn((object) [
             'status'=> 'queued',
             'status_url' => 'https://register.rockthevote.com/api/v4/registrant_reports/17',
-        ]);
-
-        $report = factory(RockTheVoteReport::class)->create([
-            'status' => 'failed',
         ]);
 
         $this->assertEquals($report->retry_report_id, null);
@@ -119,9 +117,5 @@ class RockTheVoteReportTest extends TestCase
         $retryReport = $report->createRetryReport();
 
         $this->assertEquals($report->retry_report_id, $retryReport->id);
-
-        if ($isFaker) {
-            \Config::set('services.rock_the_vote.faker', 'true');
-        }
     }
 }
