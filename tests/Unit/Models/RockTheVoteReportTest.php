@@ -15,6 +15,12 @@ class RockTheVoteReportTest extends TestCase
      */
     public function testCreateViaApiWithValidResponse()
     {
+        $isFaker = config('services.rock_the_vote.faker');
+
+        if ($isFaker) {
+            \Config::set('services.rock_the_vote.faker', false);
+        }
+
         $this->rockTheVoteMock->shouldReceive('createReport')->andReturn((object) [
             'status'=> 'queued',
             'status_url' => 'https://register.rockthevote.com/api/v4/registrant_reports/17',
@@ -30,6 +36,10 @@ class RockTheVoteReportTest extends TestCase
         $this->assertEquals($report->before, $before);
         $this->assertEquals($report->status, 'queued');
         $this->assertEquals($report->user_id, null);
+
+        if ($isFaker) {
+            \Config::set('services.rock_the_vote.faker', 'true');
+        }
     }
 
     /**
@@ -39,11 +49,21 @@ class RockTheVoteReportTest extends TestCase
      */
     public function testCreateViaApiWithInvalidResponseType()
     {
+        $isFaker = config('services.rock_the_vote.faker');
+
+        if ($isFaker) {
+            \Config::set('services.rock_the_vote.faker', false);
+        }
+
         $this->rockTheVoteMock->shouldReceive('createReport')->andReturn('test');
 
         $this->expectException(ErrorException::class);
 
         RockTheVoteReport::createViaApi();
+
+        if ($isFaker) {
+            \Config::set('services.rock_the_vote.faker', 'true');
+        }
     }
 
     /**
@@ -53,6 +73,12 @@ class RockTheVoteReportTest extends TestCase
      */
     public function testCreateViaApiWithMissingStatusUrl()
     {
+        $isFaker = config('services.rock_the_vote.faker');
+
+        if ($isFaker) {
+            \Config::set('services.rock_the_vote.faker', false);
+        }
+
         $this->rockTheVoteMock->shouldReceive('createReport')->andReturn((object) [
             'status'=> 'queued',
         ]);
@@ -60,5 +86,9 @@ class RockTheVoteReportTest extends TestCase
         $this->expectException(ErrorException::class);
 
         RockTheVoteReport::createViaApi();
+
+        if ($isFaker) {
+            \Config::set('services.rock_the_vote.faker', 'true');
+        }
     }
 }
