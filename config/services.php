@@ -74,5 +74,7 @@ return [
         'api_key' =>  env('ROCK_THE_VOTE_API_KEY'),
         'partner_id' => env('ROCK_THE_VOTE_PARTNER_ID'),
         'url' => env('ROCK_THE_VOTE_API_URL', 'https://register.rockthevote.com'),
+        // Used for local development to avoid making API requests.
+        'faker' => env('ROCK_THE_VOTE_API_FAKER', false),
     ],
 ];

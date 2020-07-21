@@ -34,7 +34,7 @@ class RockTheVoteReportController extends Controller
     }
 
     /**
-     * Execute API request to create a Rock The Vote Report, and save ID to storage.
+     * Execute API request to create a Rock The Vote Report, and dispatches for import.
      *
      * @param  \Illuminate\Http\Request  $request
      */
@@ -81,5 +81,26 @@ class RockTheVoteReportController extends Controller
         return view('pages.rock-the-vote-reports.index', [
             'data' => $query->paginate(15),
         ]);
+    }
+
+    /**
+     * Creates a retry report for given Rock The Vote Report, and dispatches for import.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function update(Request $request, $id)
+    {
+        $report = RockTheVoteReport::findOrFail($id);
+        $retryReport = $report->createRetryReport();
+
+        if (config('services.rock_the_vote.faker')) {
+            return redirect()->back()
+                ->with('status', 'Created fake retry report ' . $retryReport->id);
+        }
+
+        ImportRockTheVoteReport::dispatch(\Auth::user(), $retryReport);
+
+        return redirect()->back()->with('status', 'Dispatched retry report ' . $retryReport->id);
     }
 }

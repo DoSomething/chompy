@@ -18,13 +18,14 @@ class RockTheVoteReport extends Model
      * @var array
      */
     protected $fillable = [
-        'id',
-        'status',
-        'since',
         'before',
-        'row_count',
         'current_index',
         'dispatched_at',
+        'id',
+        'retry_report_id',
+        'row_count',
+        'since',
+        'status',
         'user_id',
     ];
 
@@ -34,9 +35,9 @@ class RockTheVoteReport extends Model
      * @var array
      */
     protected $dates = [
-        'since',
         'before',
         'dispatched_at',
+        'since',
     ];
 
     /**
@@ -48,8 +49,9 @@ class RockTheVoteReport extends Model
      * @var array
      */
     public static $indexes = [
-        'status',
         'dispatched_at',
+        'retry_report_id',
+        'status',
     ];
 
     /**
@@ -61,6 +63,22 @@ class RockTheVoteReport extends Model
      */
     public static function createViaApi($since = null, $before = null)
     {
+        $userId = optional(\Auth::user())->northstar_id;
+
+        if (config('services.rock_the_vote.faker')) {
+            $reportId = self::count() + 1;
+
+            info('Creating fake report with ID ' . $reportId);
+
+            return self::create([
+                'id' => $reportId,
+                'since' => $since,
+                'before' => $before,
+                'status' => 'queued',
+                'user_id' => $userId,
+            ]);
+        }
+
         $response = app(RockTheVote::class)->createReport([
             'since' => $since,
             'before' => $before,
@@ -76,7 +94,7 @@ class RockTheVoteReport extends Model
             'since' => $since,
             'before' => $before,
             'status' => $response->status,
-            'user_id' => optional(\Auth::user())->northstar_id,
+            'user_id' => $userId,
         ]);
     }
 
@@ -86,5 +104,20 @@ class RockTheVoteReport extends Model
     public function getPercentageAttribute()
     {
         return round(($this->current_index * 100) / $this->row_count);
+    }
+
+    /**
+     * Creates a new report from since and before, and saves it to retry_report_id.
+     *
+     * @return RockTheVoteReport
+     */
+    public function createRetryReport()
+    {
+        $retryReport = self::createViaApi($this->since, $this->before);
+
+        $this->retry_report_id = $retryReport->id;
+        $this->save();
+
+        return $retryReport;
     }
 }
