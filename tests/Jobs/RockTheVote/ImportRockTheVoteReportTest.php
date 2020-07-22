@@ -106,7 +106,7 @@ class ImportRockTheVoteReportTest extends TestCase
 
         $importRockTheVoteReportJob->handle();
 
-        Bus::assertDispatched(ImportRockTheVoteReport::class, function ($job) use (&$report, &$user) {
+        Bus::assertDispatched(ImportRockTheVoteReport::class, function ($job) use (&$report) {
             $params = $job->getParameters();
 
             $this->assertEquals($params['report']->id, $report->retry_report_id);
