@@ -57,7 +57,7 @@ class ImportRockTheVoteReport implements ShouldQueue
         if ($status !== 'complete') {
             $this->report->save();
 
-            // If non-failed, status may be queued or building, so try importing again in 2 minutes. 
+            // If non-failed, status may be queued or building, so try importing again in 2 minutes.
             if ($status !== 'failed') {
                 return self::dispatch($this->user, $this->report)->delay(now()->addMinutes(2));
             }
