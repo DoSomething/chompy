@@ -13,11 +13,11 @@ use Chompy\Jobs\ImportRockTheVoteReport;
 class ImportRockTheVoteReportTest extends TestCase
 {
     /**
-     * Test that report is not downloaded when status not complete.
+     * Test that report is not downloaded and job is retried if status is building.
      *
      * @return void
      */
-    public function testReportStatusNotComplete()
+    public function testReportStatusBuilding()
     {
         Bus::fake();
 
@@ -50,7 +50,71 @@ class ImportRockTheVoteReportTest extends TestCase
     }
 
     /**
-     * Test that report is downloaded and imported when status is complete.
+     * Test that a new job is not dispatched if status is failed and report has a retry report ID.
+     *
+     * @return void
+     */
+    public function testReportStatusFailedAndRetried()
+    {
+        Bus::fake();
+
+        $report = factory(RockTheVoteReport::class)->create([
+            'retry_report_id' => 27,
+        ]);
+        $user = User::forceCreate(['role' => 'admin']);
+
+        $this->rockTheVoteMock->shouldReceive('getReportStatusById')->andReturn((object) [
+            'status'=> 'failed',
+            'record_count' => 0,
+            'current_index' => 0,
+        ]);
+        $this->rockTheVoteMock->shouldNotReceive('getReportByUrl');
+
+        $importRockTheVoteReportJob = new ImportRockTheVoteReport($user, $report);
+
+        $importRockTheVoteReportJob->handle();
+
+        Bus::assertNotDispatched(ImportRockTheVoteReport::class);
+    }
+
+    /**
+     * Test that a new report is dispatched if status is failed and report retry report ID is null.
+     *
+     * @return void
+     */
+    public function testReportStatusFailedAndNotRetried()
+    {
+        Bus::fake();
+
+        $report = factory(RockTheVoteReport::class)->create();
+        $user = User::forceCreate(['role' => 'admin']);
+
+        $this->rockTheVoteMock->shouldReceive('getReportStatusById')->andReturn((object) [
+            'status'=> 'failed',
+            'record_count' => 0,
+            'current_index' => 0,
+        ]);
+        $this->rockTheVoteMock->shouldReceive('createReport')->andReturn((object) [
+            'status'=> 'queued',
+            'status_url' => 'https://register.rockthevote.com/api/v4/registrant_reports/127',
+        ]);
+        $this->rockTheVoteMock->shouldNotReceive('getReportByUrl');
+
+        $importRockTheVoteReportJob = new ImportRockTheVoteReport($user, $report);
+
+        $importRockTheVoteReportJob->handle();
+
+        Bus::assertDispatched(ImportRockTheVoteReport::class, function ($job) use (&$report, &$user) {
+            $params = $job->getParameters();
+
+            $this->assertEquals($params['report']->id, $report->retry_report_id);
+
+            return true;
+        });
+    }
+
+    /**
+     * Test that report is downloaded and its contents are dispatched for import if status complete.
      *
      * @return void
      */

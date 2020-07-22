@@ -52,14 +52,31 @@ class ImportRockTheVoteReport implements ShouldQueue
         $this->report->row_count = $response->record_count;
         $this->report->current_index = $response->current_index;
 
-        info('Report status is ' . $status);
+        info('Report ' . $reportId . ' status is ' . $status);
 
         if ($status !== 'complete') {
             $this->report->save();
 
-            return self::dispatch($this->user, $this->report)->delay(now()->addMinutes(2));
+            // If non-failed, status may be queued or building, so try importing again in 2 minutes. 
+            if ($status !== 'failed') {
+                return self::dispatch($this->user, $this->report)->delay(now()->addMinutes(2));
+            }
+
+            // If failed and we've already retried this report, log the oddity and discard this job.
+            if ($this->report->retry_report_id) {
+                info('Report ' . $reportId . ' already has retry report ' . $this->report->retry_report_id);
+
+                return;
+            }
+
+            $retryReport = $this->report->createRetryReport();
+
+            info('Report ' . $reportId . ' created retry report ' . $this->report->retry_report_id);
+
+            return self::dispatch($this->user, $retryReport);
         }
 
+        // Download the completed report CSV.
         $now = Carbon::now();
         $path = 'uploads/' . ImportType::$rockTheVote . '-report-' . $reportId . '-' .$now . '.csv';
 
@@ -67,6 +84,7 @@ class ImportRockTheVoteReport implements ShouldQueue
 
         info('Downloaded report '.$reportId);
 
+        // Import report CSV.
         ImportFileRecords::dispatch($this->user, $path, ImportType::$rockTheVote, ['report_id' => $reportId])->delay(now()->addSeconds(3));
 
         $this->report->dispatched_at = $now;
