@@ -30,7 +30,13 @@
                 {{$report->before}}
               </td>
               <td class="col-md-2">
-                {{$report->status}}
+                @if ($report->retry_report_id)
+                  retried <a href="{{ route('rock-the-vote-reports.show', $report->retry_report_id) }}">
+                    #{{ $report->retry_report_id }}
+                  </a>
+                @else
+                  {{$report->status}}
+                @endif
               </td>
               <td class="col-md-2">
                 {{$report->dispatched_at}}
