@@ -29,6 +29,7 @@ class ImportRockTheVoteReportTest extends TestCase
             'record_count' => 117,
             'current_index' => 3,
         ]);
+        $this->rockTheVoteMock->shouldNotReceive('createReport');
         $this->rockTheVoteMock->shouldNotReceive('getReportByUrl');
 
         $importRockTheVoteReportJob = new ImportRockTheVoteReport($user, $report);
@@ -68,6 +69,7 @@ class ImportRockTheVoteReportTest extends TestCase
             'record_count' => 0,
             'current_index' => 0,
         ]);
+        $this->rockTheVoteMock->shouldNotReceive('createReport');
         $this->rockTheVoteMock->shouldNotReceive('getReportByUrl');
 
         $importRockTheVoteReportJob = new ImportRockTheVoteReport($user, $report);
@@ -132,7 +134,7 @@ class ImportRockTheVoteReportTest extends TestCase
             'record_count' => 1112,
             'current_index' => 1112,
         ]);
-
+        $this->rockTheVoteMock->shouldNotReceive('createReport');
         $this->rockTheVoteMock->shouldReceive('getReportByUrl');
 
         $importRockTheVoteReportJob = new ImportRockTheVoteReport($user, $report);
