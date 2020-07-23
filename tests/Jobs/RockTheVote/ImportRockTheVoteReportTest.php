@@ -14,7 +14,7 @@ class ImportRockTheVoteReportTest extends TestCase
 {
     /**
      * Test that a job is dispatched to import this report again after 2 minutes if status building.
-     * 
+     *
      * @return void
      */
     public function testReportStatusBuilding()
