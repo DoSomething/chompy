@@ -34,6 +34,8 @@ return [
     ],
     // Configuration for a Rock The Vote voter registration import.
     'rock_the_vote' => [
+        // Whether to automatically retry a report with failed status.
+        'retry_failed_reports' => env('ROCK_THE_VOTE_RETRY_FAILED_REPORTS_ENABLED', false),
         // Constants to use when creating a post.
         'post' => [
             'action_id' => env('ROCK_THE_VOTE_POST_ACTION_ID', 954),

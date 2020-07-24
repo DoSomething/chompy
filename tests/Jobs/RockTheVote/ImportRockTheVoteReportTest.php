@@ -4,6 +4,7 @@ namespace Tests\Jobs\RockTheVote;
 
 use Tests\TestCase;
 use Chompy\User;
+use Illuminate\Config;
 use Chompy\Jobs\ImportFileRecords;
 use Illuminate\Support\Facades\Bus;
 use Chompy\Models\RockTheVoteReport;
@@ -12,6 +13,36 @@ use Chompy\Jobs\ImportRockTheVoteReport;
 
 class ImportRockTheVoteReportTest extends TestCase
 {
+    /**
+     * Whether the retry failed reports configuration variable is set.
+     *
+     * @var bool
+     */
+    protected $isRetryFailedReportsEnabled;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        // Save initial value of this config so we can restore it after tests are done.
+        $this->isRetryFailedReportsEnabled = config('import.rock_the_vote.retry_failed_reports');
+    }
+
+    public function enableRetry()
+    {
+        config(['import.rock_the_vote.retry_failed_reports' => 'true']);
+    }
+
+    public function disableRetry()
+    {
+        config(['import.rock_the_vote.retry_failed_reports' => false]);
+    }
+
+    public function restoreRetry()
+    {
+        config(['import.rock_the_vote.retry_failed_reports' => $this->isRetryFailedReportsEnabled]);
+    }
+
     /**
      * Test that a job is dispatched to import this report again after 2 minutes if status building.
      *
@@ -51,12 +82,45 @@ class ImportRockTheVoteReportTest extends TestCase
     }
 
     /**
+     * Test that a new job is not dispatched if status is failed and retries are disabled.
+     *
+     * @return void
+     */
+    public function testReportStatusFailedAndRetryDisabled()
+    {
+        $this->disableRetry();
+
+        Bus::fake();
+
+        $report = factory(RockTheVoteReport::class)->create();
+        $user = User::forceCreate(['role' => 'admin']);
+
+        $this->rockTheVoteMock->shouldReceive('getReportStatusById')->andReturn((object) [
+            'status'=> 'failed',
+            'record_count' => 0,
+            'current_index' => 0,
+        ]);
+        $this->rockTheVoteMock->shouldNotReceive('createReport');
+        $this->rockTheVoteMock->shouldNotReceive('getReportByUrl');
+
+        $importRockTheVoteReportJob = new ImportRockTheVoteReport($user, $report);
+
+        $importRockTheVoteReportJob->handle();
+
+        Bus::assertNotDispatched(ImportRockTheVoteReport::class);
+
+        $this->restoreRetry();
+    }
+
+    /**
      * Test that a new job is not dispatched if status is failed and report has a retry report ID.
      *
      * @return void
      */
     public function testReportStatusFailedAndRetried()
     {
+        $this->enableRetry();
+
         Bus::fake();
 
         $report = factory(RockTheVoteReport::class)->create([
@@ -77,6 +141,8 @@ class ImportRockTheVoteReportTest extends TestCase
         $importRockTheVoteReportJob->handle();
 
         Bus::assertNotDispatched(ImportRockTheVoteReport::class);
+
+        $this->restoreRetry();
     }
 
     /**
@@ -86,6 +152,8 @@ class ImportRockTheVoteReportTest extends TestCase
      */
     public function testReportStatusFailedAndNotRetried()
     {
+        $this->enableRetry();
+
         Bus::fake();
 
         $report = factory(RockTheVoteReport::class)->create();
@@ -113,6 +181,8 @@ class ImportRockTheVoteReportTest extends TestCase
 
             return true;
         });
+
+        $this->restoreRetry();
     }
 
     /**
