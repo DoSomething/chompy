@@ -19,3 +19,5 @@ Staff members may login to Chompy with their Northstar credentials, and select a
 ### Pusher
 
 Chompy uses [Pusher](https://pusher.com/) as a [broadcast driver](https://laravel.com/docs/5.6/broadcasting) to update the import progress bar in real time.
+
+### We shall defeat the bot, we shall.
