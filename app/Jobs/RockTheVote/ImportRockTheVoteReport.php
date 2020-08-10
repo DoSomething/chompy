@@ -62,6 +62,10 @@ class ImportRockTheVoteReport implements ShouldQueue
                 return self::dispatch($this->user, $this->report)->delay(now()->addMinutes(2));
             }
 
+            if (config('import.rock_the_vote.retry_failed_reports') !== 'true') {
+                return;
+            }
+
             // If failed and we've already retried this report, log the oddity and discard this job.
             if ($this->report->retry_report_id) {
                 info('Report ' . $reportId . ' already has retry report ' . $this->report->retry_report_id);
