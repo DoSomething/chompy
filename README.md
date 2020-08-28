@@ -13,9 +13,6 @@ To get started with development, you'll first need local instances of [Northstar
 Next, fork and clone this repository, and [add it to your Homestead](https://github.com/DoSomething/communal-docs/blob/master/Homestead/readme.md). SSH into your VirtualBox, navigate to your Chompy directory, and run the installation steps:
 
 ```sh
-# First, switch to PHP 7.3
-$ php73
-
 # Install dependencies
 $ composer install && npm install
 
