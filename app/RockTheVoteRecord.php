@@ -59,13 +59,14 @@ class RockTheVoteRecord
                 'email_subscription_status' => $emailOptIn,
                 'email_subscription_topics' => $emailOptIn ? explode(',', $config['user']['email_subscription_topics']) : [],
             ]);
-        }
 
-        if ($mobile) {
-            $smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
+            // If a mobile was provided, set SMS subscriptions per opt-in value.
+            if ($mobile) {
+                $smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
 
-            $this->userData['sms_status'] = $smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
-            $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
+                $this->userData['sms_status'] = $smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
+                $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
+            }
         }
 
         $this->postData = [
