@@ -30,8 +30,6 @@ class RockTheVoteRecord
             $config = ImportType::getConfig(ImportType::$rockTheVote);
         }
 
-        $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
-        $mobile = isset($record[static::$mobileFieldName]) && is_valid_mobile($record[static::$mobileFieldName]) ? $record[static::$mobileFieldName] : null;
         $rtvStatus = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
 
         $this->userData = [
@@ -49,19 +47,21 @@ class RockTheVoteRecord
          * until they have been collected in step 2.
          */
         if ($rtvStatus !== 'step-1') {
+            $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
+
             $this->userData = array_merge($this->userData, [
                 'addr_street1' => $record['Home address'],
                 'addr_street2' => $record['Home unit'],
                 'addr_city' => $record['Home city'],
-                'first_name' => $record['First name'],
-                'last_name' => $record['Last name'],
-                'mobile' => $mobile,
                 'email_subscription_status' => $emailOptIn,
                 'email_subscription_topics' => $emailOptIn ? explode(',', $config['user']['email_subscription_topics']) : [],
+                'first_name' => $record['First name'],
+                'last_name' => $record['Last name'],
+                'mobile' => isset($record[static::$mobileFieldName]) && is_valid_mobile($record[static::$mobileFieldName]) ? $record[static::$mobileFieldName] : null,
             ]);
 
-            // If a mobile was provided, set SMS subscriptions per opt-in value.
-            if ($mobile) {
+            // If a mobile was provided, set SMS subscription per opt-in value.
+            if ($this->userData['mobile']) {
                 $smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
 
                 $this->userData['sms_status'] = $smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
