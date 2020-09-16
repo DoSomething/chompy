@@ -26,7 +26,7 @@ class FakerRockTheVoteReportRow extends Base
             'Finish with State' => 'Yes',
             'Pre-Registered' => 'No',
             'Started registration' => $this->daysAgoInRockTheVoteFormat(),
-            'Status' => 'Step 1',
+            'Status' => 'Step 2',
             'Tracking Source' => 'ads',
             'Opt-in to Partner email?' => 'Yes',
             'Opt-in to Partner SMS/robocall' => 'No',
