@@ -42,9 +42,10 @@ class RockTheVoteRecord
         ];
 
         /**
-         * At step 1, a user is not asked for PII or prompted to subscribe, but the Rock The Vote
-         * sometimes mysteriously sends through values for these fields. We don't want to save them
-         * until they have been collected in step 2.
+         * At step 1, a user has only provided their email and zip, but Rock The Vote will sometimes
+         * mysteriously send through data for fields populated in later steps. We don't want to save
+         * any other data until the status is at least step 2.
+         * @see /docs/imports/readme.MD#status
          */
         if ($rtvStatus !== 'step-1') {
             $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
