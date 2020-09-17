@@ -45,7 +45,7 @@ class RockTheVoteRecord
          * At step 1, a user has only provided their email and zip, but Rock The Vote will sometimes
          * mysteriously send through data for fields populated in later steps. We don't want to save
          * any other data until the status is at least step 2.
-         * @see /docs/imports/readme.MD#status
+         * @see /docs/imports/README.md#status
          */
         if ($rtvStatus !== 'step-1') {
             $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
