@@ -145,9 +145,6 @@ class ImportRockTheVoteRecord implements ShouldQueue
     /**
      * Check for user first by id, next by email, last by mobile.
      *
-     * @param string $id
-     * @param string $email
-     * @param string $mobile
      * @return NorthstarUser
      */
     private function getUser()
