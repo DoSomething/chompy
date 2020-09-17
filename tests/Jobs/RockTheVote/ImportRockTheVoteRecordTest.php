@@ -42,6 +42,30 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
+     * Test that a password reset email is not set when a new user is created with Step 1 status.
+     *
+     * @return void
+     */
+    public function testDoesNotSendPasswordResetWhenCreatesUserWithStep1()
+    {
+        $userId = $this->faker->northstar_id;
+        $row = $this->faker->rockTheVoteReportRow([
+            'Status' => 'Step 1',
+        ]);
+        $importFile = factory(ImportFile::class)->create();
+
+        $this->northstarMock->shouldReceive('getUser')->andReturn(null);
+        $this->mockCreateNorthstarUser(['id' => $userId]);
+        $this->northstarMock->shouldNotReceive('sendPasswordReset');
+        $this->rogueMock->shouldReceive('getPosts')->andReturn(null);
+        $this->rogueMock->shouldReceive('createPost')->andReturn([
+            'data' => $this->faker->rogueVoterRegPost(),
+        ]);
+
+        ImportRockTheVoteRecord::dispatch($row, $importFile);
+    }
+
+    /**
      * Test that user is not created if user is found.
      *
      * @return void
