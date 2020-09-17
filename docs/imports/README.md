@@ -161,7 +161,7 @@ If the RTV Status is past Step 1, we also include these fields when creating a n
 
 ## Notes
 
-- The conditional logic that checks for `Step 1` values when creating a user was introduced in [#190](https://github.com/DoSomething/chompy/pull/190). Prior to this change, the import would use all given fields when creating a new user (details in the PR its linked Pivotal story).
+- The conditional logic that checks for `Step 1` values when creating a user was introduced in [September 2020](https://github.com/DoSomething/chompy/pull/190). Prior to this change, the import would use all given fields when creating a new user (details in the PR its linked Pivotal story).
 
 - An existing user's SMS subscription is only updated once per unique registration. This is to avoid a scenario where a registration may appear twice within our hourly imports, and we could re-subscribe a user who unsubscribed after the first import that subscribed them was processed.
 
