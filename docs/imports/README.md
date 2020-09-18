@@ -36,8 +36,6 @@ The other status values returned from RTV are:
 
 - `step-1`: a person entered email/ZIP code on the first page, then stopped.
 
-  - Note -- we've seen profile info entered in rows that are on Step 1, and TBD why this happens sometimes.
-
 - `step-2`: user got to the second page to start filling out their personal info, but did not finish
 
 - `step-3`/`step-4`: a person finished entering their registration information, but either (1) did not click to open/print their paper registration form, or (2) were eligible to finish on their state website, but did not click through
@@ -135,9 +133,21 @@ If an existing user **opts-out** of voting-related SMS messaging from DS:
 
 ## New Users
 
-If the `Tracking Source` doesn't contain a NS ID, the import searches for an existing user by email, and last by mobile number. If a user is still not found, then a new user is created using the following record data:
+If the `Tracking Source` doesn't contain a NS ID, the import searches for an existing user by email, and last by mobile number. If a user is still not found, then a new user is created.
 
-- PII: First name, last name, address, city, zip
+If the RTV Status is Step 1, we create a new user with these fields:
+
+- Email
+
+- Zip
+
+- Voter Registration Status
+
+If the RTV Status is past Step 1, we also include these fields when creating a new user:
+
+- First and last name
+
+- Address and city
 
 - Email Subscription
 
@@ -149,9 +159,9 @@ If the `Tracking Source` doesn't contain a NS ID, the import searches for an exi
 
   - If user opts-out of SMS messaging from DS, user's `sms_status` will be set to `stop` and `sms_subscription_topics` will be set to empty.
 
-- Voter Registration Status
-
 ## Notes
+
+- The conditional logic that checks for `Step 1` values when creating a user was introduced in [September 2020](https://github.com/DoSomething/chompy/pull/190). Prior to this change, the import would use all given fields when creating a new user (details in the PR its linked Pivotal story).
 
 - An existing user's SMS subscription is only updated once per unique registration. This is to avoid a scenario where a registration may appear twice within our hourly imports, and we could re-subscribe a user who unsubscribed after the first import that subscribed them was processed.
 

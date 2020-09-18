@@ -55,6 +55,31 @@ class RockTheVoteRecordTest extends TestCase
     }
 
     /**
+     * Test that userData contains a smaller dataset when RTV status is Step 1.
+     *
+     * @return void
+     */
+    public function testStep1StatusUserData()
+    {
+        $exampleRow = $this->faker->rockTheVoteReportRow([
+            'Status' => 'Step 1',
+        ]);
+        $config = ImportType::getConfig(ImportType::$rockTheVote);
+
+        $record = new RockTheVoteRecord($exampleRow);
+
+        $this->assertEquals($record->userData, [
+            'addr_zip' => $exampleRow['Home zip code'],
+            'email' => $exampleRow['Email address'],
+            'id' => null,
+            'referrer_user_id' => null,
+            'source' => config('services.northstar.client_credentials.client_id'),
+            'source_detail' => $config['user']['source_detail'],
+            'voter_registration_status' => 'step-1',
+        ]);
+    }
+
+    /**
      * Test that user is not subscribed if they did not opt-in.
      *
      * @return void

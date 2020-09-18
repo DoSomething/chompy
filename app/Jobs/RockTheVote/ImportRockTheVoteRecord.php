@@ -60,7 +60,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
 
         info('Processing Rock The Vote record', ['started_registration' => $postDetails['Started registration']]);
 
-        $user = $this->getUser($this->userData['id'], $this->userData['email'], $this->userData['mobile']);
+        $user = $this->getUser();
 
         if (! $user) {
             info('User not found, creating user');
@@ -97,7 +97,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
         $user = $this->updateUserVoterRegistrationStatusIfChanged($user);
 
         // If registration does not have a mobile provided, no need to update SMS subscription.
-        if ($this->userData['mobile']) {
+        if (isset($this->userData['mobile'])) {
             $user = $this->updateUserSmsSubscriptionIfChanged($user);
         }
 
@@ -145,15 +145,12 @@ class ImportRockTheVoteRecord implements ShouldQueue
     /**
      * Check for user first by id, next by email, last by mobile.
      *
-     * @param string $id
-     * @param string $email
-     * @param string $mobile
      * @return NorthstarUser
      */
-    private function getUser($id, $email, $mobile)
+    private function getUser()
     {
-        if ($id) {
-            $user = gateway('northstar')->asClient()->getUser($id);
+        if ($this->userData['id']) {
+            $user = gateway('northstar')->asClient()->getUser($this->userData['id']);
 
             if ($user && $user->id) {
                 info('Found user by id', ['user' => $user->id]);
@@ -162,8 +159,8 @@ class ImportRockTheVoteRecord implements ShouldQueue
             }
         }
 
-        if ($email) {
-            $user = gateway('northstar')->asClient()->getUserByEmail($email);
+        if ($this->userData['email']) {
+            $user = gateway('northstar')->asClient()->getUserByEmail($this->userData['email']);
 
             if ($user && $user->id) {
                 info('Found user by email', ['user' => $user->id]);
@@ -172,11 +169,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
             }
         }
 
-        if (! $mobile) {
+        if (! isset($this->userData['mobile'])) {
             return null;
         }
 
-        $user = gateway('northstar')->asClient()->getUserByMobile($mobile);
+        $user = gateway('northstar')->asClient()->getUserByMobile($this->userData['mobile']);
 
         if ($user && $user->id) {
             info('Found user by mobile', ['user' => $user->id]);

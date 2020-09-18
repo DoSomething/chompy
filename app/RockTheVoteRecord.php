@@ -30,31 +30,44 @@ class RockTheVoteRecord
             $config = ImportType::getConfig(ImportType::$rockTheVote);
         }
 
-        $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
         $rtvStatus = $this->parseVoterRegistrationStatus($record['Status'], $record['Finish with State']);
 
         $this->userData = [
-            'addr_street1' => $record['Home address'],
-            'addr_street2' => $record['Home unit'],
-            'addr_city' => $record['Home city'],
             'addr_zip' => $record['Home zip code'],
             'email' => $record['Email address'],
-            'first_name' => $record['First name'],
-            'last_name' => $record['Last name'],
-            'mobile' => isset($record[static::$mobileFieldName]) && is_valid_mobile($record[static::$mobileFieldName]) ? $record[static::$mobileFieldName] : null,
-            'email_subscription_status' => $emailOptIn,
-            'email_subscription_topics' => $emailOptIn ? explode(',', $config['user']['email_subscription_topics']) : [],
-            'voter_registration_status' => Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus,
             // Source is required in order to set the source detail.
             'source' => config('services.northstar.client_credentials.client_id'),
             'source_detail' => $config['user']['source_detail'],
+            'voter_registration_status' => Str::contains($rtvStatus, 'register') ? 'registration_complete' : $rtvStatus,
         ];
 
-        if ($this->userData['mobile']) {
-            $smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
+        /**
+         * At step 1, a user has only provided their email and zip, but Rock The Vote will sometimes
+         * mysteriously send through data for fields populated in later steps. We don't want to save
+         * any other data until the status is at least step 2.
+         * @see /docs/imports/README.md#status
+         */
+        if ($rtvStatus !== 'step-1') {
+            $emailOptIn = str_to_boolean($record['Opt-in to Partner email?']);
 
-            $this->userData['sms_status'] = $smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
-            $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
+            $this->userData = array_merge($this->userData, [
+                'addr_street1' => $record['Home address'],
+                'addr_street2' => $record['Home unit'],
+                'addr_city' => $record['Home city'],
+                'email_subscription_status' => $emailOptIn,
+                'email_subscription_topics' => $emailOptIn ? explode(',', $config['user']['email_subscription_topics']) : [],
+                'first_name' => $record['First name'],
+                'last_name' => $record['Last name'],
+                'mobile' => isset($record[static::$mobileFieldName]) && is_valid_mobile($record[static::$mobileFieldName]) ? $record[static::$mobileFieldName] : null,
+            ]);
+
+            // If a mobile was provided, set SMS subscription per opt-in value.
+            if ($this->userData['mobile']) {
+                $smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
+
+                $this->userData['sms_status'] = $smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
+                $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
+            }
         }
 
         $this->postData = [
