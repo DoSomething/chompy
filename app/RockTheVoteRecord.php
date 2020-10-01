@@ -58,15 +58,19 @@ class RockTheVoteRecord
                 'email_subscription_topics' => $emailOptIn ? explode(',', $config['user']['email_subscription_topics']) : [],
                 'first_name' => $record['First name'],
                 'last_name' => $record['Last name'],
-                'mobile' => isset($record[static::$mobileFieldName]) && is_valid_mobile($record[static::$mobileFieldName]) ? $record[static::$mobileFieldName] : null,
             ]);
 
-            // If a mobile was provided, set SMS subscription per opt-in value.
-            if ($this->userData['mobile']) {
-                $smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
+            // If a the user opted in to SMS messaging, add their mobile number
+            $smsOptIn = str_to_boolean($record[static::$smsOptInFieldName]);
+            if ($smsOptIn) {
+                $this->userData['mobile'] = isset($record[static::$mobileFieldName]) && is_valid_mobile($record[static::$mobileFieldName]) ? $record[static::$mobileFieldName] : null;
 
-                $this->userData['sms_status'] = $smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
-                $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
+                // Only set SMS subscription fields if mobile is included and valid
+                if($this->userData['mobile']) {
+                    $this->userData['sms_status'] = $smsOptIn ? SmsStatus::$active : SmsStatus::$stop;
+                    $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
+                }
+
             }
         }
 
