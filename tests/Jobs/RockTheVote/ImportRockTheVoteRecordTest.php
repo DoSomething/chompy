@@ -523,7 +523,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             'Phone' => $phoneNumber,
             'Opt-in to Partner SMS/robocall' => 'No',
         ]);
-        // If the mobile is not owned by any other users, we can update our import user with it.
+        // We won't try to match on SMS or update this user
         $this->northstarMock->shouldNotReceive('getUserByMobile');
         $this->northstarMock->shouldNotReceive('updateUser');
 
