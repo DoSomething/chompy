@@ -69,7 +69,7 @@ class RockTheVoteRecord
                     $this->userData['mobile'] = $record[static::$mobileFieldName];
                     $this->userData['sms_status'] = SmsStatus::$active;
                     $this->userData['sms_subscription_topics'] = $smsOptIn ? explode(',', $config['user']['sms_subscription_topics']) : [];
-                }                
+                }
             }
         }
 
