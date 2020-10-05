@@ -80,7 +80,8 @@ class RockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that user is not subscribed if they did not opt-in.
+     * Test that if a user did not opt in to SMS or email, then their phone number
+     * is not saved and they are not subscribed.
      *
      * @return void
      */
@@ -94,10 +95,14 @@ class RockTheVoteRecordTest extends TestCase
 
         $record = new RockTheVoteRecord($exampleRow);
 
+        // Email
         $this->assertEquals($record->userData['email_subscription_status'], false);
         $this->assertEquals($record->userData['email_subscription_topics'], []);
-        $this->assertEquals($record->userData['sms_status'], 'stop');
-        $this->assertEquals($record->userData['sms_subscription_topics'], []);
+
+        // SMS
+        $this->assertEquals($record->userData['mobile'], null);
+        $this->assertEquals($record->userData['sms_status'], null);
+        $this->assertArrayNotHasKey('sms_subscription_topics', $record->userData);
     }
 
     /**

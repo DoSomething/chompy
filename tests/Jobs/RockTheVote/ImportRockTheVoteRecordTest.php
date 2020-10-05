@@ -475,7 +475,7 @@ class ImportRockTheVoteRecordTest extends TestCase
     }
 
     /**
-     * Test that import user's mobile is updated if they don't have one set, and no other user owns
+     * Test that import user's mobile is updated only if they don't have one set already, and no other user owns
      * the mobile number, and they have opted-in to SMS messaging.
      *
      * @return void
@@ -491,10 +491,9 @@ class ImportRockTheVoteRecordTest extends TestCase
             'Opt-in to Partner SMS/robocall' => 'Yes',
         ]);
         // If the mobile is not owned by any other users, we can update our import user with it.
-        // $this->northstarMock->shouldReceive('getUser')->andReturn(null);
         $this->northstarMock->shouldReceive('getUserByMobile')
-        ->with($phoneNumber)
-        ->andReturn(null);
+                                ->with($phoneNumber)
+                                ->andReturn(null);
         $this->northstarMock->shouldReceive('updateUser')
             ->with($user->id, [
                 'mobile' => $phoneNumber,
@@ -525,7 +524,7 @@ class ImportRockTheVoteRecordTest extends TestCase
             'Opt-in to Partner SMS/robocall' => 'No',
         ]);
         // If the mobile is not owned by any other users, we can update our import user with it.
-        $this->northstarMock->shouldNotReceive('getUser');
+        $this->northstarMock->shouldNotReceive('getUserByMobile');
         $this->northstarMock->shouldNotReceive('updateUser');
 
         $job = new ImportRockTheVoteRecord($row, factory(ImportFile::class)->create());
