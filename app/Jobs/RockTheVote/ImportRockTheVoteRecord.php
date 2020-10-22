@@ -48,9 +48,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
         try {
             $this->record = new RockTheVoteRecord($record, $this->config);
         } catch (ValidationException $e) {
+            $this->exception = $e;
+
             return;
         }
-        
+
         $this->userData = $this->record->userData;
         $this->postData = $this->record->postData;
         $this->smsOptIn = isset($this->userData['sms_status']) && $this->userData['sms_status'] == SmsStatus::$active;
@@ -63,10 +65,12 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function handle()
     {
-        if (!$this->record) {
+        if (! $this->record) {
             $this->importFile->incrementSkipCount();
 
-            return [];
+            return [
+                'response' => ['message' => $this->exception->getMessage()],
+            ];
         }
 
         $postDetails = $this->record->getPostDetails();

@@ -13,6 +13,31 @@ use DoSomething\Gateway\Resources\NorthstarUser;
 class ImportRockTheVoteRecordTest extends TestCase
 {
     /**
+     * Test that record is skipped if the RTV data is invalid.
+     *
+     * @return void
+     */
+    public function testSkipsImportIfInvalidRecordData()
+    {
+        $row = $this->faker->rockTheVoteReportRow([
+            RockTheVoteRecord::$startedRegistrationFieldName => '555-555-5555',
+        ]);
+        $importFile = factory(ImportFile::class)->create();
+
+        $this->northstarMock->shouldNotReceive('getUser');
+        $this->northstarMock->shouldNotReceive('createUser');
+        $this->rogueMock->shouldNotReceive('getPost');
+        $this->rogueMock->shouldNotReceive('createPost');
+
+        ImportRockTheVoteRecord::dispatch($row, $importFile);
+
+        $this->assertDatabaseHas('import_files', [
+            'id' => $importFile->id,
+            'skip_count' => 1,
+        ]);
+    }
+
+    /**
      * Test that user and post are created if user not found.
      *
      * @return void
