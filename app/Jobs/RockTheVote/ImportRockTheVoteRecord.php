@@ -65,6 +65,7 @@ class ImportRockTheVoteRecord implements ShouldQueue
     {
         if (!$this->record) {
             $this->importFile->incrementSkipCount();
+
             return [];
         }
 
