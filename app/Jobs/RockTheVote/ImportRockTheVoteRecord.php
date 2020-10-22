@@ -14,6 +14,7 @@ use Chompy\Models\RockTheVoteLog;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Validation\ValidationException;
 use DoSomething\Gateway\Resources\NorthstarUser;
 
 class ImportRockTheVoteRecord implements ShouldQueue
@@ -42,10 +43,16 @@ class ImportRockTheVoteRecord implements ShouldQueue
     public function __construct($record, ImportFile $importFile)
     {
         $this->config = ImportType::getConfig(ImportType::$rockTheVote);
-        $this->record = new RockTheVoteRecord($record, $this->config);
+        $this->importFile = $importFile;
+
+        try {
+            $this->record = new RockTheVoteRecord($record, $this->config);
+        } catch (ValidationException $e) {
+            return;
+        }
+        
         $this->userData = $this->record->userData;
         $this->postData = $this->record->postData;
-        $this->importFile = $importFile;
         $this->smsOptIn = isset($this->userData['sms_status']) && $this->userData['sms_status'] == SmsStatus::$active;
     }
 
@@ -56,6 +63,11 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function handle()
     {
+        if (!$this->record) {
+            $this->importFile->incrementSkipCount();
+            return [];
+        }
+
         $postDetails = $this->record->getPostDetails();
 
         info('Processing Rock The Vote record', ['started_registration' => $postDetails['Started registration']]);

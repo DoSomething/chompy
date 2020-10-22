@@ -3,6 +3,8 @@
 namespace Chompy;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class RockTheVoteRecord
 {
@@ -19,6 +21,11 @@ class RockTheVoteRecord
     public static $smsOptInFieldName = 'Opt-in to Partner SMS/robocall';
 
     /**
+     * @var string
+     */
+    public static $startedRegistrationFieldName = 'Started registration';
+
+    /**
      * Parses values to send to DS API from given CSV record, using given config.
      *
      * @param array $record
@@ -26,6 +33,20 @@ class RockTheVoteRecord
      */
     public function __construct($record, $config = null)
     {
+        $validator = Validator::make($record, [
+            static::$startedRegistrationFieldName => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            $errorMessages = $validator->errors()->all();
+
+            info('Invalid Rock The Vote record', array_merge([
+                static::$startedRegistrationFieldName => $record[static::$startedRegistrationFieldName],
+            ], $errorMessages));
+
+            throw ValidationException::withMessages($errorMessages);
+        }
+
         if (! $config) {
             $config = ImportType::getConfig(ImportType::$rockTheVote);
         }
