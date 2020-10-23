@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use Chompy\ImportType;
 use Chompy\RockTheVoteRecord;
+use Illuminate\Validation\ValidationException;
 
 class RockTheVoteRecordTest extends TestCase
 {
@@ -280,5 +281,29 @@ class RockTheVoteRecordTest extends TestCase
         foreach (config('import.rock_the_vote.post.details') as $key) {
             $this->assertEquals($result[$key], $row[$key]);
         }
+    }
+
+    /**
+     * @return void
+     */
+    public function testMissingStartedRegisration()
+    {
+        $this->expectException(ValidationException::class);
+
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            RockTheVoteRecord::$startedRegistrationFieldName => null,
+        ]));
+    }
+
+    /**
+     * @return void
+     */
+    public function testInvalidStartedRegisration()
+    {
+        $this->expectException(ValidationException::class);
+
+        $record = new RockTheVoteRecord($this->faker->rockTheVoteReportRow([
+            RockTheVoteRecord::$startedRegistrationFieldName => '555-555-5555',
+        ]));
     }
 }
