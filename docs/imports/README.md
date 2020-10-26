@@ -2,6 +2,10 @@
 
 Chompy integrates with the Rock The Vote (RTV) API to generate, download, and import voter registration CSV's on an hourly basis.
 
+QA: https://staging.rocky.rockthevote.com/registrants/new?partner=26299
+
+Production: https://register.rockthevote.com/registrants/new?partner=37187
+
 ## Overview
 
 The import upserts a `voter-reg` type post for each unique "Started registration" datetime we receive for a user -- saving it to an action we set via config variable. This import action is changed each election year, in order to track user registrations per election.
