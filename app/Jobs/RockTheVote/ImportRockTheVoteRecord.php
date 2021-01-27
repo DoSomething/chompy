@@ -249,11 +249,17 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     public function getPost(NorthstarUser $user)
     {
-        $result = app(Rogue::class)->getPosts([
+        $params = [
             'action_id' => $this->postData['action_id'],
             'northstar_id' => $user->id,
             'type' => config('import.rock_the_vote.post.type'),
-        ]);
+        ];
+
+        logger('getPost params', $params);
+
+        $result = app(Rogue::class)->getPosts($params);
+
+        logger('getPost response', $result);
 
         if (! $result['data']) {
             return null;
@@ -288,11 +294,17 @@ class ImportRockTheVoteRecord implements ShouldQueue
      */
     private function createPost($user)
     {
-        $post = app(Rogue::class)->createPost(array_merge([
+        $params = array_merge([
             'northstar_id' => $user->id,
-        ], $this->postData));
+        ], $this->postData);
+
+        logger('createPost params', $params);
+
+        $post = app(Rogue::class)->createPost($params);
 
         info('Created post', ['post' => $post['data']['id'], 'user' => $user->id]);
+
+        logger('createPost response', $post);
 
         return $post['data'];
     }
