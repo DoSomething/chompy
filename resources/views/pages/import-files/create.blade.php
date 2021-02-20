@@ -12,6 +12,8 @@
             @include('pages.partials.rock-the-vote.create', ['config' => $config])
         @elseif ($importType === \Chompy\ImportType::$emailSubscription)
             @include('pages.partials.email-subscription.create')
+        @elseif ($importType === \Chompy\ImportType::$mutePromotions)
+            @include('pages.partials.mute-promotions.create')
         @endif
         <div class="form-group">
             <h3>Upload</h3>

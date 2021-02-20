@@ -12,6 +12,13 @@ class ImportType
     public static $emailSubscription = 'email-subscription';
 
     /**
+     * A mute promotions import.
+     *
+     * @var string
+     */
+    public static $mutePromotions = 'mute-promotions';
+
+    /**
      * A Rock The Vote import.
      *
      * @var string
