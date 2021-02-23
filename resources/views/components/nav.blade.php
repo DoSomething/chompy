@@ -32,6 +32,13 @@
                             Email subscription
                         </a>
                     </li>
+
+                    <li @if (Request::path() === "import/mute-promotions") class="active" @endif>
+                        <a class="nav-item nav-link" href="/import/mute-promotions">
+                            Mute promotions
+                        </a>
+                    </li>
+
                     <li @if (strpos(Request::path(), 'rock-the-vote') !== false)) class="active" @endif>
                         <a class="nav-item nav-link" href="/rock-the-vote-reports">
                             Rock The Vote

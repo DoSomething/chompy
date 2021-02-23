@@ -54,8 +54,12 @@ class ImportFileRecords implements ShouldQueue
      * @param array $importOptions
      * @return void
      */
-    public function __construct(\Chompy\User $user = null, string $filepath, string $importType, array $importOptions = [])
-    {
+    public function __construct(
+        \Chompy\User $user = null,
+        string $filepath,
+        string $importType,
+        array $importOptions = []
+    ) {
         $this->filepath = $filepath;
         $this->importType = $importType;
         $this->importOptions = $importOptions;
@@ -105,11 +109,20 @@ class ImportFileRecords implements ShouldQueue
         $importFile->save();
 
         foreach ($records as $offset => $record) {
-            if ($this->importType === ImportType::$rockTheVote) {
-                ImportRockTheVoteRecord::dispatch($record, $importFile);
-            } elseif ($this->importType === ImportType::$emailSubscription) {
-                ImportEmailSubscription::dispatch($record, $importFile, $this->importOptions);
+            switch ($this->importType) {
+                case ImportType::$rockTheVote:
+                    ImportRockTheVoteRecord::dispatch($record, $importFile);
+                    break;
+
+                case ImportType::$emailSubscription:
+                    ImportEmailSubscription::dispatch($record, $importFile, $this->importOptions);
+                    break;
+
+                case ImportType::$mutePromotions:
+                    ImportMutePromotions::dispatch($record, $importFile);
+                    break;
             }
+
             event(new LogProgress('', 'progress', ($offset / $this->totalRecords) * 100));
         }
 
