@@ -2,6 +2,7 @@
 
 namespace Chompy\Http\Controllers\Web;
 
+use Chompy\Models\MutePromotionsLog;
 use Chompy\Models\RockTheVoteLog;
 use Chompy\Http\Controllers\Controller;
 
@@ -25,8 +26,10 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $rows = RockTheVoteLog::where('user_id', $id)->paginate(15);
-
-        return view('pages.users.show', ['id' => $id, 'rows' => $rows]);
+        return view('pages.users.show', [
+            'id' => $id,
+            'mutePromotionsLogs' => MutePromotionsLog::where('user_id', $id)->get(),
+            'rockTheVoteLogs' => RockTheVoteLog::where('user_id', $id)->paginate(15),
+        ]);
     }
 }

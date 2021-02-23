@@ -7,6 +7,7 @@ use Chompy\ImportType;
 use League\Csv\Reader;
 use Illuminate\Http\Request;
 use Chompy\Models\ImportFile;
+use Chompy\Models\MutePromotionsLog;
 use Chompy\Models\RockTheVoteLog;
 use Chompy\Jobs\ImportFileRecords;
 use Chompy\Http\Controllers\Controller;
@@ -95,9 +96,11 @@ class ImportFileController extends Controller
 
         $request->validate($rules);
 
-        // Push file to S3.
         $upload = $request->file('upload-file');
+        // Save original file name to reference from admin UI.
+        $importOptions['name'] = $upload->getClientOriginalName();
 
+        // Push file to S3.
         $path = 'uploads/' . $importType . '-importer' . Carbon::now() . '.csv';
         $csv = Reader::createFromPath($upload->getRealPath());
         $success = Storage::put($path, (string) $csv);
@@ -134,11 +137,20 @@ class ImportFileController extends Controller
         $importFile = ImportFile::findOrFail($id);
         $rows = [];
 
-        if ($importFile->import_type === ImportType::$rockTheVote) {
-            $rows = RockTheVoteLog::where('import_file_id', $id)->paginate(15);
+        switch ($importFile->import_type) {
+            case ImportType::$mutePromotions:
+                $rows = MutePromotionsLog::where('import_file_id', $id)->paginate(100);
+                break;
+
+            case ImportType::$rockTheVote:
+                $rows = RockTheVoteLog::where('import_file_id', $id)->paginate(15);
+                break;
         }
 
-        return view('pages.import-files.show', ['importFile' => $importFile, 'rows' => $rows]);
+        return view('pages.import-files.show', [
+            'importFile' => $importFile,
+            'rows' => $rows,
+        ]);
     }
 
     /**

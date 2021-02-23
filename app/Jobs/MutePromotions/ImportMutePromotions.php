@@ -4,6 +4,7 @@ namespace Chompy\Jobs;
 
 use Carbon\Carbon;
 use Chompy\Models\ImportFile;
+use Chompy\Models\MutePromotionsLog;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -44,8 +45,26 @@ class ImportMutePromotions implements ShouldQueue
             'promotions_muted_at' => Carbon::now(),
         ]);
 
+        MutePromotionsLog::create([
+            'import_file_id' => $this->importFile->id,
+            'user_id' => $this->userId,
+        ]);
+
         info('import.mute-promotions', ['promotions_muted_at' => $user->promotions_muted_at, 'user_id' => $this->userId]);
 
         $this->importFile->incrementImportCount();
+    }
+
+    /**
+     * Return the parameters passed to this job.
+     *
+     * @return array
+     */
+    public function getParameters()
+    {
+        return [
+            'import_file_id' => $this->importFile->id,
+            'user_id' => $this->userId,
+        ];
     }
 }
