@@ -54,4 +54,17 @@ class ImportMutePromotions implements ShouldQueue
 
         $this->importFile->incrementImportCount();
     }
+
+    /**
+     * Return the parameters passed to this job.
+     *
+     * @return array
+     */
+    public function getParameters()
+    {
+        return [
+            'import_file_id' => $this->importFile->id,
+            'user_id' => $this->userId,
+        ];
+    }
 }
