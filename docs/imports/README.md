@@ -183,6 +183,10 @@ If the RTV Status is past Step 1, we also include these fields when creating a n
 
 - Before we partnered with Rock The Vote on voter registration, we had partnered with TurboVote in 2016, 2018. See [VR Tech Inventory](https://docs.google.com/document/d/1xs2C3DNdD5h1j_abBrGVBNrsrxKvwn2VHDWweIEhvqc/edit?usp=sharing) for more details.
 
+# Mute Promotions
+
+Admins can upload CSV's of user IDs to delete their Customer.io profiles. The import will update each user's `promotions_muted_at` field via the Northstar API, triggering their Customer.io profile deletion.
+
 # Email Subscriptions
 
 Admins can upload CSV's of Instapage leads to subscribe users to email newsletters. The import will create or update an existing user via the Northstar API.
