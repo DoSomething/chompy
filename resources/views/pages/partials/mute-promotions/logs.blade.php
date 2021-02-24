@@ -15,3 +15,5 @@
         </tr>
     @endforeach
 </table>
+
+{{$rows->links()}}

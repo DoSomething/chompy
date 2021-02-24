@@ -2,7 +2,7 @@
 
 namespace Chompy\Jobs;
 
-use Carbon\Carbon;
+use Exception;
 use Chompy\Models\ImportFile;
 use Chompy\Models\MutePromotionsLog;
 use Illuminate\Bus\Queueable;
@@ -35,22 +35,29 @@ class ImportMutePromotions implements ShouldQueue
     }
 
     /**
-     * Execute the job to set user's promotions_muted_at field.
-     *
-     * @return array
+     * Execute the job to mute user promotions.
      */
     public function handle()
     {
-        $user = gateway('northstar')->asClient()->updateUser($this->userId, [
-            'promotions_muted_at' => Carbon::now(),
-        ]);
+        /*
+         * We're sending a POST request instead of DELETE because Gateway PHP doesn't properly
+         * parse a Northstar DELETE request.
+         */
+        $response = gateway('northstar')->asClient()->post('v2/users/'. $this->userId . '/promotions');
+
+        if (! $response) {
+            throw new Exception('Could not mute promotions for user ' . $this->userId);
+        }
 
         MutePromotionsLog::create([
             'import_file_id' => $this->importFile->id,
             'user_id' => $this->userId,
         ]);
 
-        info('import.mute-promotions', ['promotions_muted_at' => $user->promotions_muted_at, 'user_id' => $this->userId]);
+        info('import.mute-promotions', [
+            'user_id' => $this->userId,
+            'promotions_muted_at' => $response['data']['promotions_muted_at'],
+        ]);
 
         $this->importFile->incrementImportCount();
     }
