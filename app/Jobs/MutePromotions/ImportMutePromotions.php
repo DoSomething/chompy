@@ -2,7 +2,6 @@
 
 namespace Chompy\Jobs;
 
-use Carbon\Carbon;
 use Chompy\Models\ImportFile;
 use Chompy\Models\MutePromotionsLog;
 use Illuminate\Bus\Queueable;
