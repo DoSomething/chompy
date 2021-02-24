@@ -39,13 +39,13 @@ class ImportMutePromotions implements ShouldQueue
      */
     public function handle()
     {
-        /**
+        /*
          * We're sending a POST request instead of DELETE because Gateway PHP doesn't properly
          * parse a Northstar DELETE request.
          */
         $response = gateway('northstar')->asClient()->post('v2/users/'. $this->userId . '/promotions');
 
-        if (!$response) {
+        if (! $response) {
             throw new Exception('Could not mute promotions for user ' . $this->userId);
         }
 
