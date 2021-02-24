@@ -9,7 +9,7 @@ use Chompy\Jobs\ImportMutePromotions;
 class ImportMutePromotionsTest extends TestCase
 {
     /**
-     * Test that Northstar DELETE /users/:id/promotions request is executed.
+     * Test that Northstar Mute Promotions request is executed and logged.
      *
      * @return void
      */

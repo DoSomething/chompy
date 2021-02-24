@@ -185,7 +185,7 @@ If the RTV Status is past Step 1, we also include these fields when creating a n
 
 # Mute Promotions
 
-Admins can upload CSV's of user IDs to delete their Customer.io profiles. The import will update each user's `promotions_muted_at` field via the Northstar API, triggering their Customer.io profile deletion.
+Admins can upload CSV's of user IDs to delete their Customer.io profiles. The import will execute a Northstar API request to mute promotions for each user, setting their `promotions_muted_at` field and triggering their Customer.io profile deletion.
 
 # Email Subscriptions
 

@@ -139,7 +139,7 @@ class ImportFileController extends Controller
 
         switch ($importFile->import_type) {
             case ImportType::$mutePromotions:
-                $rows = MutePromotionsLog::where('import_file_id', $id)->paginate(25);
+                $rows = MutePromotionsLog::where('import_file_id', $id)->paginate(100);
                 break;
 
             case ImportType::$rockTheVote:
