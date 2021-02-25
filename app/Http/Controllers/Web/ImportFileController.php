@@ -131,7 +131,9 @@ class ImportFileController extends Controller
             $query->where('import_type', $importType);
         }
 
-        return view('pages.import-files.index', ['data' => $query->paginate(15)]);
+        return view('pages.import-files.index', [
+            'data' => $query->paginate(15)->appends(request()->query()),
+        ]);
     }
 
     /**

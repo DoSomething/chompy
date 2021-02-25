@@ -14,6 +14,7 @@
             <th class="col-md-3">Created by</th>
           </tr>
         </thead>
+
         @foreach($data as $key => $importFile)
             <tr class="row">
               <td class="col-md-3">
@@ -21,22 +22,27 @@
                   <strong>{{$importFile->created_at}}</strong>
                 </a>
               </td>
+
               <td class="col-md-3">
                 {{$importFile->import_type}}
+
                 @if ($importFile->options)
                   @include('pages.partials.import-files.import-options', ['options' => $importFile->options])
                 @endif
-              </td> 
+              </td>
+
               <td class="col-md-3">
                 {{$importFile->import_count}}
               </td>
+
               <td class="col-md-3">
                 {{$importFile->user_id ? $importFile->user_id : 'Console'}}
               </td>     
             </tr>
         @endforeach
     </table>
-    {{$data->links()}}
+
+    {{$data->appends(request()->query())->links()}}
 </div>
 
 @stop
