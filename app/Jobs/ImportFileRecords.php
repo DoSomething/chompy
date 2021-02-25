@@ -18,6 +18,14 @@ class ImportFileRecords implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
+     * The number of seconds the job can run before timing out.
+     * We set this to 12 minutes to avoid timeouts with the Mute Permutations CSVs (490K rows).
+     *
+     * @var int
+     */
+    public $timeout = 720;
+
+    /**
      * The path to the stored csv.
      *
      * @var string
