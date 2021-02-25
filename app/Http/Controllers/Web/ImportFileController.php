@@ -118,13 +118,22 @@ class ImportFileController extends Controller
     /**
      * Display a listing of import files.
      *
+     * @param Request $request
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = ImportFile::orderBy('id', 'desc')->paginate(15);
+        $importType = $request->query('type');
 
-        return view('pages.import-files.index', ['data' => $data]);
+        $query = ImportFile::orderBy('id', 'desc');
+
+        if ($importType) {
+            $query->where('import_type', $importType);
+        }
+
+        return view('pages.import-files.index', [
+            'data' => $query->paginate(15)->appends(request()->query()),
+        ]);
     }
 
     /**
