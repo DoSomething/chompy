@@ -15,6 +15,14 @@ class ImportMutePromotions implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
+     * The number of seconds the job can run before timing out.
+     * We set this to 12 minutes because each of these files is about 490K rows, and will time out.
+     *
+     * @var int
+     */
+    public $timeout = 720;
+
+    /**
      * The Northstar user ID to mute promotions for.
      *
      * @var string
