@@ -10,6 +10,7 @@ use Chompy\Models\ImportFile;
 use Chompy\Models\MutePromotionsLog;
 use Chompy\Models\RockTheVoteLog;
 use Chompy\Jobs\ImportFileRecords;
+use Illuminate\Support\Facades\Auth;
 use Chompy\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Chompy\Jobs\ImportRockTheVoteRecord;
@@ -46,7 +47,7 @@ class ImportFileController extends Controller
         $data = [];
 
         if ($importType === ImportType::$rockTheVote) {
-            $userId = \Auth::user()->northstar_id;
+            $userId = Auth::user()->northstar_id;
             $user = gateway('northstar')->asClient()->getUser($userId, [
                 'addr_street1', 'addr_street2', 'email', 'mobile', 'last_name',
             ]);
@@ -109,7 +110,8 @@ class ImportFileController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
-        ImportFileRecords::dispatch(\Auth::user(), $path, $importType, $importOptions)->delay(now()->addSeconds(3));
+        ImportFileRecords::dispatch(Auth::user(), $path, $importType, $importOptions)
+            ->delay(now()->addSeconds(3));
 
         return redirect('import/'.$importType)
             ->with('status', 'Queued '.$path.' for import.');
