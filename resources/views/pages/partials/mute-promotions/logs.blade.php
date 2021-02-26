@@ -16,4 +16,6 @@
     @endforeach
 </table>
 
-{{$rows->links()}}
+@if(method_exists($rows, 'links'))
+    {{$rows->links()}}
+@endif
