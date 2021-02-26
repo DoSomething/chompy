@@ -110,8 +110,11 @@ class ImportFileController extends Controller
             throw new HttpException(500, 'Unable read and store file to S3.');
         }
 
+        $queue = config('queue.names.high');
+
         ImportFileRecords::dispatch(Auth::user(), $path, $importType, $importOptions)
-            ->delay(now()->addSeconds(3));
+            ->delay(now()->addSeconds(3))
+            ->onQueue($queue);
 
         return redirect('import/'.$importType)
             ->with('status', 'Queued '.$path.' for import.');
