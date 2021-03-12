@@ -1,6 +1,6 @@
 # Chompy
 
-This is **Chompy**, the DoSomething.org importer app. Chompy is built using [Laravel 5.6](https://laravel.com/docs/5.6) and [bootstrap-sass](https://www.npmjs.com/package/bootstrap-sassbootstrap-sass).
+This is **Chompy**, the DoSomething.org importer app. Chompy is built using [Laravel 6](https://laravel.com/docs/6.x/) and [bootstrap-sass](https://www.npmjs.com/package/bootstrap-sassbootstrap-sass).
 
 ### Getting Started
 
@@ -25,7 +25,7 @@ $ npm run dev
 
 When running `php artisan chompy:setup`, add your local instances of Northstar and Rogue, along with your local Northstar auth credentials. The step for setting up [Pusher](https://github.com/DoSomething/chompy/blob/master/docs#pusher) is safe to ignore, as it is not required to run imports locally.
 
-We follow [Laravel's code style](http://laravel.com/docs/5.6/contributions#coding-style) and automatically
+We follow [Laravel's code style](http://laravel.com/docs/6.x/contributions#coding-style) and automatically
 lint all pull requests with [StyleCI](https://github.styleci.io/repos/125392958). Be sure to configure
 [EditorConfig](http://editorconfig.org) to ensure you have proper indentation settings.
 
@@ -40,6 +40,6 @@ and will be promptly addressed. Thank you for taking the time to responsibly dis
 
 ### License
 
-&copy;2019 DoSomething.org. Chompy is free software, and may be redistributed under the terms specified
+&copy; DoSomething.org. Chompy is free software, and may be redistributed under the terms specified
 in the [LICENSE](https://github.com/DoSomething/chompy/blob/master/LICENSE) file. The name and logo for
 DoSomething.org are trademarks of Do Something, Inc and may not be used without permission.
