@@ -51,11 +51,9 @@ class ExportController extends Controller
         $csv->insertOne(['user_id']);
 
         foreach ($data as $failedJob) {
-            $json = json_decode($failedJob->payload);
-            $command = unserialize($json->data->command);
-            $parameters = $command->getParameters();
+            $data = parse_failed_job($failedJob);
 
-            $csv->insertOne([$parameters['user_id']]);
+            $csv->insertOne([$data['parameters']['user_id']]);
         }
 
         $csv->output('mute-promotions-failed-jobs.csv');

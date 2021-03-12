@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Str;
+
 /**
  * Parse a string as boolean.
  *
@@ -61,4 +63,24 @@ function is_valid_mobile($mobile)
     $mobile = preg_replace("/[\s-]+/", '', $mobile);
 
     return strlen($mobile) > 9;
+}
+
+/**
+ * Parses the data of given record in the failed_jobs DB table.
+ *
+ * @param object $failedJob
+ * @return array
+ */
+function parse_failed_job($failedJob)
+{
+    $json = json_decode($failedJob->payload);
+    $command = unserialize($json->data->command);
+
+    return [
+        'id' => $failedJob->id,
+        'failedAt' => $failedJob->failed_at,
+        'commandName' => $json->data->commandName,
+        'errorMessage' => Str::limit($failedJob->exception, 255),
+        'parameters' => method_exists($command, 'getParameters') ? $command->getParameters() : [],
+    ];
 }
