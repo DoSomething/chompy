@@ -43,7 +43,7 @@ class ExportController extends Controller
         ]);
 
         $exportType = $request['type'];
-    
+
         $data = DB::table('failed_jobs')->where('payload', 'LIKE', '%'.$exportType.'%')->get();
 
         $csv = Writer::createFromFileObject(new \SplTempFileObject());
