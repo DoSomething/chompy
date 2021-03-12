@@ -78,9 +78,10 @@ function parse_failed_job($failedJob)
 
     return [
         'id' => $failedJob->id,
-        'failedAt' => $failedJob->failed_at,
-        'commandName' => $json->data->commandName,
-        'errorMessage' => Str::limit($failedJob->exception, 255),
+        'failed_at' => $failedJob->failed_at,
+        'command_name' => $json->data->commandName,
+        'error_message' => Str::limit($failedJob->exception, 255),
+        'exception' => $failedJob->exception,
         'parameters' => method_exists($command, 'getParameters') ? $command->getParameters() : [],
     ];
 }

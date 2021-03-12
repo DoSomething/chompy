@@ -5,6 +5,7 @@ namespace Chompy\Http\Controllers\Web;
 use Illuminate\Support\Str;
 use Chompy\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 class FailedJobController extends Controller
 {
@@ -19,29 +20,7 @@ class FailedJobController extends Controller
         $this->middleware('role:admin');
     }
 
-    /**
-     * Adds parsed properties to given failed job class.
-     *
-     * @param stdClass $failedJob
-     *
-     * @return void
-     */
-    protected function addParsedPropertiesToFailedJob($failedJob)
-    {
-        $json = json_decode($failedJob->payload);
-        $failedJob->commandName = $json->data->commandName;
-        $failedJob->errorMessage = Str::limit($failedJob->exception, 255);
 
-        if (
-            Str::contains($failedJob->commandName, 'CallPower') ||
-            Str::contains($failedJob->commandName, 'SoftEdge') ||
-            Str::contains($failedJob->commandName, 'RockTheVote') ||
-            Str::contains($failedJob->commandName, 'MutePromotions')
-        ) {
-            $command = unserialize($json->data->command);
-            $failedJob->parameters = $command->getParameters();
-        }
-    }
 
     /**
      * Display a listing of failed jobs.
@@ -50,11 +29,7 @@ class FailedJobController extends Controller
      */
     public function index()
     {
-        $data = \DB::table('failed_jobs')->paginate(10);
-
-        foreach ($data as $failedJob) {
-            $this->addParsedPropertiesToFailedJob($failedJob);
-        }
+        $data = DB::table('failed_jobs')->paginate(10);
 
         return view('pages.failed-jobs.index', ['data' => $data]);
     }
@@ -67,15 +42,15 @@ class FailedJobController extends Controller
      */
     public function show($id)
     {
-        $data = \DB::table('failed_jobs')->where('id', '=', $id)->get();
+        $data = DB::table('failed_jobs')->where('id', '=', $id)->get();
+
         if (! isset($data[0])) {
             abort(404);
         }
 
-        $failedJob = $data[0];
-        $this->addParsedPropertiesToFailedJob($failedJob);
-
-        return view('pages.failed-jobs.show', ['data' => $failedJob]);
+        return view('pages.failed-jobs.show', [
+            'data' => parse_failed_job($data[0]),
+        ]);
     }
 
     /**
@@ -87,6 +62,7 @@ class FailedJobController extends Controller
     public function destroy($id)
     {
         $exitCode = Artisan::call('queue:forget', ['id' => $id]);
+
         info('Forgetting job:'.$id.' exitCode:'.$exitCode);
 
         return redirect('failed-jobs')
