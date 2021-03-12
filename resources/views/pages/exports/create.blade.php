@@ -15,7 +15,7 @@
         {{ csrf_field()}}
 
         <div class="form-check">
-            <input class="form-check-input" name="topic" type="radio" value="MutePromotions" checked>
+            <input class="form-check-input" name="type" type="radio" value="MutePromotions" checked>
 
             <label class="form-check-label" for="MutePromotions">Failed jobs - Mute Promotions</label>
         </div>
