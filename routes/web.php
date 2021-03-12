@@ -23,6 +23,10 @@ Route::resource('rock-the-vote-reports', 'RockTheVoteReportController', [
     'except' => ['delete'],
 ]);
 
+Route::resource('exports', 'ExportController', [
+    'only' => ['create', 'store'],
+]);
+
 Route::resource('users', 'UserController', ['only' => ['show']]);
 
 Route::get('/', function () {
