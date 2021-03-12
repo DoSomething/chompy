@@ -2,7 +2,6 @@
 
 namespace Chompy\Http\Controllers\Web;
 
-use Illuminate\Support\Str;
 use Chompy\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -20,8 +19,6 @@ class FailedJobController extends Controller
         $this->middleware('role:admin');
     }
 
-
-
     /**
      * Display a listing of failed jobs.
      *
@@ -29,9 +26,9 @@ class FailedJobController extends Controller
      */
     public function index()
     {
-        $data = DB::table('failed_jobs')->paginate(10);
-
-        return view('pages.failed-jobs.index', ['data' => $data]);
+        return view('pages.failed-jobs.index', [
+            'data' => DB::table('failed_jobs')->paginate(10),
+        ]);
     }
 
     /**
@@ -49,7 +46,7 @@ class FailedJobController extends Controller
         }
 
         return view('pages.failed-jobs.show', [
-            'data' => parse_failed_job($data[0]),
+            'failedJob' => parse_failed_job($data[0]),
         ]);
     }
 
