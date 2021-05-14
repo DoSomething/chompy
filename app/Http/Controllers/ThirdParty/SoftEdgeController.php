@@ -33,10 +33,7 @@ class SoftEdgeController extends Controller
             'campaign_target_district' => 'nullable|string',
         ]);
 
-        Log::debug('sending job to create post with details', [
-            'northstar_id' => $request['northstar_id'],
-            'action_id' => $request['action_id'],
-        ]);
+        Log::debug('SoftEdgeController@store: ' . json_encode($parameters));
 
         // Send to queued job.
         ImportSoftEdgeRecord::dispatch($parameters);
