@@ -33,7 +33,7 @@ class SoftEdgeController extends Controller
             'campaign_target_district' => 'nullable|string',
         ]);
 
-        Log::debug('SoftEdgeController@store:' . json_encode($parameters));
+        Log::debug('SoftEdgeController@store: ' . json_encode($parameters));
 
         // Send to queued job.
         ImportSoftEdgeRecord::dispatch($parameters);

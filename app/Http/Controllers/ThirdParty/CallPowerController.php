@@ -37,7 +37,7 @@ class CallPowerController extends Controller
             'number_dialed_into' => 'required',
         ]);
 
-        Log::debug('CallPowerController@store:' . json_encode($parameters));
+        Log::debug('CallPowerController@store: ' . json_encode($parameters));
 
         // Send to queued job.
         ImportCallPowerRecord::dispatch($parameters);
